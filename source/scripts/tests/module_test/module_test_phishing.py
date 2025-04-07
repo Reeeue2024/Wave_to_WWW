@@ -28,7 +28,7 @@ def get_url_data(file_path) :
 """
 Scan with Module
 """
-def scan(module_class, urls, data_file_index) :    
+def test(module_class, urls, data_file_index) :    
     print(f"\nNumber of URLs to TEST: {len(urls)}\n")
 
     results = []
@@ -89,4 +89,4 @@ if __name__ == "__main__" :
 
         urls = get_url_data(data_file_path)
         
-        scan(Homograph, urls, index)
+        test(Homograph, urls, index)
