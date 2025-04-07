@@ -1,0 +1,1 @@
+print("[ Server ] FAST API - Main ( Entry Point )")
