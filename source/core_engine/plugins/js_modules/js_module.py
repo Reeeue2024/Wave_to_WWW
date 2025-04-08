@@ -1,1 +1,0 @@
-print("[ Plug-In ] JS Module")
