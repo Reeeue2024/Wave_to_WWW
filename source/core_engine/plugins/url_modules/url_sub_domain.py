@@ -9,7 +9,7 @@ import tldextract
 IN : URL
 OUT : Scan Result ( True : Phishing O / False : Phishing X )
 """
-class Sub_Domain :
+class UrlSubDomain :
     """
     IN : 
     OUT : 
@@ -93,5 +93,5 @@ if __name__ == "__main__" :
         sys.exit(1)
     
     input_url = sys.argv[1]
-    sub_domain = Sub_Domain(input_url)
-    sub_domain.scan()
+    sub_domain_instance = UrlSubDomain(input_url)
+    sub_domain_instance.scan()

@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 IN : URL
 OUT : Scan Result ( True : Phishing O / False : Phishing X )
 """
-class WHOIS :
+class UrlWhois :
     """
     IN : 
     OUT : 
@@ -187,5 +187,5 @@ if __name__ == "__main__" :
         sys.exit(1)
     
     input_url = sys.argv[1]
-    whois_instance = WHOIS(input_url)
+    whois_instance = UrlWhois(input_url)
     whois_instance.scan()

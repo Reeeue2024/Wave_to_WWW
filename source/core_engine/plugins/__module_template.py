@@ -30,5 +30,5 @@ if __name__ == "__main__" :
         sys.exit(1)
     
     input_url = sys.argv[1]
-    template = Template(input_url)
-    template.scan()
+    template_instance = Template(input_url)
+    template_instance.scan()

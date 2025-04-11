@@ -1,1 +1,0 @@
-print("[ Plug-In ] ETC Module")

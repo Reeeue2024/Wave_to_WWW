@@ -8,7 +8,7 @@ from urllib.parse import urlparse
 IN : URL
 OUT : Scan Result ( True : Phishing O / False : Phishing X )
 """
-class Homograph :
+class UrlHomograph :
     """
     IN : 
     OUT : 
@@ -86,13 +86,13 @@ class Homograph :
             if flag == True :
                 # print("[ ⚠️ Suspicious ⚠️ ]")
                 # print(f">>>> Input URL : {self.input_url}")
-                return
+                return True
             else :
                 # print("[ ✅ OK ]")
-                return
+                return False
         else :
             # print("[ ✅ OK ]")
-            return
+            return False
 
         # print("\nModule End.")
 
@@ -104,5 +104,5 @@ if __name__ == "__main__" :
         sys.exit(1)
     
     input_url = sys.argv[1]
-    homograph = Homograph(input_url)
-    homograph.scan()
+    homograph_instance = UrlHomograph(input_url)
+    homograph_instance.scan()

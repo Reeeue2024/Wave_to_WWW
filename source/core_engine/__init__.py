@@ -1,1 +1,1 @@
-print("[ Core Engine ] Init ")
+# [ Core ] Kernel : __init__.py
