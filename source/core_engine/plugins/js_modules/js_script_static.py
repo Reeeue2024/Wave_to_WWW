@@ -1,4 +1,4 @@
-#[ JS Modules ] js_script_static.py
+#[ JS Modules ] script_injection_detector_static.py
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -6,7 +6,7 @@ from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 import re
 
-class StaticScriptInjectionDetector:
+class JsScriptStatic:
     """
     IN  : URL
     OUT : 탐지 결과
@@ -108,8 +108,9 @@ class StaticScriptInjectionDetector:
 
         scripts = self.driver.find_elements("tag name", "script")
 
+        content = ""
         for script in scripts:
-            content = script.get_attribute("outerHTML") or ""
+            content += script.get_attribute("outerHTML") or ""
 
             for rule in self.detection_rules:
                 if not rule["detected"] and re.search(rule["pattern"], content):

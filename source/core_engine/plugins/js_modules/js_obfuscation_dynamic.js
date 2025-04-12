@@ -48,7 +48,7 @@ const path = require("path");
 
   try {
     const browser = await puppeteer.launch({
-      executablePath: path.resolve(
+      executablePath: process.env.PUPPETEER_EXEC_PATH || path.resolve(
         process.env.HOME,
         ".cache/puppeteer/chrome/mac-135.0.7049.42/chrome-mac-x64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing"
       ),

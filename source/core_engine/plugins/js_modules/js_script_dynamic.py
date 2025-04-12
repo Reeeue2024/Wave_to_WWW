@@ -1,10 +1,10 @@
-# [ JS Modules ] js_script_dynamic.py
+# [ JS Modules ] obfuscation_detector_dynamic
 
 import subprocess
 import json
 import os
 
-class DynamicScriptInjectionDetector:
+class JsScriptDynamic:
     """
     IN  : URL
     OUT : 탐지 결과
@@ -32,7 +32,7 @@ class DynamicScriptInjectionDetector:
         - 예외 발생 시 로그 및 점수 반영
         """
         script_dir = os.path.dirname(os.path.abspath(__file__))
-        js_path = os.path.abspath(os.path.join(script_dir, "..", "JS", "dynamic", "js_module", "dynamic_script_injection.js"))
+        js_path = os.path.abspath(os.path.join(script_dir, "..", "source", "core_engine", "plugins", "js_modules", "js_script_dynamic.js"))
 
         result_json = ""
 

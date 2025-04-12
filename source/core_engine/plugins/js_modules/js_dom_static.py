@@ -1,4 +1,4 @@
-# [ JS Modules ] js_dom_static.py
+# [ JS Modules ] obfuscation_detector_static
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -7,7 +7,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 from urllib.parse import urlparse
 import time
 
-class StaticDomChangeDetector:
+class JsObfuscationStatic:
     """
     IN  : URL
     OUT : 탐지 결과

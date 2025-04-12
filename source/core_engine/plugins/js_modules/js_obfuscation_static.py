@@ -1,4 +1,4 @@
-# [ JS Modules ] js_obfuscation_static.py
+# [ JS Modules ] obfuscation_detector_static
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -6,7 +6,7 @@ from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 import re
 
-class StaticObfuscationDetector:
+class JsObfuscationStatic:
     """
     IN  : URL
     OUT : 탐지 결과
@@ -108,8 +108,9 @@ class StaticObfuscationDetector:
 
         scripts = self.driver.find_elements("tag name", "script")
 
+        code = ""
         for script in scripts:
-            code = script.get_attribute("innerText") or ""
+            code += script.get_attribute("innerText") or ""
 
             for rule in self.detection_rules:
                 if not rule["detected"] and re.search(rule["pattern"], code):

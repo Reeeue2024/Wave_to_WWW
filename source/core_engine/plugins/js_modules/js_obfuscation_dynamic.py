@@ -1,10 +1,10 @@
-# [ JS Modules ] js_obfuscation_dynamic.py
+# [ JS Modules ] obfuscation_detector_dynamic
 
 import subprocess
 import json
 import os
 
-class DynamicScriptInjectionDetector:
+class JsObfuscationDynamic:
     """
     IN  : URL
     OUT : 탐지 결과
@@ -32,7 +32,7 @@ class DynamicScriptInjectionDetector:
         - 예외 발생 시 로그 및 점수 반영
         """
         script_dir = os.path.dirname(os.path.abspath(__file__))
-        js_path = os.path.abspath(os.path.join(script_dir, "..", "JS", "dynamic", "js_module", "dynamic_script_injection.js"))
+        js_path = os.path.abspath(os.path.join(script_dir, "..", "source", "core_engine", "plugins", "js_modules", "js_script_dynamic.js"))
 
         result_json = ""
 
@@ -55,8 +55,8 @@ class DynamicScriptInjectionDetector:
                 self.logs.extend(result.get("logs", []))
                 self.score += int(result.get("score", 0))
             except json.JSONDecodeError:
-                self.logs.append("[오류] JS 결과 파싱 실패 (+10점)")
-                self.score += 10
+                self.logs.append("[오류] JS 결과 파싱 실패 (+20점)")
+                self.score += 20
 
         if self.score >= 50:
             self.status = "위험"
@@ -66,7 +66,7 @@ class DynamicScriptInjectionDetector:
             self.status = "안전"
 
         return {
-            "module": "Script Injection Detector (Dynamic)",
+            "module": "Obfuscation Detector (Dynamic)",
             "score": self.score,
             "status": self.status,
             "logs": self.logs
