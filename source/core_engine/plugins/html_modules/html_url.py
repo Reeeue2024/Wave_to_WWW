@@ -28,7 +28,7 @@ class HtmlUrl:
     OUT : 화면 출력 (외부 리소스 비율, 피싱 여부)
     """
     def scan(self):
-        print("📦 External Resource Analyzer Module Start.\n")
+        ##print("📦 External Resource Analyzer Module Start.\n")
 
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/121.0.0.0 Safari/537.36"
@@ -39,8 +39,9 @@ class HtmlUrl:
             response.raise_for_status()
             html = response.text
         except requests.exceptions.RequestException as e:
-            print(f"[❌] URL 요청 실패: {str(e)}")
-            sys.exit(1)
+            ##print(f"[❌] URL 요청 실패: {str(e)}")
+            return False
+            ##sys.exit(1)
 
         soup = BeautifulSoup(html, 'html.parser')
         base_url = self.input_url
@@ -55,11 +56,11 @@ class HtmlUrl:
         for tag in soup.find_all('img', src=True):
             resources.append(tag['src'])
 
-        print(f"🔍 총 리소스 수집 개수: {len(resources)}")
+        ##print(f"🔍 총 리소스 수집 개수: {len(resources)}")
 
         if not resources:
-            print("\n✅ 리소스가 없어 피싱 가능성 낮음 (0%)")
-            return
+            ##print("\n✅ 리소스가 없어 피싱 가능성 낮음 (0%)")
+            return False
 
         # 외부 리소스 탐지
         external_count = sum(
@@ -71,16 +72,18 @@ class HtmlUrl:
         probability = round(ratio * 100, 2)
         is_phishing = probability > 50.0
 
-        print(f"🚨 외부 리소스 비율: {external_count}/{len(resources)}")
-        print(f"\n📊 피싱 가능성: {probability}%")
-        print(f"🔐 최종 판단: {'Phishing O (위험)' if is_phishing else 'Phishing X (안전)'}")
-        print("\n✅ Module End.")
+        ##print(f"🚨 외부 리소스 비율: {external_count}/{len(resources)}")
+        ##print(f"\n📊 피싱 가능성: {probability}%")
+        ##print(f"🔐 최종 판단: {'Phishing O (위험)' if is_phishing else 'Phishing X (안전)'}")
+        ##print("\n✅ Module End.")
+        if external_count: return True 
+        else: return False
 
 # Module Main
 if __name__ == "__main__":
     # Input : URL
     if len(sys.argv) != 2:
-        print("사용법: python3 external_resource_analyzer.py <URL>")
+        ##print("사용법: python3 external_resource_analyzer.py <URL>")
         sys.exit(1)
 
     input_url = sys.argv[1]

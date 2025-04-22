@@ -28,7 +28,7 @@ class HtmlForm:
     OUT : 화면 출력 (form action 분석 결과, 피싱 확률)
     """
     def scan(self):
-        print("📦 Form Action Analyzer Module Start.\n")
+        ##print("📦 Form Action Analyzer Module Start.\n")
 
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/121.0.0.0 Safari/537.36"
@@ -39,18 +39,18 @@ class HtmlForm:
             response.raise_for_status()
             html = response.text
         except requests.exceptions.RequestException as e:
-            print(f"[❌] URL 요청 실패: {str(e)}")
-            sys.exit(1)
+            return False
+            ##sys.exit(1)
 
         soup = BeautifulSoup(html, 'html.parser')
         base_url = self.input_url
         forms = soup.find_all('form')
 
-        print(f"🔍 form 태그 개수: {len(forms)}")
+        ##print(f"🔍 form 태그 개수: {len(forms)}")
 
         if not forms:
-            print("\n✅ form이 없어 피싱 가능성 낮음 (0%)")
-            return
+            ##print("\n✅ form이 없어 피싱 가능성 낮음 (0%)")
+            return False
 
         risky_forms = 0
 
@@ -70,16 +70,19 @@ class HtmlForm:
         probability = round(ratio * 100, 2)
         is_phishing = probability > 50.0
 
-        print(f"🚨 위험한 form 비율: {risky_forms}/{len(forms)}")
-        print(f"\n📊 피싱 가능성: {probability}%")
-        print(f"🔐 최종 판단: {'Phishing O (위험)' if is_phishing else 'Phishing X (안전)'}")
-        print("\n✅ Module End.")
+        ##print(f"🚨 위험한 form 비율: {risky_forms}/{len(forms)}")
+        ##print(f"\n📊 피싱 가능성: {probability}%")
+       ## print(f"🔐 최종 판단: {'Phishing O (위험)' if is_phishing else 'Phishing X (안전)'}")
+        ##print("\n✅ Module End.")
+        if risky_forms: return True 
+        else: return False
+
 
 # Module Main
 if __name__ == "__main__":
     # Input : URL
     if len(sys.argv) != 2:
-        print("사용법: python3 form_action_analyzer.py <URL>")
+        ##print("사용법: python3 form_action_analyzer.py <URL>")
         sys.exit(1)
 
     input_url = sys.argv[1]
