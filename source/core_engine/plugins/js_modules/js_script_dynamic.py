@@ -32,7 +32,7 @@ class JsScriptDynamic:
         - 예외 발생 시 로그 및 점수 반영
         """
         script_dir = os.path.dirname(os.path.abspath(__file__))
-        js_path = os.path.abspath(os.path.join(script_dir, "..", "source", "core_engine", "plugins", "js_modules", "js_script_dynamic.js"))
+        js_path = os.path.abspath(os.path.join(script_dir, "js_script_dynamic.js"))
 
         result_json = ""
 
@@ -82,4 +82,5 @@ class JsScriptDynamic:
             print("[ 탐지 로그 ]", log)
         print(f"[ 탐지 결과 ] 총점: {result['score']}점")
         print(f"[ 탐지 결과 ] 위험도: {result['status']}")
+        print("--------------------")
         return result["status"] != "안전"

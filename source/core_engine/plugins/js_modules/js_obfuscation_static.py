@@ -1,9 +1,7 @@
-# [ JS Modules ] obfuscation_detector_static
+# [ JS Modules ] js_obfuscation_static.py
 
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
+import requests
+from bs4 import BeautifulSoup
 import re
 
 class JsObfuscationStatic:
@@ -16,67 +14,72 @@ class JsObfuscationStatic:
         초기화 및 탐지규칙 설정
         """
         self.url = url
-        self.score = 0
         self.logs = []
+        self.score = 0
         self.status = "안전"
-        self.driver = None
+        self.rules = [
+    {
+        "name": "base64_encoding",
+        "pattern": r"atob\(|btoa\(",
+        "score": 10,
+        "message": "Base64 인코딩 감지"
+    },
+    {
+        "name": "hex_encoding",
+        "pattern": r"\\x[0-9a-fA-F]{2}",
+        "score": 10,
+        "message": "16진수 인코딩 감지"
+    },
+    {
+        "name": "split_join_obfuscation",
+        "pattern": r"(\"[a-zA-Z]\" *\+ *\"[a-zA-Z]\")",
+        "score": 10,
+        "message": "문자열 분할 후 합성 감지"
+    },
+    {
+        "name": "reverse_join_obfuscation",
+        "pattern": r"split\(.*\)\s*\.\s*reverse\(\)\s*\.\s*join\(\)",
+        "score": 10,
+        "message": "reverse + join 조합 감지"
+    },
+    {
+        "name": "random_var_names",
+        "pattern": r"var\s+_0x[a-f0-9]{4,}",
+        "score": 10,
+        "message": "무작위 변수명 패턴 감지"
+    },
+    {
+        "name": "charcode_execution",
+        "pattern": r"String\.fromCharCode\(",
+        "score": 10,
+        "message": "문자코드 기반 실행 가능성 감지"
+    },
+    {
+        "name": "function_constructor",
+        "pattern": r"new\s+Function\s*\(",
+        "score": 10,
+        "message": "Function 생성자 사용 감지"
+    },
+    {
+        "name": "iife_detected",
+        "pattern": r"\(function\s*\(.*\)\s*{.*}\)\s*\(\)",
+        "score": 10,
+        "message": "즉시 실행 함수 감지"
+    },
+    {
+        "name": "self_invoking_wrapper",
+        "pattern": r"var\s+\w+\s*=\s*function\s*\(.*\)\s*{.*};\s*\w+\(\)",
+        "score": 10,
+        "message": "자체 호출 래퍼 함수 감지"
+    },
+    {
+        "name": "replace_function_obfuscation",
+        "pattern": r"\.replace\(\s*\/.*\/\s*,\s*function\s*\(",
+        "score": 10,
+        "message": "정규표현식 + replace 함수 난독화 감지"
+    }
+]
 
-        self.detection_rules = [
-            {
-                "name": "eval",
-                "pattern": r"eval\s*\(",
-                "score": 25,
-                "message": "eval() 사용 감지",
-                "detected": False
-            },
-            {
-                "name": "function",
-                "pattern": r"Function\s*\(",
-                "score": 15,
-                "message": "Function() 사용 감지",
-                "detected": False
-            },
-            {
-                "name": "setTimeout",
-                "pattern": r"setTimeout\s*\(\s*['\"]",
-                "score": 10,
-                "message": "setTimeout 문자열 실행 감지",
-                "detected": False
-            },
-            {
-                "name": "fromCharCode",
-                "pattern": r"String\.fromCharCode\s*\(",
-                "score": 10,
-                "message": "String.fromCharCode() 사용 감지",
-                "detected": False
-            },
-            {
-                "name": "hexEscape",
-                "pattern": r"\\x[0-9a-fA-F]{2}",
-                "score": 20,
-                "message": "16진수 이스케이프 문자열 감지",
-                "detected": False
-            },
-            {
-                "name": "obfuscatedVar",
-                "pattern": r"var\s+_0x[a-fA-F0-9]+",
-                "score": 20,
-                "message": "난독화된 변수명 패턴 감지",
-                "detected": False
-            }
-        ]
-
-    def setup_driver(self):
-        """
-        headless Chrome 드라이버 설정
-        """
-        options = Options()
-        options.add_argument("--headless")
-        options.add_argument("--disable-gpu")
-        options.add_argument("--no-sandbox")
-        service = Service(ChromeDriverManager().install())
-        self.driver = webdriver.Chrome(service=service, options=options)
-        self.driver.set_page_load_timeout(5)
 
     def run(self):
         """
@@ -86,40 +89,26 @@ class JsObfuscationStatic:
             score : 총 탐지 점수,
             status: 안전 / 주의 / 위험,
             logs  : 탐지 로그 리스트
-        }
-        - 브라우저 통해 접속 시도, 접속 실패하는 경우도 "주의"로 판단
-        - 렌더링 <script> 요소의 JavaScript 코드만 수집
+            }
         """
-        self.setup_driver()
-
         try:
-            self.driver.get(self.url)
+            response = requests.get(self.url, timeout=5)
+            html = response.text
         except Exception as e:
-            self.logs.append(f"[접속 실패] (+20점) {self.url} → {str(e)}")
+            self.logs.append(f"[접속 실패] {self.url} → {str(e)} (+20점)")
             self.score += 20
             self.status = "주의"
-            self.driver.quit()
-            return {
-                "module": "Obfuscation Detector (Static)",
-                "score": self.score,
-                "status": self.status,
-                "logs": self.logs
-            }
+            return self.result()
 
-        scripts = self.driver.find_elements("tag name", "script")
+        soup = BeautifulSoup(html, "html.parser")
+        scripts = soup.find_all("script")
+        js_code = "\n".join(script.text for script in scripts if script.text)
 
-        code = ""
-        for script in scripts:
-            code += script.get_attribute("innerText") or ""
+        for rule in self.rules:
+            if re.search(rule["pattern"], js_code):
+                self.logs.append(f"{rule['message']} (+{rule['score']}점)")
+                self.score += rule["score"]
 
-            for rule in self.detection_rules:
-                if not rule["detected"] and re.search(rule["pattern"], code):
-                    message = f"{rule['message']} (+{rule['score']}점)"
-                    self.logs.append(message)
-                    self.score += rule["score"]
-                    rule["detected"] = True
-
-        # 위험도 계산
         if self.score >= 50:
             self.status = "위험"
         elif self.score >= 20:
@@ -127,20 +116,17 @@ class JsObfuscationStatic:
         else:
             self.status = "안전"
 
-        self.driver.quit()
+        return self.result()
 
+    def result(self):
         return {
-            "module": "Obfuscation Detector (Static)",
+            "module": "js_obfuscation_static",
             "score": self.score,
             "status": self.status,
             "logs": self.logs
         }
 
     def scan(self):
-        """
-        - run() 실행 결과를 바탕으로 로그와 위험도 출력
-        - 최종 위험도에 따라 Boolean 결과 반환
-        """
         result = self.run()
         for log in result["logs"]:
             print("[ 탐지 로그 ]", log)

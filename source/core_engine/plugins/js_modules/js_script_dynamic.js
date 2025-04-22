@@ -7,79 +7,166 @@ const path = require("path");
   const url = process.argv[2];
   const logs = [];
   let score = 0;
+  const triggeredRules = new Set();
+  const detectedRules = new Set();
 
-  // 탐지 규칙 정의
-  const rules = [
+  function addLog(message, points) {
+    logs.push(`${message} (+${points}점)`);
+    score += points;
+  }
+
+  // 정규표현식 정의
+  const ScriptRules = [
     {
-      pattern: /https?:\/\/[^\s'"]*(malicious|track|spy|steal|adserver)[^\s'"]*/i,
+      name: "suspiciousCdn",
+      pattern: /https?:\/\/[^\s'""]*(malicious|track|spy|steal|adserver)[^\s'""]*/,
       score: 25,
-      message: "의심스러운 외부 CDN URL 감지 (+25점)"
+      message: "의심스럽고 복잡한 CDN URL 검지"
     },
     {
-      pattern: /data:text\/javascript/i,
-      score: 20,
-      message: "data URI 형식의 스크립트 감지 (+20점)"
-    },
-    {
-      pattern: /<script[^>]*(onerror|onload|onclick)=/i,
+      name: "inlineEventScript",
+      pattern: /<script[^>]*>.*(onerror|onload|onclick)=.*<\/script>/,
       score: 15,
-      message: "inline 이벤트 핸들러 포함 스크립트 감지 (+15점)"
+      message: "inline event 기능의 스크립트 검지"
     },
     {
-        pattern: /document\.write(ln)?\s*\(/i,
-        score: 15,
-        message: "document.write(ln) 사용 감지 (+15점)"
-      },
-      {
-        pattern: /(steal|track|keylog|cookie|grab)[a-z]*\b/i,
-        score: 15,
-        message: "의심 키워드 포함 감지 (+15점)"
-      },
-      {
-        pattern: /atob\s*\(|btoa\s*\(|[A-Za-z0-9+/]{50,}={0,2}/,
-        score: 10,
-        message: "Base64 디코딩 또는 긴 인코딩 문자열 감지 (+10점)"
-      }
+      name: "dataJsUrl",
+      pattern: /data:text\/javascript/,
+      score: 20,
+      message: "data URI 구조의 스크립트 삽입 검지"
+    },
+    {
+      name: "documentWrite",
+      pattern: /document\.write(ln)?\s*\(/,
+      score: 15,
+      message: "document.write 사용 감지"
+    },
+    {
+      name: "suspiciousKeyword",
+      pattern: /(steal|track|keylog|cookie|grab)[a-z]*\b/,
+      score: 15,
+      message: "의심 키워드 포함 스크립트 감지"
+    },
+    {
+      name: "base64EncodedString",
+      pattern: /atob\s*\(|btoa\s*\(|[A-Za-z0-9+/]{50,}={0,2}/,
+      score: 10,
+      message: "Base64 디코딩 또는 인코딩 스크립트 감지"
+    },
+    {
+      name: "script_in_img_tag",
+      pattern: /<img[^>]+src=['"]javascript:/,
+      score: 20,
+      message: "<img> 태그에서 javascript: 사용 감지"
+    },
+    {
+      name: "script_src_inline_mix",
+      pattern: /<script[^>]+src=.*?>.*?<\/script>/,
+      score: 15,
+      message: "<script> 태그에서 src와 inline 코드 병용 감지"
+    },
+    {
+      name: "iframe_javascript_src",
+      pattern: /<iframe[^>]+src=['"]javascript:/,
+      score: 20,
+      message: "<iframe>의 src 속성에 javascript URI 사용 감지"
+    },
+    {
+      name: "cookie_access",
+      pattern: /document\.cookie/,
+      score: 10,
+      message: "document.cookie 접근 코드 감지"
+    }
   ];
 
-  // 중복 탐지 방지 위한 메세지 추적용 Set
-  const detected = new Set();
+  // 헤드리스 크롬 실행
+  const browser = await puppeteer.launch({
+    executablePath: process.env.PUPPETEER_EXEC_PATH || path.resolve(
+      process.env.HOME,
+      ".cache/puppeteer/chrome/mac-135.0.7049.42/chrome-mac-x64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing"
+    ),
+    headless: true,
+    args: ["--no-sandbox"]
+  });
+
+  const page = await browser.newPage();
+
+  // 리소스 요청 차단, 성능 최적화
+  await page.setRequestInterception(true);
+  page.on("request", (request) => {
+    if (["image", "stylesheet", "font"].includes(request.resourceType())) {
+      request.abort();
+    } else {
+      request.continue();
+    }
+  });
 
   try {
-    const browser = await puppeteer.launch({
-      executablePath: process.env.PUPPETEER_EXEC_PATH || path.resolve(
-        process.env.HOME,
-        ".cache/puppeteer/chrome/mac-135.0.7049.42/chrome-mac-x64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing"
-      ),
-      headless: true,
-      args: ["--no-sandbox"]
+    // 실행 감지 위한 후킹 함수 등록
+    await page.exposeFunction("trackExecution", (ruleName, message, execScore) => {
+      if (detectedRules.has(ruleName) && !triggeredRules.has(ruleName)) {
+        addLog(`[실행 탐지] ${message}`, execScore);
+        triggeredRules.add(ruleName);
+      }
     });
 
-    // 렌더링 <script> 태그의 전체 outerHTML 및 src 속성 수집
-    const page = await browser.newPage();
-    await page.goto(url, { waitUntil: "networkidle2", timeout: 5000 });
+    // 자동 실행 탐지를 위한 후킹 삽입
+    await page.evaluateOnNewDocument(() => {
+      const ruleChecks = {
+        cookie_access: code => code.includes("document.cookie"),
+        documentWrite: code => code.includes("document.write"),
+        base64EncodedString: code => code.includes("atob(") || code.includes("btoa("),
+        suspiciousKeyword: code => /(steal|track|keylog|cookie|grab)/.test(code)
+      };
+
+      // 루프 돌며 룰 검사
+      const smartHook = (original, gatewayName, execScore) => {
+        return function (...args) {
+          try {
+            const code = args[0];
+            if (typeof code === "string") {
+              for (const rule in ruleChecks) {
+                if (ruleChecks[rule](code)) {
+                  window.trackExecution(rule, `${gatewayName}을 통한 ${rule} 실행 감지`, execScore);
+                }
+              }
+            }
+          } catch (_) {}
+          return original.apply(this, args);
+        };
+      };
+
+      window.eval = smartHook(window.eval, "eval", 15);
+      window.Function = smartHook(window.Function, "Function", 15);
+      window.setTimeout = smartHook(window.setTimeout, "setTimeout", 10);
+      window.setInterval = smartHook(window.setInterval, "setInterval", 10);
+    });
+
+    // 페이지 접속 후 코드 수집
+    await page.goto(url, { waitUntil: "networkidle0", timeout: 10000 });
 
     const scripts = await page.$$eval("script", elements =>
-      elements.map(el => (el.outerHTML || "") + "\n" + (el.src || ""))
+      elements.map(el => el.innerText).filter(Boolean)
     );
-    
-    // 탐지 규칙 매칭, 점수 및 로그 누적
-    for (const content of scripts) {
-      for (const rule of rules) {
-        if (!detected.has(rule.message) && rule.pattern.test(content)) {
-          logs.push(rule.message);
-          score += rule.score;
-          detected.add(rule.message);
+
+    const uniqueScripts = [...new Set(scripts)];
+
+    for (const code of uniqueScripts) {
+      // 정규표현식 탐지 수행
+      for (const rule of ScriptRules) {
+        if (rule.pattern.test(code)) {
+          addLog(rule.message, rule.score); // 정적 탐지 점수 가산
+          detectedRules.add(rule.name); // 저장
         }
       }
     }
 
-    await browser.close();
   } catch (err) {
-    logs.push(`[오류] 페이지 열기 실패: ${err.message} (+20점)`);
+    logs.push(`[오류] 페이지 분석 실패: ${err.message} (+20점)`);
     score += 20;
+  } finally {
+    await browser.close();
   }
 
-  // 최종 결과 JSON 출력
   console.log(JSON.stringify({ logs, score }));
 })();

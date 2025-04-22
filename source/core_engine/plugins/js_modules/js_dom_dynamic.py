@@ -1,38 +1,23 @@
-# [ JS Modules ] obfuscation_detector_dynamic
+# [Python Modules] js_dom_dynamic.py
 
 import subprocess
 import json
 import os
 
-class JsObfuscationDynamic:
+class JsDomDynamic:
     """
     IN  : URL
     OUT : 탐지 결과
     """
     def __init__(self, url):
-        """
-        초기화
-        """
         self.url = url
         self.logs = []
         self.score = 0
         self.status = "안전"
 
     def run(self):
-        """
-        IN  : self.url
-        OUT : {
-            module: 모듈 이름,
-            score : 누적 점수,
-            status: 안전 / 주의 / 위험,
-            logs  : 탐지 로그 리스트
-            }
-        - Node.js 기반 JS 파일 실행 (puppeteer 사용)
-        - JS 실행 결과(JSON)를 파싱하여 점수 및 로그 수집
-        - 예외 발생 시 로그 및 점수 반영
-        """
         script_dir = os.path.dirname(os.path.abspath(__file__))
-        js_path = os.path.abspath(os.path.join(script_dir, "js_obfuscation_dynamic.js"))
+        js_path = os.path.abspath(os.path.join(script_dir, "js_dom_dynamic.js"))
 
         result_json = ""
 
@@ -66,21 +51,17 @@ class JsObfuscationDynamic:
             self.status = "안전"
 
         return {
-            "module": "Obfuscation Detector (Dynamic)",
+            "module": "DOM Change Detector (Dynamic)",
             "score": self.score,
             "status": self.status,
             "logs": self.logs
         }
 
     def scan(self):
-        """
-        - run() 실행 결과를 바탕으로 로그와 위험도 출력
-        - 최종 위험도에 따라 Boolean 결과 반환
-        """
         result = self.run()
-        for log in result["logs"]:
-            print("[ 탐지 로그 ]", log)
-        print(f"[ 탐지 결과 ] 총점: {result['score']}점")
-        print(f"[ 탐지 결과 ] 위험도: {result['status']}")
-        print("--------------------")
+        # for log in result["logs"]:
+        #     print("[ 탐지 로그 ]", log)
+        # print(f"[ 탐지 결과 ] 총점: {result['score']}점")
+        # print(f"[ 탐지 결과 ] 위험도: {result['status']}")
+        # print("--------------------")
         return result["status"] != "안전"
