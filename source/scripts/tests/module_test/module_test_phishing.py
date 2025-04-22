@@ -4,13 +4,13 @@ import csv
 from urllib.parse import urlparse
 
 db_domain_list = [
-    "module_test_data/phishing-domains-ACTIVE.txt",
     "module_test_data/phishing-domains-NEW-today.txt",
+    "module_test_data/phishing-domains-ACTIVE.txt",
 ]
 
 db_url_list = [
-    "module_test_data/phishing-links-ACTIVE.txt",
     "module_test_data/phishing-links-NEW-today.txt",
+    "module_test_data/phishing-links-ACTIVE.txt",
     "module_test_data/phishing-links-INACTIVE.txt",
 ]
 
@@ -81,7 +81,7 @@ def test(module_class, urls, data_file_index) :
 Main
 """
 if __name__ == "__main__" :
-    from url_homograph import Homograph # Example ( Url Modules - "url_homograph.py" )
+    from url_homograph import UrlHomograph # Example ( Url Modules - "url_homograph.py" )
     
     for index, data_file_path in enumerate(db_url_list, 1) :
         print(f"[ # {index} ] TEST")
@@ -89,4 +89,4 @@ if __name__ == "__main__" :
 
         urls = get_url_data(data_file_path)
         
-        test(Homograph, urls, index)
+        test(UrlHomograph, urls, index)

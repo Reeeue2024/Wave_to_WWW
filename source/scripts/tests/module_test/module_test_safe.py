@@ -92,7 +92,7 @@ def test(module_class, urls, data_file_index) :
 Main
 """
 if __name__ == "__main__" :
-    from url_homograph import Homograph # Example ( Url Modules - "url_homograph.py" )
+    from url_homograph import UrlHomograph # Example ( Url Modules - "url_homograph.py" )
     
     for index, data_file_path in enumerate(db_url_list, 1) :
         txt_file_path = get_txt_from_csv(data_file_path)
@@ -102,4 +102,4 @@ if __name__ == "__main__" :
 
         urls = get_url_data(txt_file_path)
         
-        test(Homograph, urls, index)
+        test(UrlHomograph, urls, index)
