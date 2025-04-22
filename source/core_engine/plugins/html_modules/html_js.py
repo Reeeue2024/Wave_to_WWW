@@ -7,7 +7,7 @@ from urllib.parse import urlparse
 import tldextract
 import re
 
-class JsEventAnalyzer:
+class HtmlJs:
     """
     IN : input_url (str)
     OUT : scan 결과 출력 (Phishing 가능성 확률, 탐지 여부)
@@ -94,5 +94,5 @@ if __name__ == "__main__":
         sys.exit(1)
 
     input_url = sys.argv[1]
-    module = JsEventAnalyzer(input_url)
+    module = HtmlJs(input_url)
     module.scan()

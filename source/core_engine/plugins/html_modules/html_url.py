@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 from urllib.parse import urlparse
 import tldextract
 
-class ExternalResourceAnalyzer:
+class HtmlUrl:
     """
     IN : input_url (str)
     OUT : scan 결과 출력 (Phishing 가능성 확률, 탐지 여부)
@@ -84,5 +84,5 @@ if __name__ == "__main__":
         sys.exit(1)
 
     input_url = sys.argv[1]
-    module = ExternalResourceAnalyzer(input_url)
+    module = HtmlUrl(input_url)
     module.scan()

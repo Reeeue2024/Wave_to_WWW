@@ -7,7 +7,7 @@ from urllib.parse import urlparse, urljoin
 import tldextract
 import re
 
-class MetaRedirectAnalyzer:
+class HtmlMeta:
     """
     IN : input_url (str)
     OUT : scan 결과 출력 (Phishing 가능성 확률, 탐지 여부)
@@ -88,5 +88,5 @@ if __name__ == "__main__":
         sys.exit(1)
 
     input_url = sys.argv[1]
-    module = MetaRedirectAnalyzer(input_url)
+    module = HtmlMeta(input_url)
     module.scan()
