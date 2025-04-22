@@ -1,4 +1,4 @@
-# [ URL / Domain Modules ] 단축 URL 사용 여부를 바탕으로 탐지
+# [ URL / Domain Modules ] URL Shorting
 
 # 이 모듈은 "리디렉션을 따라가서 최종 URL을 얻는다"까지만 함
 # 피싱 판별 등은 다른 모듈로 넘김
@@ -8,22 +8,31 @@ import sys
 import re
 import requests
 
-class ShortenedURLDetector:
+class UrlShorting:
     """
-    IN : URL (string)
-    OUT : 
-        - is_shortened (bool) : 단축 URL 여부
-        - original_url (string) : 리디렉션된 원본 URL (단축일 경우)
+    IN  : input_url (str) - 검사 대상 URL
+    OUT : is_shortened (bool) - 단축 URL 여부
+          expanded_url (str) - 리디렉션된 원본 URL (단축일 경우)
     """
-    def __init__(self, input_url):
+    def __init__(self, input_url=None):
         self.input_url = input_url
         self.original_url = None
 
-        # 자주 사용되는 단축 URL 도메인 목록
+        # 단축 URL 도메인 목록
         self.short_url_domains = [
+            # 기존 기본 도메인
             "bit.ly", "goo.gl", "t.co", "ow.ly", "tinyurl.com",
             "is.gd", "buff.ly", "adf.ly", "bit.do", "mcaf.ee",
-            "rebrand.ly", "su.pr", "shorte.st", "cli.gs", "v.gd"
+            "rebrand.ly", "su.pr", "shorte.st", "cli.gs", "v.gd",
+
+            # 추가된 도메인
+            "url.kr", "buly.kr", "alie.kr", "link24.kr", "lrl.kr",
+            "tr.ee", "t.ly", "t.me", "rb.gy", "shrtco.de",
+            "chilp.it", "cutt.ly", "vvd.bz", 'IRI.MY', 'LINC.kr', 'abit.ly', 'chzzk.me', 'flic.kr',
+            'glol.in', 'gourl.kr', 'han.gl', 'juso.ga', 'muz.so',
+            'na.to', 'site.naver.com', 't2m.kr', 'tny.kr', 'tuney.kr',
+            'twr.kr', 'ual.kr', 'url.sg', 'vo.la', 'wo.to',
+            'yao.ng', 'zed.kr', 'zxcv.be'
         ]
     
     def is_shortened_url(self):
@@ -38,51 +47,49 @@ class ShortenedURLDetector:
 
     def expand_url(self):
         """
-        단축 URL인 경우 리디렉션을 따라가 최종 목적지 URL을 찾는 함수
+        IN  : self.input_url (str) - 단축 URL
+        OUT : self.original_url (str or None) - 리디렉션된 최종 URL
         """
         try:
-            # HEAD 요청을 보내 리디렉션 확인 (파일 다운로드 없음)
-            response = requests.head(self.input_url, allow_redirects=True, timeout=5)
-
-            # 만약 리디렉션이 정상적으로 되지 않으면 GET 요청으로 재시도
-            if response.status_code >= 400 or response.url == self.input_url:
-                response = requests.get(self.input_url, allow_redirects=True, timeout=5)
-
-            # 최종 목적지 URL 저장
+            response = requests.get(self.input_url, allow_redirects=True, timeout=5)
             self.original_url = response.url
         except requests.RequestException:
-            # 요청 중 에러가 발생하면 None 처리
             self.original_url = None
 
-    def scan(self):
+    def scan(self, input_url=None):
         """
-        전체 단축 URL 탐지 및 리디렉션 처리 흐름을 실행하는 함수
+        IN : input_url
+        OUT : Scan Result (True : 단축 URL / False : 일반 URL)
         """
-        print("Module Start: [Shortened URL Detection]")
+        
+        if input_url:
+            self.input_url = input_url
+        if not self.input_url:
+            raise ValueError("No URL provided to scan.")
+
+        # print("Module Start: [URL Shorting]")
 
         if self.is_shortened_url():
-            print(f"[Detected] Shortened URL : {self.input_url}")
-            self.expand_url()
-
-            if self.original_url:
-                print(f"→ Redirected to: {self.original_url}")
-            else:
-                print("⚠ Redirection failed. Original URL could not be resolved.")
-            
-            print("\nModule End.")
-            return True, self.original_url
+            # print(f"[Detected] Shortened URL : {self.input_url}")
+            # self.expand_url()
+            # if self.original_url:
+            #    print(f"→ Redirected to: {self.original_url}")
+            # else:
+            #    print("Redirection failed. Original URL could not be resolved.")
+            # print("\nModule End.")
+            return True
         else:
-            print(f"[Normal URL] {self.input_url}")
-            print("\nModule End.")
-            return False, self.input_url
+            # print(f"[Normal URL] {self.input_url}")
+            # print("\nModule End.")
+            return False
+
 
 # Module Main
 if __name__ == "__main__":
-    # Input : URL
     if len(sys.argv) != 2:
         print("How to Use : python3 url_shorting.py < URL >")
         sys.exit(1)
     
     input_url = sys.argv[1]
-    detector = ShortenedURLDetector(input_url)
-    is_shortened, expanded_url = detector.scan()
+    detector = UrlShorting()
+    is_shortened = detector.scan(input_url)
