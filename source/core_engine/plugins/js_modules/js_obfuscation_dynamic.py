@@ -78,9 +78,9 @@ class JsObfuscationDynamic:
         - 최종 위험도에 따라 Boolean 결과 반환
         """
         result = self.run()
-        for log in result["logs"]:
-            print("[ 탐지 로그 ]", log)
-        print(f"[ 탐지 결과 ] 총점: {result['score']}점")
-        print(f"[ 탐지 결과 ] 위험도: {result['status']}")
-        print("--------------------")
+        # for log in result["logs"]:
+        #     print("[ 탐지 로그 ]", log)
+        # print(f"[ 탐지 결과 ] 총점: {result['score']}점")
+        # print(f"[ 탐지 결과 ] 위험도: {result['status']}")
+        # print("--------------------")
         return result["status"] != "안전"
