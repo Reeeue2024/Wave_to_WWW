@@ -32,7 +32,7 @@ class JsExfilDynamic:
                 ['node', self.js_script_path, self.input_url],
                 capture_output=True,
                 text=True,
-                timeout=45
+                timeout=15
             )
 
             if result.returncode != 0:
@@ -52,7 +52,7 @@ class JsExfilDynamic:
             # else:
             #     print(f"[Detected] No JS Exfil. (+{score:.1f})")
 
-            return score > 0.0  # 외부 요청이 있으면 True
+            return score > False  # 외부 요청이 있으면 True
 
         except subprocess.TimeoutExpired:
             return self._handle_error("Node.js script timed out after 45 seconds.")
@@ -73,7 +73,7 @@ class JsExfilDynamic:
                 if line.startswith('{') and line.endswith('}'):
                     return json.loads(line)  # 유효한 JSON 반환
         except json.JSONDecodeError:
-            return None
+            return False
 
     def _handle_error(self, message, stderr=None):
         """

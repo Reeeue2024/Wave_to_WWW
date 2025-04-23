@@ -45,9 +45,9 @@ class JsRedirectDynamic:
             score = result_data.get("score", 0)
 
             # 리디렉션 응답 코드 출력 (Python에서 직접 출력)
-            for line in lines:
-                if "Redirect response code detected:" in line:
-                    print(f"[Info] Redirect Response Code: {line.split(':')[1].strip()}")  # [Info] 포맷
+            # for line in lines:
+            #     if "Redirect response code detected:" in line:
+            #         print(f"[Info] Redirect Response Code: {line.split(':')[1].strip()}")  # [Info] 포맷
 
             # JS 로그에 의한 리디렉션 대상 추출
             redirect_targets = [
@@ -64,7 +64,7 @@ class JsRedirectDynamic:
             # print(f"[Detected] JS Redirect: {redirect_targets} (fast +{score})")
             # print(f"→ Score: {score:.1f} (0.0: Safe, 1.0: High Risk)")
 
-            return score > 0.0  # 점수가 0 이상이면 위험 URL로 판단
+            return score > False  # 점수가 0 이상이면 위험 URL로 판단
 
         except Exception as e:
             # print("Error:", e)

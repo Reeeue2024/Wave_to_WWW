@@ -43,18 +43,18 @@ class JsExfilStatic:
                 # print(f"[Detected] JS Exfil : {suspicious_hits}")
                 # print("→ Score: 1.0 (0.0: Safe, 1.0: High Risk)")
                 # print("\nModule End.")
-                return 1.0
+                return True
             else:
                 # print(f"[Normal] No JS EXfil: {self.input_url}")
                 # print("→ Score: 0.0 (0.0: Safe, 1.0: High Risk)")
                 # print("\nModule End.")
-                return 0.0
+                return False
 
         except requests.RequestException as e:
             # print(f"[ERROR] Failed to fetch JS file: {e}")
             # print("→ Score: 0.0 (0.0: Safe, 1.0: High Risk)")
             # print("\nModule End.")
-            return 0.0
+            return False
 
 
 # Module Main
