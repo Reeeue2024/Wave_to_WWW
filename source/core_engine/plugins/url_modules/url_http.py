@@ -28,19 +28,19 @@ class UrlHttp:
             # print(f"[Detected] HTTP URL: {self.input_url}")
             # print(f"→ Score: 1.00 (0.0: Safe, 1.0: High Risk)")
             # print("\nModule End.")
-            return 1.0 # True
+            return True
 
         elif self.input_url.startswith("https://"):
             # print(f"[Detected] HTTPS URL: {self.input_url}")
             # print(f"→ Score: 0.00 (0.0: Safe, 1.0: High Risk)")
             # print("\nModule End.")
-            return 0.0 # False
+            return False
 
         else:
             # print(f"[Warning] Unknown URL format: {self.input_url}")
             # print("→ Score: None (unable to evaluate)")
             # print("\nModule End.")
-            return None # False
+            return False
 
 # Module Main
 if __name__ == "__main__":

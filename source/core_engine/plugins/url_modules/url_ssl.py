@@ -39,7 +39,7 @@ class UrlSsl:
             return cert
         except Exception as e:
             # print(f"[ERROR] SSL Certificate fetch failed: {e}")
-            return None
+            return False
 
     """
     무료 인증서 여부에 따라 위험 점수 부여
@@ -54,8 +54,8 @@ class UrlSsl:
         # print(f"[Issuer] {issuer}")
         if any(ca in issuer for ca in free_cas):
             # print(f"[Detected] Free SSL Certificate: {self.input_url}")
-            return 1.0  
-        return 0.0  
+            return True
+        return False 
 
     """
     신뢰 낮은 인증기관(CA) 여부에 따라 위험 점수 부여
@@ -104,7 +104,7 @@ class UrlSsl:
         #     print(f"→ Score: {final_score:.2f} (0.0: Safe, 1.0: High Risk)")
 
         # print("\nModule End.")
-        return final_score > 0.0
+        return final_score > False
 
 
 # Module Main
