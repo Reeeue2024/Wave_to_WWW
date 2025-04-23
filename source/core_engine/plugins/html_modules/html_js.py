@@ -7,7 +7,7 @@ from urllib.parse import urlparse
 import tldextract
 import re
 
-class HtmlJS:
+class HtmlJs:
     def __init__(self, input_url):
         self.input_url = input_url
 
@@ -107,5 +107,5 @@ if __name__ == "__main__":
         sys.exit(1)
 
     input_url = sys.argv[1]
-    module = HtmlJS(input_url)
+    module = HtmlJs(input_url)
     module.scan()
