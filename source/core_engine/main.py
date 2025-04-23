@@ -14,13 +14,14 @@ if __name__ == "__main__" :
 
     result_flag = kernel_instance.start()
 
-    print("\n========== ========== ========== ==========")
-
-    print("[ Result of \"Kernel\" ]")
-    print(f"Input URL : {input_url}")
+    print()
+    print("* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ")
+    print(" [ Kernel ]")
+    print(f"   [ * ] URL : {input_url}")
     if result_flag == True : 
-        print(f">> ⚠️ Suspicious")
+        print(f"   [ * ] ⚠️ Suspicious")
     else :
-        print(f">> ✅ OK")
+        print(f"   [ * ] ✅ OK")
+    print("* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ")
+    print()
     
-    print("========== ========== ========== ==========\n")

@@ -49,7 +49,7 @@ class UrlWhois :
             date_result = datetime.now() - creation_date
 
             if date_result < timedelta(days=days) :
-                print(f"[ DEBUG ] Create Date : {creation_date}")
+                # print(f"[ DEBUG ] Create Date : {creation_date}")
                 return True
         
         return False
@@ -69,9 +69,9 @@ class UrlWhois :
         for field in fields :
 
             if any(keyword in field for keyword in ["privacy", "redacted", "private", "whoisguard"]):
-                print(f"[ DEBUG ] Registrant Name : {fields[0]}")
-                print(f"[ DEBUG ] E - Mail : {fields[1]}")
-                print(f"[ DEBUG ] Organization : {fields[2]}")
+                # print(f"[ DEBUG ] Registrant Name : {fields[0]}")
+                # print(f"[ DEBUG ] E - Mail : {fields[1]}")
+                # print(f"[ DEBUG ] Organization : {fields[2]}")
                 return True
         
         return False
@@ -89,7 +89,7 @@ class UrlWhois :
             tld_data = domain_data[-1]
 
             if tld_data in free_tld_list :
-                print(f"[ DEBUG ] TLD : {tld_data}")
+                # print(f"[ DEBUG ] TLD : {tld_data}")
                 return True
 
         return False
@@ -115,8 +115,8 @@ class UrlWhois :
         if whois_country :
 
             if tld_data in country_tld_map and not whois_country.endswith(country_tld_map[tld_data]) :
-                print(f"[ DEBUG ] TLD Country : {tld_data}")
-                print(f"[ DEBUG ] \"WHOIS\" Country : {whois_country}")
+                # print(f"[ DEBUG ] TLD Country : {tld_data}")
+                # print(f"[ DEBUG ] \"WHOIS\" Country : {whois_country}")
                 return True
             
         else :
@@ -168,13 +168,13 @@ class UrlWhois :
             scan_result_list.append("country_tld")
 
         if scan_result_list :
-            print("[ ⚠️ Suspicious ⚠️ ]")
-            print(f">>>> Input URL : {self.input_url}")
-            print(f">>>> Result : {" / ".join(scan_result_list)}")
+            # print("[ ⚠️ Suspicious ⚠️ ]")
+            # print(f">>>> Input URL : {self.input_url}")
+            # print(f">>>> Result : {" / ".join(scan_result_list)}")
             return True
         
         else :
-            print("[ ✅ OK ]")
+            # print("[ ✅ OK ]")
             return False
         
         # print("\nModule End.")

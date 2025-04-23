@@ -13,6 +13,7 @@ Role of "kernel.py"
 
 import importlib
 import os
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 class Kernel :
     def __init__(self, input_url) :
@@ -54,7 +55,8 @@ class Kernel :
                         # ( 2 ) Module을 Dynamic Load
                         module = importlib.import_module(module_import_path)
 
-                        print(f">>>> [ DEBUG ] Success to Load Module \"{module_full_path}\" : {module_name} / {module_class_name}")
+                        module_string = f"{module_class_name}"
+                        print(f"  [ + ]  {module_string:<25} {module_full_path}")
 
                         module_class = getattr(module, module_class_name)
                         module_instance = module_class(self.input_url)
@@ -67,7 +69,7 @@ class Kernel :
                     except Exception as e :
                         print(f"[ ERROR ] Fail to Load Module \"{module_full_path}\" : {e}")
         
-        print(f"[ DEBUG ] Module Instance List : {module_instance_list}")
+        # print(f"[ DEBUG ] Module Instance List : {module_instance_list}")
 
         self.module_instance_list = module_instance_list
             
@@ -78,25 +80,38 @@ class Kernel :
     def get_result_dictionary(self) :
         result_dictionary = {}
 
-        # ( 1 ) Target : 각각의 Module Instance
-        for module_instance in self.module_instance_list :
-
-            try :
-                # ( 2 ) 각각의 Module의 Scan을 실행
-                result = module_instance.scan()
-
-                class_name = module_instance.__class__.__name__
-                module_file_path = getattr(module_instance, "_file_path", "Fail to Get File Path")
-                result_dictionary[f"{class_name} ( Module : {module_file_path} )"] = result
+        # ( 1 ) 각각의 Thread 실행
+        with ThreadPoolExecutor() as executor :
+            work_list = [executor.submit(self.run_module_scan, m) for m in self.module_instance_list]
             
-            except Exception as e :
-                class_name = module_instance.__class__.__name__
-                module_file_path = getattr(module_instance, "_file_path", "Fail to Get File Path")
-                result_dictionary[f"{class_name} ( Module : {module_file_path} )"] = f"ERROR : {e}"
-        
-        print(f"[ DEBUG ] Result Dictionary : {result_dictionary}")
+            for work_result in as_completed(work_list) :
+                key, result = work_result.result()
+                result_dictionary[key] = result
+
+        # print(f"[ DEBUG ] Result Dictionary : {result_dictionary}")
 
         self.result_dictionary = result_dictionary
+    
+    """
+    IN : 
+    OUT : 
+    """
+    def run_module_scan(self, module_instance) :
+        try :
+            result = module_instance.scan()
+
+            class_name = module_instance.__class__.__name__
+            module_file_path = getattr(module_instance, "_file_path", "Fail to Get File Path")
+            key = f"{class_name} ( Module : {module_file_path} )"
+
+            return (key, result)
+        
+        except Exception as e :
+            class_name = module_instance.__class__.__name__
+            module_file_path = getattr(module_instance, "_file_path", "Fail to Get File Path")
+            key = f"{class_name} ( Module : {module_file_path} )"
+
+            return (key, f"ERROR : {e}")
             
     """
     IN : 
@@ -105,9 +120,29 @@ class Kernel :
     def get_score_dictionary(self) :
         # [ To Do ]
         module_weight_list = {
-            "homograph" : 10,
-            "sub_domain" : 10,
-            "whois": 10,
+            "url_homograph" : 10,
+            "url_http" : 10,
+            "url_shorting": 10,
+            "url_ssl" : 10,
+            "url_sub_domain" : 10,
+            "url_whois" : 10,
+            "html_form" : 10,
+            "html_iframe" : 10,
+            "html_js" : 10,
+            "html_meta" : 10,
+            "html_url" : 10,
+            "js_dom_dynamic" : 10,
+            "js_dom_static" : 10,
+            "js_exfil_dynamic" : 10,
+            "js_exfil_static" : 10,
+            "js_hooking_dynamic" : 10,
+            "js_hooking_static" : 10,
+            "js_obfuscation_dynamic" : 10,
+            "js_obfuscation_static" : 10,
+            "js_redirect_dynamic" : 10,
+            "js_redirect_static" : 10,
+            "js_script_dynamic" : 10,
+            "js_script_static" : 10,
         }
 
         score = 0
@@ -121,14 +156,15 @@ class Kernel :
             result = self.result_dictionary.get(result_dictionary_key, False) # Module Instance의 결과를 Get
 
             for keyword, weight in module_weight_list.items() :
+                # print(f"[ DEBUG ] {keyword} ( {weight} ) : {result}")
 
                 # ( 2 ) "module_weight_list" 안에 해당 Module Instance가 있을 경우 + 해당 Module Instance의 결과 True 경우 => Score +
-                if ( keyword in module_file_path.lower() ) and ( result is True ) :
+                if ( keyword in result_dictionary_key ) and ( result is True ) :
                     score += weight
                     score_dictionary[class_name] = weight # 그리고 "score_dictionary"에 추가
 
-        print(f"[ DEBUG ] Score : {score}")
-        print(f"[ DEBUG ] Score Dictionary : {score_dictionary}")
+        # print(f"[ DEBUG ] Score : {score}")
+        # print(f"[ DEBUG ] Score Dictionary : {score_dictionary}")
         
         self.score = score
         self.score_dictionary = score_dictionary
@@ -138,14 +174,35 @@ class Kernel :
     OUT : 
     """
     def start(self) :
+        print()
+        print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        print(" [ Kernel ] Load Modules ...")
+        print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+
         self.load_modules()
+
+        print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        print(f" [ Kernel ] Total Modules : {len(self.module_instance_list)}")
+        print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        print()
 
         self.get_result_dictionary()
 
+        print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        print(" [ Kernel ] Calculate Score ...")
+        print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+
         self.get_score_dictionary()
 
+        for class_name, score in self.score_dictionary.items() :
+            print(f"  [ + ]  {class_name:<25} {score}")
+
+        print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        print(f" [ Kernel ] Total Score : {self.score}")
+        print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+
         # [ To Do ]
-        if self.score >= 30 :
+        if self.score >= 100 :
             return True
         else :
             return False

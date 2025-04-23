@@ -77,8 +77,8 @@ class UrlSubDomain :
             # sys.exit(1)
             return # ( For TEST ) To-Do
                 
-        print(f"[ DEBUG ] Host Name : {hostname}")
-        print(f"[ DEBUG ] Path : {path}")
+        # print(f"[ DEBUG ] Host Name : {hostname}")
+        # print(f"[ DEBUG ] Path : {path}")
 
         tldextract_result = tldextract.extract(hostname)
 
@@ -88,45 +88,45 @@ class UrlSubDomain :
 
         input_domain_suffix = f"{domain}.{suffix}"
 
-        print(f"[ DEBUG ] Sub Domain : {subdomain}")
-        print(f"[ DEBUG ] Domain : {domain}")
-        print(f"[ DEBUG ] Suffix : {suffix}")
+        # print(f"[ DEBUG ] Sub Domain : {subdomain}")
+        # print(f"[ DEBUG ] Domain : {domain}")
+        # print(f"[ DEBUG ] Suffix : {suffix}")
 
-        print(f"[ DEBUG ] Domain : {input_domain_suffix}")
+        # print(f"[ DEBUG ] Domain : {input_domain_suffix}")
 
         # ( 1-1 ) "White List : Domain + Suffix"에 "input_domain_suffix" 없을 경우
         if input_domain_suffix not in self.white_list_domain_suffix :
             for brand in self.white_list_brand :
                 # ( 2-1 ) 하지만 "Sub Domain"에 "White List : Brand" 있을 경우 => "Suspicious"
                 if brand in subdomain :
-                    print(f"[ ⚠️ Suspicious ]")
-                    print(f">>>> ( Suspicious ) Brand : \"{brand}\"")
-                    print(f">>>> ( Suspicious ) Sub Domain : {subdomain}")
-                    print(f">>>> Domain + Suffix : {input_domain_suffix}")
-                    print(f">>>> Input URL : {self.input_url}")
+                    # print(f"[ ⚠️ Suspicious ]")
+                    # print(f">>>> ( Suspicious ) Brand : \"{brand}\"")
+                    # print(f">>>> ( Suspicious ) Sub Domain : {subdomain}")
+                    # print(f">>>> Domain + Suffix : {input_domain_suffix}")
+                    # print(f">>>> Input URL : {self.input_url}")
                     return True
             
                 # ( 2-2 ) 그리고 "Sub Domain"에 "White List : Brand" 없을 경우
                 else :
                     # ( 3-1 ) 하지만 "Path"에 "White List : Brand" 있을 경우 => "Suspicious"
                     if brand in path :
-                        print(f"[ ⚠️ Suspicious ]")
-                        print(f">>>> ( Suspicious ) Brand : \"{brand}\"")
-                        print(f">>>> ( Suspicious ) Path : {path}")
-                        print(f">>>> Domain + Suffix : {input_domain_suffix}")
-                        print(f">>>> Input URL : {self.input_url}")
+                        # print(f"[ ⚠️ Suspicious ]")
+                        # print(f">>>> ( Suspicious ) Brand : \"{brand}\"")
+                        # print(f">>>> ( Suspicious ) Path : {path}")
+                        # print(f">>>> Domain + Suffix : {input_domain_suffix}")
+                        # print(f">>>> Input URL : {self.input_url}")
                         return True
                     
                     # ( 3-2 ) 그리고 "Path"에 "White List : Brand" 없을 경우 => "OK"
                     else :
-                        print(f"[ OK - DEBUG ] N IN - White List : Brand")
-                        print(f"[ ✅ OK ]")
+                        # print(f"[ OK - DEBUG ] N IN - White List : Brand")
+                        # print(f"[ ✅ OK ]")
                         return False
         
         # ( 1-2 ) "White List : Domain + Suffix"에 "input_domain_suffix" 있을 경우 => "OK"
         else :
-            print(f"[ OK - DEBUG ] IN - White List : Domain + Suffix")
-            print(f"[ ✅ OK ]")
+            # print(f"[ OK - DEBUG ] IN - White List : Domain + Suffix")
+            # print(f"[ ✅ OK ]")
             return False
         
         # print("\nModule End.")

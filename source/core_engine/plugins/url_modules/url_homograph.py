@@ -116,7 +116,7 @@ class UrlHomograph :
     def scan_tools_dnstwist(self, hostname) :
         domain_list_suspicious_open, domain_list_suspicious_close = self.run_dnstwist(hostname)
 
-        print(f"[ DEBUG ] Number of Suspicious Open : {len(domain_list_suspicious_open)}")
+        # print(f"[ DEBUG ] Number of Suspicious Open : {len(domain_list_suspicious_open)}")
         # print(f"[ DEBUG ] Number of Suspicious Close : {len(domain_list_suspicious_close)}")
 
         for domain_element in domain_list_suspicious_open :
@@ -142,7 +142,8 @@ class UrlHomograph :
 
         try :
             dnstwist_result = subprocess.run(
-                ["python3", "../../tools/dnstwist/dnstwist.py", "--format", "json", domain],
+                # ["python3", "../../tools/dnstwist/dnstwist.py", "--format", "json", domain],
+                ["python3", "tools/dnstwist/dnstwist.py", "--format", "json", domain],
                 capture_output=True,
                 text=True,
                 check=True
