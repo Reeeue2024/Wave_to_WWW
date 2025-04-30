@@ -1,4 +1,4 @@
-# [Python Modules] js_dom_dynamic.py
+# [ JS Modules ] js_dom_dynamic.py
 
 import subprocess
 import json
