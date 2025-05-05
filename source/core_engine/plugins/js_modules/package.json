@@ -1,16 +1,15 @@
 {
-  "dependencies": {
-    "proxy-agent": "^6.5.0",
-    "puppeteer": "^24.7.0",
-    "y18n": "^5.0.8"
-  },
   "name": "js_modules",
   "version": "1.0.0",
-  "main": "js_dom_dynamic.js",
+  "main": "",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error : No Test\" && exit 1"
   },
+  "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": ""
+  "description": "",
+  "dependencies": {
+    "puppeteer": "^24.8.0"
+  }
 }

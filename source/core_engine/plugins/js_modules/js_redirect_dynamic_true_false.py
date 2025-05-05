@@ -1,4 +1,4 @@
-# [ Core ] Module - JS : js_dom_dynamic.py ( Score )
+# [ Core ] Module - JS : js_redirect_dynamic.py ( True / False )
 
 from plugins._base_module import BaseModule
 
@@ -7,7 +7,7 @@ import subprocess
 import json
 import os
 
-class JsDomDynamic(BaseModule) :
+class JsRedirectDynamic(BaseModule) :
     def __init__(self, input_url) :
         super().__init__(input_url)
 
@@ -17,7 +17,7 @@ class JsDomDynamic(BaseModule) :
     """
     def scan(self) :
         js_directory_path = os.path.dirname(os.path.abspath(__file__))
-        js_file_path = os.path.abspath(os.path.join(js_directory_path, "js_dom_dynamic.js"))
+        js_file_path = os.path.abspath(os.path.join(js_directory_path, "js_redirect_dynamic.js"))
 
         try :
             result_js = subprocess.check_output(
@@ -25,7 +25,7 @@ class JsDomDynamic(BaseModule) :
                 universal_newlines = True,
                 timeout = 10
             )
-        
+
         except Exception as e :
             self.module_result_flag = False
             self.module_result_data["reason"] = f"Fail to Execute JS : {e}"
@@ -37,25 +37,22 @@ class JsDomDynamic(BaseModule) :
         try :
             result_object = json.loads(result_js)
 
-            self.module_result_data["log_list"] = result_object.get("log_list", [])
-            self.module_result_data["score"] = result_object.get("score", 0)
+            log_list = result_object.get("logs", [])
+            flag = result_object.get("flag", False)
 
-            if result_object.get("score", 0) >= 50 :
-
-                self.module_result_flag = True
-                self.module_result_data["reason"] = "DOM Dynamic Score : High."
-            
-            elif result_object.get("score", 0) >= 20 :
+            if flag :
 
                 self.module_result_flag = True
-                self.module_result_data["reason"] = "DOM Dynamic Score : Not High / Not Low."
-            
+                self.module_result_data["reason"] = "Redirect Exist."
+                self.module_result_data["log_list"] = log_list
+
             else :
 
                 self.module_result_flag = False
-                self.module_result_data["reason"] = "DOM Dynamic Score : Low."
+                self.module_result_data["reason"] = "Redirect Not Exist."
 
         except json.JSONDecodeError :
+
             self.module_result_flag = True
             self.module_result_data["reason"] = "Fail to Parse Result of JS."
 
@@ -70,12 +67,12 @@ if __name__ == "__main__" :
 
     if len(sys.argv) != 2 :
 
-        print("How to Use : python3 js_dom_dynamic.py < URL >")
+        print("How to Use : python3 js_redirect_dynamic.py < URL >")
 
         sys.exit(1)
 
     input_url = sys.argv[1]
 
-    module_instance = JsDomDynamic(input_url)
+    module_instance = JsRedirectDynamic(input_url)
 
     module_instance.scan()

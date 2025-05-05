@@ -1,86 +1,81 @@
-# [ JS Modules ] JS Redirect Dynamic Python
+# [ Core ] Module - JS : js_redirect_dynamic.py ( Score )
 
-import os
+from plugins._base_module import BaseModule
+
 import sys
 import subprocess
 import json
+import os
 
-class JsRedirectDynamic:
-    """
-    IN  : URL (str)
-    OUT : score (float) : 0.0 ~ 1.0
-    """
-    def __init__(self, input_url):
-        self.input_url = input_url
+class JsRedirectDynamic(BaseModule) :
+    def __init__(self, input_url) :
+        super().__init__(input_url)
 
     """
-    IN  : URL
-    OUT : Scan Result (True : Phishing O / False : Phishing X)
+    IN : 
+    OUT : 
     """
-    def scan(self):
-        # print("Module Start: [JS Redirect Dynamic].")
+    def scan(self) :
+        js_directory_path = os.path.dirname(os.path.abspath(__file__))
+        js_file_path = os.path.abspath(os.path.join(js_directory_path, "js_redirect_dynamic.js"))
 
-        try:
-            result = subprocess.run(
-                ['node', 'js_redirect_dynamic.js', self.input_url],
-                capture_output=True,
-                text=True,
-                timeout=15
+        try :
+            result_js = subprocess.check_output(
+                ["node", js_file_path, self.input_url],
+                universal_newlines = True,
+                timeout = 10
             )
 
-            lines = result.stdout.strip().split('\n')
+        except Exception as e :
+            self.module_result_flag = False
+            self.module_result_data["reason"] = f"Fail to Execute JS : {e}"
 
-            # 최종 URL 파싱
-            final_url = None
-            for line in lines:
-                if "Final URL:" in line:
-                    final_url = line.split("Final URL:")[1].strip()
-                    break
+            self.create_module_result()
 
-            # JSON 추출
-            json_line = next(line for line in lines if line.strip().startswith('{'))
-            result_data = json.loads(json_line)
+            return self.module_result_dictionary
 
-            logs = result_data.get("logs", [])
-            score = result_data.get("score", 0)
+        try :
+            result_object = json.loads(result_js)
 
-            # 리디렉션 응답 코드 출력 (Python에서 직접 출력)
-            # for line in lines:
-            #     if "Redirect response code detected:" in line:
-            #         print(f"[Info] Redirect Response Code: {line.split(':')[1].strip()}")  # [Info] 포맷
+            self.module_result_data["log_list"] = result_object.get("log_list", [])
+            self.module_result_data["score"] = result_object.get("score", 0)
 
-            # JS 로그에 의한 리디렉션 대상 추출
-            redirect_targets = [
-                line.split("Redirect detected:")[1].strip()
-                for line in lines if "Redirect detected:" in line
-            ]
+            if result_object.get("score", 0) >= 50 :
 
-            # JS 로그에는 없지만 최종 URL이 변경된 경우 → 강제 포함
-            if not redirect_targets and any("Redirect detected" in log for log in logs):
-                if final_url and final_url != self.input_url:
-                    redirect_targets.append(final_url)
+                self.module_result_flag = True
+                self.module_result_data["reason"] = "Redirect Score : High."
+            
+            elif result_object.get("score", 0) >= 20 :
 
-            # 리디렉션 정보 출력
-            # print(f"[Detected] JS Redirect: {redirect_targets} (fast +{score})")
-            # print(f"→ Score: {score:.1f} (0.0: Safe, 1.0: High Risk)")
+                self.module_result_flag = True
+                self.module_result_data["reason"] = "Redirect Score : Not High / Not Low."
+            
+            else :
 
-            return score > False  # 점수가 0 이상이면 위험 URL로 판단
+                self.module_result_flag = False
+                self.module_result_data["reason"] = "Redirect Score : Low."
 
-        except Exception as e:
-            # print("Error:", e)
-            # print("→ Score: 0.0 (Fail)")
-            return False
+        except json.JSONDecodeError :
+            self.module_result_flag = True
+            self.module_result_data["reason"] = "Fail to Parse Result of JS."
 
-        # finally:
-            # print("\nModule End.")
+        self.create_module_result()
 
+        # print(f"[ DEBUG ] Module Result Dictionary : {self.module_result_dictionary}")
+
+        return self.module_result_dictionary
 
 # Module Main
-if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        # print("How to Use : python3 js_redirect_dynamic.py < URL >")
+if __name__ == "__main__" :
+
+    if len(sys.argv) != 2 :
+
+        print("How to Use : python3 js_redirect_dynamic.py < URL >")
+
         sys.exit(1)
 
     input_url = sys.argv[1]
-    js_redirect_dynamic = JsRedirectDynamic(input_url)
-    js_redirect_dynamic.scan()
+
+    module_instance = JsRedirectDynamic(input_url)
+
+    module_instance.scan()

@@ -1,4 +1,4 @@
-# [ Core ] Module - JS : js_dom_dynamic.py ( Score )
+# [ Core ] Module - JS : js_obfuscate_dynamic.py ( Score )
 
 from plugins._base_module import BaseModule
 
@@ -7,7 +7,7 @@ import subprocess
 import json
 import os
 
-class JsDomDynamic(BaseModule) :
+class JsObfuscateDynamic(BaseModule) :
     def __init__(self, input_url) :
         super().__init__(input_url)
 
@@ -17,7 +17,7 @@ class JsDomDynamic(BaseModule) :
     """
     def scan(self) :
         js_directory_path = os.path.dirname(os.path.abspath(__file__))
-        js_file_path = os.path.abspath(os.path.join(js_directory_path, "js_dom_dynamic.js"))
+        js_file_path = os.path.abspath(os.path.join(js_directory_path, "js_obfuscate_dynamic.js"))
 
         try :
             result_js = subprocess.check_output(
@@ -43,17 +43,17 @@ class JsDomDynamic(BaseModule) :
             if result_object.get("score", 0) >= 50 :
 
                 self.module_result_flag = True
-                self.module_result_data["reason"] = "DOM Dynamic Score : High."
+                self.module_result_data["reason"] = "Obfuscate Dynamic Score : High."
             
             elif result_object.get("score", 0) >= 20 :
 
                 self.module_result_flag = True
-                self.module_result_data["reason"] = "DOM Dynamic Score : Not High / Not Low."
+                self.module_result_data["reason"] = "Obfuscate Dynamic Score : Not High / Not Low."
             
             else :
 
                 self.module_result_flag = False
-                self.module_result_data["reason"] = "DOM Dynamic Score : Low."
+                self.module_result_data["reason"] = "Obfuscate Dynamic Score : Low."
 
         except json.JSONDecodeError :
             self.module_result_flag = True
@@ -61,7 +61,7 @@ class JsDomDynamic(BaseModule) :
 
         self.create_module_result()
 
-        print(f"[ DEBUG ] Module Result Dictionary : {self.module_result_dictionary}")
+        # print(f"[ DEBUG ] Module Result Dictionary : {self.module_result_dictionary}")
 
         return self.module_result_dictionary
 
@@ -70,12 +70,12 @@ if __name__ == "__main__" :
 
     if len(sys.argv) != 2 :
 
-        print("How to Use : python3 js_dom_dynamic.py < URL >")
+        print("How to Use : python3 js_obfuscate_dynamic.py < URL >")
 
         sys.exit(1)
 
     input_url = sys.argv[1]
 
-    module_instance = JsDomDynamic(input_url)
+    module_instance = JsObfuscateDynamic(input_url)
 
     module_instance.scan()

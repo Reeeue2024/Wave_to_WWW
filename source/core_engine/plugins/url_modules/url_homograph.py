@@ -1,4 +1,6 @@
-# [ URL Modules ] Homograph
+# [ Core ] Module - URL : url_homograph.py
+
+from plugins._base_module import BaseModule
 
 import os
 import sys
@@ -6,144 +8,54 @@ from urllib.parse import urlparse
 import subprocess
 import json
 
-"""
-IN : URL
-OUT : Scan Result ( True : Phishing O / False : Phishing X )
-"""
-class UrlHomograph :
-    # [ Class Level ] White List : Domain + Suffix => To-Do
-    white_list_domain_suffix = [ "google.com", "paypal.com", "apple.com", "microsoft.com", "naver.com", "kakao.com" ]
-    
-    """
-    IN : 
-    OUT : 
-    """
+class UrlHomograph(BaseModule) :
     def __init__(self, input_url) :
-        self.input_url = input_url
 
-        self.load_white_lists()
-    
+        super().__init__(input_url)
+
+        self.white_list_domain_suffix = self.get_kernel_resource("white_list_domain_suffix")
+
     """
     IN : 
     OUT : 
-    """
-    @classmethod
-    def load_white_lists(cls) :
-        if cls.white_list_domain_suffix is not None :
-            return
-        
-        BASE_PATH = os.path.dirname(os.path.abspath(__file__))
-        WHITE_LIST_DOMAIN_SUFFIX_PATH = os.path.abspath(
-            os.path.join(BASE_PATH, "../../_white_list/white_list_top-1m_domain.txt")
-        )
-
-        # White List : Domain + Suffix
-        cls.white_list_domain_suffix = []
-
-        try :
-            with open(WHITE_LIST_DOMAIN_SUFFIX_PATH, "r", encoding="utf-8") as f :
-                for line in f :
-                    line = line.strip().lower()
-
-                    if not line or line.startswith("#") :
-                        continue
-                    
-                    cls.white_list_domain_suffix.append(line)
-
-        except FileNotFoundError :
-            print(f"[ ERROR ] Fail to Load White List File ( Domain + Suffix ) : {WHITE_LIST_DOMAIN_SUFFIX_PATH}")
-
-    """
-    IN : 
-    OUT : True ( Suspicious ) / False ( OK )
     """
     def scan_hostname_ascii(self, hostname) :
-        # 1st
-
-        # Not Only ASCII : Suspicious
         if not hostname.isascii() :
-            # print("[ 1st ] Suspicious")
-            return True
+
+            return True, "Hostname is Not ASCII Only."
         
-        # Only ASCII : OK
-        else :
-            # print("[ 1st ] OK")
-            return False
+        return False, "Hostname is ASCII Only."
 
     """
     IN : 
-    OUT : True ( Suspicious ) / False ( OK )
+    OUT : 
     """
     def scan_hostname_punycode(self, hostname) :
-        # 2nd
-        
         try :
             punycode = hostname.encode("idna").decode("ascii")
-            # print(f"[ DEBUG ] Punycode : {punycode}")
 
-            # Include Punycode : Suspicious
             if "xn--" in punycode :
-                # print("[ 2nd ] Suspicious")
-                return True
+
+                return True, f"Hostname Contains Punycode. ( {punycode} )"
             
-            # Not Include Punycode : OK
             else :
-                # print("[ 2nd ] OK")
-                return False
+
+                return False, "Hostname Not Contains Punycode."
             
         except UnicodeError as e :
-            print(f"[ DEBUG ] Fail to Encode Punycode ( \"idna\" ) : {e}")
-            return False # To-Do
-    
-    """
-    IN : 
-    OUT : 
-    """
-    def scan_ascii_homograph_table(self) :
-        print() # To-Do
-
-    """
-    IN : 
-    OUT : 
-    """
-    def scan_ascii_homograph_rapidfuzz(self) :
-        print() # To-Do
-    
-    """
-    IN : 
-    OUT : True ( Suspicious ) / False ( OK )
-    """
-    def scan_tools_dnstwist(self, hostname) :
-        domain_list_suspicious_open, domain_list_suspicious_close = self.run_dnstwist(hostname)
-
-        # print(f"[ DEBUG ] Number of Suspicious Open : {len(domain_list_suspicious_open)}")
-        # print(f"[ DEBUG ] Number of Suspicious Close : {len(domain_list_suspicious_close)}")
-
-        for domain_element in domain_list_suspicious_open :
-            # print(domain_element)
-
-            for white_element in self.white_list_domain_suffix :
-                if domain_element["domain"] == white_element :
-                    return True
-        
-        return False
-        
-        # To-Do
-        # for domain in domain_list_suspicious_close :
-        #     print(domain)
+            return False, f"[ ERROR ] Fail to Encode / Decode Punycode : {e}"
 
     """
     IN : 
     OUT : 
     """
     def run_dnstwist(self, domain) :
-        domain_list_suspicious_open = [] # ( IPV4 / IPV6 : True )
-        domain_list_suspicious_close = [] # ( IPV4 / IPV6 : False ) + ( Name Server / Mail Server : True ) 
+        domain_list_open = [] # ( IPV4 / IPV6 : True )
+        domain_list_close = [] # ( IPV4 / IPV6 : False ) + ( Name Server / Mail Server : True ) 
 
         try :
             dnstwist_result = subprocess.run(
-                # ["python3", "../../tools/dnstwist/dnstwist.py", "--format", "json", domain],
-                ["python3", "tools/dnstwist/dnstwist.py", "--format", "json", domain],
+                ["python3", "Tools/dnstwist/dnstwist.py", "--format", "json", domain],
                 capture_output=True,
                 text=True,
                 check=True
@@ -155,74 +67,129 @@ class UrlHomograph :
             dnstwist_result_domain_list = [item for item in dnstwist_result_domain_list if item["fuzzer"] != "*original"]
 
             for item in dnstwist_result_domain_list :
+
                 # ( IPV4 : True )
                 if "dns_a" in item and "!ServFail" not in item["dns_a"] :
-                    domain_list_suspicious_open.append(item)
+                    domain_list_open.append(item)
+
                 # ( IPV6 : True )
                 elif "dns_aaaa" in item and "!ServFail" not in item["dns_aaaa"] :
-                    domain_list_suspicious_open.append(item)
+                    domain_list_open.append(item)
+
                 # ( IPV4 / IPV6 : False ) + ( Name Server : True ) 
                 elif "dns_ns" in item and "!ServFail" not in item["dns_ns"] :
-                    domain_list_suspicious_close.append(item)
+                    domain_list_close.append(item)
+
                 # ( IPV4 / IPV6 : False ) + ( Mail Server : True )
                 elif "dns_mx" in item and "!ServFail" not in item["dns_mx"] :
-                    domain_list_suspicious_close.append(item)
+                    domain_list_close.append(item)
 
         except Exception as e :
-                print(f"[ ERROR ] Fail to Run ( Tools - \"dnstwist\" ) : {e}")
+                print(f"[ ERROR ] Fail to Run \"dnstwist\" : {e}")
         
-        return domain_list_suspicious_open, domain_list_suspicious_close
-        
+        return domain_list_open, domain_list_close
+
     """
     IN : 
-    OUT : True ( Suspicious ) / False ( OK )
+    OUT : 
+    """
+    def scan_tools_dnstwist(self, hostname) :
+        domain_list_open, domain_list_close = self.run_dnstwist(hostname)
+
+        # print(f"[ DEBUG ] Number of Open : {len(domain_list_open)}")
+        # print(f"[ DEBUG ] Number of Close : {len(domain_list_close)}")
+
+        white_list_set = set(
+            item.get("domain_suffix") for item in self.white_list_domain_suffix if item.get("domain_suffix")
+        )
+
+        for domain_element in domain_list_open :
+            
+            # print(domain_element)
+
+            if domain_element["domain"] in white_list_set :
+
+                # print(f"[ DEBUG ] Domain Element : {domain_element["domain"]}")
+
+                return True, f"Match Domain Exist. ( {domain_element['domain']} )"
+        
+        return False, "Match Domain Not Exist."
+        
+        # To Do : Close
+            
+    """
+    IN : 
+    OUT : 
     """
     def scan(self) :
-        # print("Module Start.\n")
-
-        flag = False
-
-        # print(f"[ DEBUG ] Input URL : {self.input_url.encode()}")
-
         urlparse_result = urlparse(self.input_url)
         hostname = urlparse_result.hostname
 
-        # print(f"[ DEBUG ] Host Name : {hostname}")
+        # print(f"[ DEBUG ] Hostname : {hostname}")
 
         if hostname is None :
-            print("* * * * * * * * * *")
-            print("[ ERROR ] Can't Get \"Host Name\" from Input URL.")
-            print(f">>>> Input URL : {self.input_url}")
-            print("* * * * * * * * * *")
-            # sys.exit(1)
-            return # ( For TEST ) To-Do
 
-        flag = self.scan_hostname_ascii(hostname)
-        if flag == True :
-            flag = self.scan_hostname_punycode(hostname)
-            if flag == True :
-                # print("[ ⚠️ Suspicious ⚠️ ]")
-                # print(f">>>> Input URL : {self.input_url}")
-                return True
-        
-        flag = self.scan_tools_dnstwist(hostname)
-        if flag == True :
-                # print("[ ⚠️ Suspicious ⚠️ ]")
-                # print(f">>>> Input URL : {self.input_url}")
-                return True
-        
-        # print(f"[ ✅ OK ]")
-        return False
+            self.module_result_flag = False
+            self.module_result_data["error"] = "Fail to Get Hostname."
 
-        # print("\nModule End.")
+            self.create_module_result()
+
+            return self.module_result_dictionary
+
+        # [ 1. ] ASCII
+
+        ascii_flag, ascii_data = self.scan_hostname_ascii(hostname)
+        self.module_result_data["ascii"] = ascii_data
+        
+        if ascii_flag :
+
+            # [ 2. ] Punycode
+
+            punycode_flag, punycode_data = self.scan_hostname_punycode(hostname)
+            self.module_result_data["punycode"] = punycode_data 
+
+            if punycode_flag :
+                
+                self.module_result_flag = True
+                self.module_result_data["reason"] = "Punycode"
+
+                self.create_module_result()
+
+                return self.module_result_dictionary
+        
+        # [ 3. ] "dnstwist"
+
+        dnstwist_flag, dnstwist_data = self.scan_tools_dnstwist(hostname)
+        self.module_result_data["dnstwist"] = dnstwist_data
+
+        if dnstwist_flag :
+
+            self.module_result_flag = True
+            self.module_result_data["reason"] = "dnstwist"
+        
+        else :
+
+            self.module_result_flag = False
+            self.module_result_data["reason"] = ""
+        
+        self.create_module_result()
+
+        # print(f"[ DEBUG ] Module Result Dictionary : {self.module_result_dictionary}")
+
+        return self.module_result_dictionary
 
 # Module Main
 if __name__ == "__main__" :
+
     # Input : URL
     if len(sys.argv) != 2 :
+
         print("How to Use : python3 url_homograph.py < URL >")
+
         sys.exit(1)
     
     input_url = sys.argv[1]
-    homograph_instance = UrlHomograph(input_url)
-    homograph_instance.scan()
+
+    module_instance = UrlHomograph(input_url)
+    
+    module_instance.scan()

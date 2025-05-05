@@ -1,175 +1,208 @@
-// [ JS Modules ] js_dom_dynamic.js
+// [ Core ] Module - JS : js_dom_dynamic.py - js_dom_dynamic.js
 
 const puppeteer = require("puppeteer");
-const path = require("path");
+const { URL } = require("url");
 
-(async () => {
-  const url = process.argv[2];
-  const logs = [];
-  let score = 0;
-  const triggeredRules = new Set();
-  const detectedRules = new Set();
+// ( Util ) Add Log
+function addLog(logList, message, score) {
+    logList.push(`${message} ( + ${score} )`);
+}
 
-  function addLog(message, points) {
-    logs.push(`${message} (+${points}점)`);
-    score += points;
-  }
+// ( Util ) Get Pattern List
+function getPatternList(inputHostname) {
+    return [
+        {
+            patternType : "hideIframe",
+            pattern : /<iframe[^>]*(display:\s*none|visibility:\s*hidden|width=["']?0["']?|height=["']?0["']?)/i,
+            patternReason : "Exist Hide Iframe.",
+            patternWeight : 5,
+        },
+        {
+            patternType : "externalScript",
+            pattern: new RegExp(`<script[^>]+src=["']https?:\/\/(?!.*${inputHostname})`, "i"),
+            patternReason : "Exist External Script.",
+            patternWeight : 5,
+        },
+        {
+            patternType : "externalForm",
+            pattern: new RegExp(`<form[^>]+action=["']https?:\/\/(?!.*${inputHostname})`, "i"),
+            patternReason : "Exist External Form.",
+            patternWeight : 5,
+        },
+        {
+            patternType : "httpForm",
+            pattern: /<form[^>]+action=["']http:\/\/[^>]*>.*?<input[^>]*type=["']password["']/is,
+            patternReason : "Exist HTTP Form.",
+            patternWeight : 5,
+        },
+        {
+            patternType : "hideLink",
+            pattern: /<a[^>]*(display:\s*none|visibility:\s*hidden|width=["']?0["']?|height=["']?0["']?)/i,
+            patternReason : "Exist Hide Link.",
+            patternWeight : 5,
+        },
+        {
+            patternType : "redirectIframe",
+            pattern: new RegExp(`<iframe[^>]+src=["']https?:\/\/(?!.*${inputHostname})`, "i"),
+            patternReason : "Exist Redirect Iframe.",
+            patternWeight : 5,
+        },
+        {
+            patternType : "metaRefresh",
+            pattern: /<meta[^>]+http-equiv=["']refresh["'][^>]+content=["']\d+;\s*url=/i,
+            patternReason : "Exist Meta Refresh.",
+            patternWeight : 5,
+        },
+    ];
+}
 
-  const currentDomain = new URL(url).hostname;
-
-  // 정규표현식 정의
-  const DomRules = [
-    {
-      name: "password_input",
-      pattern: /<input[^>]*type=["']password["']/i,
-      score: 5,
-      message: "비밀번호 입력창 존재 감지"
-    },
-    {
-      name: "hidden_iframe",
-      pattern: /<iframe[^>]*(display:\s*none|visibility:\s*hidden|width=["']?0["']?|height=["']?0["']?)/i,
-      score: 5,
-      message: "숨겨진 iframe 감지"
-    },
-    {
-      name: "external_script",
-      pattern: new RegExp(`<script[^>]+src=["']https?:\/\/(?!.*${currentDomain})`, "i"),
-      score: 5,
-      message: "외부 스크립트 삽입 감지"
-    },
-    {
-      name: "external_form_action",
-      pattern: new RegExp(`<form[^>]+action=["']https?:\/\/(?!.*${currentDomain})`, "i"),
-      score: 5,
-      message: "form 액션이 외부 도메인으로 지정됨"
-    },
-    {
-      name: "insecure_login_form",
-      pattern: /<form[^>]+action=["']http:\/\/[^>]*>.*?<input[^>]*type=["']password["']/is,
-      score: 5,
-      message: "비밀번호 전송에 HTTPS 미사용"
-    },
-    {
-      name: "suspicious_onclick",
-      pattern: /onclick\s*=\s*["'].*(location\.href|window\.location|document\.location).*["']/i,
-      score: 5,
-      message: "onclick 속성 내 의심스러운 리디렉션 감지"
-    },
-    {
-      name: "javascript_uri",
-      pattern: /href\s*=\s*["']javascript:/i,
-      score: 5,
-      message: "href 속성에 javascript URI 사용 감지"
-    },
-    {
-      name: "invisible_link",
-      pattern: /<a[^>]*(display:\s*none|visibility:\s*hidden|width=["']?0["']?|height=["']?0["']?)/i,
-      score: 5,
-      message: "숨겨진 링크 요소 감지"
-    },
-    {
-      name: "iframe_redirect",
-      pattern: new RegExp(`<iframe[^>]+src=["']https?:\/\/(?!.*${currentDomain})`, "i"),
-      score: 5,
-      message: "외부 도메인으로 연결된 iframe 감지"
-    },
-    {
-      name: "meta_refresh_redirect",
-      pattern: /<meta[^>]+http-equiv=["']refresh["'][^>]+content=["']\d+;\s*url=/i,
-      score: 5,
-      message: "meta refresh 태그를 통한 리디렉션 감지"
-    }
-  ];
-
-  // 헤드리스 크롬 실행
-  const browser = await puppeteer.launch({
-      headless: true,
-      args: ['--no-sandbox']
-    });
-
-  const page = await browser.newPage();
-
-  // 리소스 요청 차단, 성능 최적화
-  await page.setRequestInterception(true);
-  page.on("request", (request) => {
-    if (["image", "stylesheet", "font"].includes(request.resourceType())) {
-      request.abort();
-    } else {
-      request.continue();
-    }
-  });
-
-  try {
-    // 실행 감지 위한 후킹 함수 등록
-    await page.exposeFunction("trackExecution", (ruleName, message, execScore) => {
-      if (detectedRules.has(ruleName) && !triggeredRules.has(ruleName)) {
-        addLog(`[실행 탐지] ${message}`, execScore);  // 실제 실행되면 가산
-        triggeredRules.add(ruleName); // 중복 가산 방지
-      }
-    });
-    
-    // 자동 실행 탐지를 위한 후킹 삽입
-    await page.evaluateOnNewDocument(() => {
-      // DOM 변경 자동 실행 탐지
-      const observer = new MutationObserver(mutations => {
-        for (const mutation of mutations) {
-          if (mutation.type === "childList" && mutation.addedNodes.length > 0) {
-            window.trackExecution("dom_mutation", "DOM 변경 감지 (자동 실행)", 25);
-          }
-        }
-      });
-      
-      // DOM 감시 시작
-      window.addEventListener("DOMContentLoaded", () => {
-        observer.observe(document.body, { childList: true, subtree: true });
-      });
-
-      const smartHook = (original, name) => {
+// ( Util ) Create Hook : "Delay Execute"
+function createHook(name) {
+    return function (inputFunction) {
         return function (...args) {
-          window.trackExecution("timer_exec", name + " 통해 자동 실행 감지", 25);
-          return original.apply(this, args);
+            window.logExecute("delayExecute", `Execute "Delay Execute" Function. ( ${name} )`, 25);
+
+            return inputFunction.apply(this, args);
         };
-      };
+    };
+}
 
-      window.setTimeout = smartHook(window.setTimeout, "setTimeout");
-      window.setInterval = smartHook(window.setInterval, "setInterval");
-    });
-    
-    // 페이지 접속 후 코드 수집
-    await page.goto(url, { waitUntil: "networkidle0", timeout: 3000 });
-
-    const scripts = await page.$$eval("script", elements =>
-      elements.map(el => el.innerText).filter(Boolean)
-    );
-
-    const uniqueScripts = [...new Set(scripts)];
-
-    for (const code of uniqueScripts) {
-      // 정규표현식 탐지 수행
-      for (const rule of DomRules) {
-        if (rule.pattern.test(code)) {
-          addLog(rule.message, rule.score); // 정적 탐지 점수 가산
-          detectedRules.add(rule.name); // 저장
+// ( Util ) Create Hook : "Mutate DOM"
+function setDomMutationObserver() {
+    const observer = new MutationObserver(mutationList => {
+        for (const mutation of mutationList) {
+            if (mutation.type === "childList" && mutation.addedNodes.length > 0) {
+                window.logExecute("mutateDOM", `Execute "Mutate DOM" Function.`, 25);
+            }
         }
-      }
-    }
+    });
+
+    window.addEventListener("DOMContentLoaded", () => {
+        observer.observe(document.body, { childList : true, subtree : true });
+    });
+}
+
+// ( Main )
+async function runDomDynamic() {
+    const inputUrl = process.argv[2];
+
+    let flag = false;
+    let score = 0;
+    const logList = [];
+
+    const executePatternList = new Set(); // uniqueScriptElement : Execute
+    const existPatternList = new Set(); // uniqueScriptElement : Exist
+
+    const inputHostname = new URL(inputUrl).hostname;
+
+    const patternList = getPatternList(inputHostname);
     
-    // 사용자 클릭 시뮬레이션
-    const anchors = await page.$$("a");
-    for (const anchor of anchors) {
-      try {
-        await anchor.click({ delay: 100 });
-      } catch (_) {}
+    // Execute Chrome
+    const browser = await puppeteer.launch({
+        headless : true,
+        args : [ "--no-sandbox", "--disable-setuid-sandbox" ]
+    });
+
+    const page = await browser.newPage();
+
+    // Performance
+    await page.setRequestInterception(true);
+    page.on("request", (request) => {
+        const blockTypeList = [ "image", "stylesheet", "font" ];
+
+        if (blockTypeList.includes(request.resourceType())) {
+            request.abort();
+        }
+        else {
+            request.continue();
+        }
+    });
+
+    try {
+        // [ 0-1. ] Set Hook for Hook
+        await page.exposeFunction("logExecute", (patternType, patternReason, patternWeight) => {
+            if (existPatternList.has(patternType) && !executePatternList.has(patternType)) {
+                flag = true;
+                addLog(logList, `[ Execute ( Pattern ) ] ${patternReason}`, patternWeight);
+                score += patternWeight;
+
+                executePatternList.add(patternType);
+            }
+        });
+
+        // [ 0-2. ] Set Hook
+        await page.evaluateOnNewDocument(() => {
+            setDomMutationObserver();
+            
+            const hookTimeout = createHook("setTimeout");
+            const hookInterval = createHook("setInterval");
+
+            window.setTimeout = hookTimeout(window.setTimeout);
+            window.setInterval = hookInterval(window.setInterval);
+        });
+
+        // [ 1. ] Start - ( Input ) URL
+        await page.goto(inputUrl, {
+            waitUntil : "networkidle0",
+            timeout : 20000
+        });
+
+        const scriptList = await page.$$eval("script", elements =>
+            elements.map(el => el.innerText).filter(Boolean)
+        );
+
+        const uniqueScriptList = [ ...new Set(scriptList) ];
+
+        for (const uniqueScriptElement of uniqueScriptList) {
+            for (const patternElement of patternList) {
+                const patternResult = uniqueScriptElement.match(patternElement.pattern);
+
+                if (patternResult) {
+                    const reasonData = patternResult[0].trim()
+        
+                    flag = true;
+                    addLog(logList,`${reasonData}]`, patternElement.patternWeight);
+                    score += patternElement.patternWeight;
+
+                    existPatternList.add(patternElement.patternType);
+                }
+
+                if (patternElement.pattern.test(uniqueScriptElement)) {
+                    flag = true;
+                    addLog(logList, patternElement.patternReason, patternElement.patternWeight);
+                    score += patternElement.patternWeight;
+
+                    existPatternList.add(patternElement.patternType);
+                }
+            }
+        }
+
+        const aTagList = await page.$$("a");
+
+        for (const aTagElement of aTagList) {
+            try {
+                await aTagElement.click({ delay : 100 });
+            }
+            catch (_) {}
+        }
+
+        await new Promise(resolve => setTimeout(resolve, 5000));
+
+    }
+    catch (error) {
+        flag = false;
+        addLog(logList, `[ ERROR ] Fail : ${error.message}`, 0);
+        score += 0;
+    }
+    finally {
+        await browser.close();
     }
 
-    await page.waitForTimeout(2000);
+    console.log(JSON.stringify({
+        flag,
+        log_list : logList,
+        score
+    }));
+}
 
-  } catch (err) {
-    logs.push(`[오류] 페이지 분석 실패: ${err.message} (+20점)`);
-    score += 20;
-  } finally {
-    await browser.close();
-  }
-
-  console.log(JSON.stringify({ logs, score }));
-})();
+runDomDynamic();

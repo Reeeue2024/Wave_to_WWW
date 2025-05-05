@@ -1,83 +1,135 @@
-// [ JS Modules ] JS Redirect Dynamic JS
+// [ Core ] Module - JS : js_redirect_dynamic.py - js_redirect_dynamic.js
 
-const puppeteer = require('puppeteer');
+const { after } = require("node:test");
+const puppeteer = require("puppeteer");
 
-(async () => {
-  const url = process.argv[2];  // 입력받은 URL
-  const logs = [];
-  let score = 0;
-  let redirected = false;
+// ( Util ) Add Log
+function addLog(logList, message) {
+    logList.push(message);
+}
 
-  const initialUrl = url;
-
-  // 브라우저 실행
-  const browser = await puppeteer.launch({
-    headless: true,
-    args: ['--no-sandbox']
-  });
-
-  const page = await browser.newPage();
-
-  // HTTP 리디렉션 감지
-  page.on('response', response => {
+// ( Util ) Set Hook : Redirect with "HTTP ( HTTPS )"
+function redirectHttp(response, redirectFlag, logList) {
     const status = response.status();
+
     if (status >= 300 && status < 400) {
-      console.log(`[Info] Redirect Response Code: ${status}`);  // 영어로 출력
-      logs.push(`[Info] Redirect Response Code: ${status}`);  // 로그에 기록만 함
-      redirected = true;
+        addLog(logList, `[ Execute ] Redirect with HTTP ( HTTPS ) : ${status}`);
+
+        redirectFlag.value = true;
     }
-  });
+}
 
-  // JS 기반 리디렉션 감지
-  await page.evaluateOnNewDocument(() => {
-    const originalAssign = window.location.assign;
-    window.location.assign = function (newLocation) {
-      console.log('Redirect detected:', newLocation);  // 리디렉션이 감지되면 로그 출력
-      return originalAssign.call(this, newLocation);
-    };
-  });
+// ( Main )
+async function runRedirectDynamic() {
+    const inputUrl = process.argv[2];
 
-  // 시간 측정 시작
-  const startTime = Date.now();
+    let flag = false;
+    let score = 0;
+    const logList = [];
 
-  await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    const redirectFlag = { value : false };
 
-  // 최대 5초 대기
-  const timeoutPromise = new Promise(resolve => setTimeout(resolve, 5000));
-  await Promise.race([
-    page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {}),
-    timeoutPromise
-  ]);
+    // Execute Chrome
+    const browser = await puppeteer.launch({
+        headless : true,
+        args : [ "--no-sandbox", "--disable-setuid-sandbox" ]
+    });
 
-  const finalUrl = page.url();
-  const endTime = Date.now();
-  const duration = (endTime - startTime) / 1000;
+    const page = await browser.newPage();
 
-  // 리디렉션 여부 판단 및 점수 계산
-  if (initialUrl !== finalUrl || redirected) {
-    logs.push("Redirect detected");
+    // Performance
+    await page.setRequestInterception(true);
+    page.on("request", (request) => {
+        const blockTypeList = [ "image", "stylesheet", "font" ];
 
-    if (duration <= 3) {
-      score = 0.6;
-      logs.push(`fast (+${score})`);
-    } else if (duration <= 5) {
-      score = 0.4;
-      logs.push(`moderate (+${score})`);
-    } else {
-      score = 0.2;
-      logs.push(`slow (+${score})`);
+        if (blockTypeList.includes(request.resourceType())) {
+            request.abort();
+        }
+        else {
+            request.continue();
+        }
+    });
+
+    try {
+        // [ 0-1. ] Set Hook for Hook
+        await page.exposeFunction("logExecute", (message) => {
+            addLog(logList, message);
+
+            redirectFlag.value = true;
+        });
+
+        // [ 0-2-1. ] Set Hook : Redirect with "HTTP ( HTTPS )"
+        page.on("response", (response) => {
+            redirectHttp(response, redirectFlag, logList);
+        });
+
+        // [ 0-2-2. ] Set Hook : Redirect with "window.locaion"
+        await page.evaluateOnNewDocument(() => {
+            const beforeAssign = window.location.assign;
+
+            window.location.assign = function (newLocation) {
+                window.logExecute(`[ Execute ] Redirect with "window.location" : ${newLocation}`);
+                
+                return beforeAssign.call(this, newLocation);
+            };
+        });
+
+        const redirectStartTime = Date.now();
+
+        await page.goto(inputUrl, {
+            waitUntil : "domcontentloaded",
+            timeout : 30000
+        });
+
+        const timeoutPromise = new Promise(resolve => setTimeout(resolve, 5000));
+
+        await Promise.race([
+            page.waitForNavigation({ waitUntil : "domcontentloaded", timeout : 30000 }).catch(() => {}),
+            timeoutPromise
+        ]);
+
+        const afterUrl = page.url();
+        const redirectEndTime = Date.now();
+
+        const redirectTime = (redirectEndTime - redirectStartTime) / 1000;
+
+        if (inputUrl !== afterUrl || redirectFlag.value === true) {
+            flag = true;
+            addLog(logList, `Execute Redirect. ( Redirect URL : ${afterUrl})`);
+
+            if (redirectTime <= 3) {
+                addLog(logList, `Fast Redirect. ( Redirect Time : ${redirectTime} ) ( + ${score} )`);
+                score = 60;
+            }
+            else if (redirectTime <= 5) {
+                addLog(logList, `Not Fast / Not Slow Redirect. ( Redirect Time : ${redirectTime} ) ( + ${score} )`);
+                score = 40;
+            }
+            else {
+                addLog(logList, `Slow Redirect. ( Redirect Time : ${redirectTime} ) ( + ${score} )`);
+                score = 20;
+            }
+        }
+        else {
+            flag = false;
+            addLog(logList, `Not Execute Redirect.`);
+            score = 0;
+        }
+    }
+    catch (error) {
+        flag = false;
+        addLog(logList, `[ ERROR ] Fail : ${error.message}`);
+        score += 0;
+    }
+    finally {
+        await browser.close();
     }
 
-  } else {
-    logs.push("No redirect detected (0.0)");
-    score = 0.0;
-  }
+    console.log(JSON.stringify({
+        flag,
+        log_list : logList,
+        score
+    }));
+}
 
-  await browser.close();
-
-  // 최종 URL 출력
-  console.log("Final URL:", finalUrl);
-
-  // 결과 출력 (Python에서 JSON으로 파싱)
-  console.log(JSON.stringify({ logs, score }));
-})();
+runRedirectDynamic();

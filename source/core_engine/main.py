@@ -1,27 +1,23 @@
-# [ Core ] Kernel : main.py
+# [ Core ] Kernel - Kernel Service : main.py
 
-from kernel import Kernel
-import sys
+from kernel_service import KernelService
 
 if __name__ == "__main__" :
-    if len(sys.argv) != 2 :
-        print("How to Use : python3 main.py < URL >")
-        sys.exit(1)
 
-    input_url = sys.argv[1]
+    request_payload = {
+        "input_url": "https://google.com",
+        "engine_type": "full",
+    }
 
-    kernel_instance = Kernel(input_url)
+    kernel_service = KernelService()
 
-    result_flag = kernel_instance.start()
+    kernel_result = kernel_service.run_kernel(request_payload["input_url"], request_payload["engine_type"])
 
     print()
     print("* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ")
-    print(" [ Kernel ]")
-    print(f"   [ * ] URL : {input_url}")
-    if result_flag == True : 
-        print(f"   [ * ] ⚠️ Suspicious")
-    else :
-        print(f"   [ * ] ✅ OK")
+    print(" [ Kernel Service ]")
+    print(f"   [ * ] Input URL : {request_payload["input_url"]}")
+    print(f"   [ * ] Engine Type : {request_payload["engine_type"]}")
+    print(f"   [ * ] Kernel Result : {kernel_result}")
     print("* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ")
     print()
-    

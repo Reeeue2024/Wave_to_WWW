@@ -1,55 +1,100 @@
-# [ URL / Domain Modules ] HTTP/HTTPS
+# [ Core ] Module - URL : url_http.py
 
-import os
+from plugins._base_module import BaseModule
+
 import sys
+import requests
+from urllib.parse import urlparse
 
-class UrlHttp:
+class UrlHttp(BaseModule) :
+    def __init__(self, input_url) :
+        super().__init__(input_url)
+
     """
-    IN  : input_url (str) - 검사 대상 URL
-    OUT : Scan Result
-        - True  : HTTP URL (비암호화, 위험)
-        - False : HTTPS URL (암호화, 안전)
-        - None  : Unknown Format (평가 불가)
+    IN : 
+    OUT : 
     """
-    def __init__(self, input_url):
-        # 입력된 URL 저장
-        self.input_url = input_url
+    def get_url_protocol(self, domain) :
+        try :
+            response = requests.head(f"https://{domain}", timeout = 2)
 
-    def scan(self):
-        """
-        HTTP/HTTPS 여부에 따라 위험 점수
-        - http://  → return 1.0 (True 취급)
-        - https:// → return 0.0  (False 취급)
-        - 기타      → return None (False 취급)
-        """
-        # print("Module Start: [URL HTTP/HTTPS]")
+            if response.status_code < 400 :
 
-        if self.input_url.startswith("http://"):
-            # print(f"[Detected] HTTP URL: {self.input_url}")
-            # print(f"→ Score: 1.00 (0.0: Safe, 1.0: High Risk)")
-            # print("\nModule End.")
-            return True
+                return "https" + self.input_url[4:] if self.input_url.startswith("http://") else self.input_url
 
-        elif self.input_url.startswith("https://"):
-            # print(f"[Detected] HTTPS URL: {self.input_url}")
-            # print(f"→ Score: 0.00 (0.0: Safe, 1.0: High Risk)")
-            # print("\nModule End.")
-            return False
+        except :
+            pass
 
-        else:
-            # print(f"[Warning] Unknown URL format: {self.input_url}")
-            # print("→ Score: None (unable to evaluate)")
-            # print("\nModule End.")
-            return False
+        try :
+            response = requests.head(f"http://{domain}", timeout = 2)
+
+            if response.status_code < 400 :
+
+                return "http" + self.input_url[4:] if self.input_url.startswith("https://") else self.input_url
+        
+        except :
+            pass
+
+        return None
+
+    """
+    IN : 
+    OUT : 
+    """
+    def scan(self) :
+        urlparse_result = urlparse(self.input_url)
+        hostname = urlparse_result.hostname
+
+        if not hostname :
+
+            self.module_result_flag = False
+            self.module_result_data["reason"] = "Fail to Get Hostname."
+
+            self.create_module_result()
+
+            return self.module_result_dictionary
+
+        url_with_protocol = self.get_url_protocol(hostname)
+
+        if url_with_protocol and url_with_protocol.startswith("http://") :
+
+            self.module_result_flag = True
+            self.module_result_data["url_protocol"] = "http"
+            self.module_result_data["url"] = url_with_protocol
+            self.module_result_data["reason"] = "Service is HTTP."
+
+        elif url_with_protocol and url_with_protocol.startswith("https://") :
+
+            self.module_result_flag = False
+            self.module_result_data["url_protocol"] = "https"
+            self.module_result_data["url"] = url_with_protocol
+            self.module_result_data["reason"] = "Service is HTTPS."
+
+        else :
+
+            self.module_result_flag = False
+            self.module_result_data["url_protocol"] = None
+            self.module_result_data["url"] = self.input_url
+            self.module_result_data["reason"] = "Service is Not HTTP and HTTPS."
+
+        self.create_module_result()
+
+        # print(f"[ DEBUG ] Module Result Dictionary : {self.module_result_dictionary}")
+
+        return self.module_result_dictionary
 
 # Module Main
-if __name__ == "__main__":
-    # 입력 인자 수 확인
-    if len(sys.argv) != 2:
+if __name__ == "__main__" :
+
+    # Input : URL
+    if len(sys.argv) != 2 :
+
         print("How to Use : python3 url_http.py < URL >")
+
         sys.exit(1)
     
-    # URL 입력 및 점수 평가 실행
     input_url = sys.argv[1]
-    scorer = UrlHttp(input_url)
-    score = scorer.scan()
+
+    module_instance = UrlHttp(input_url)
+    
+    module_instance.scan()

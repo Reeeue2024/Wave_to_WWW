@@ -1,1 +1,0 @@
-print("[ Core Engine ] Fast Scan Engine")

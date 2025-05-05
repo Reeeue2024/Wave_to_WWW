@@ -1,134 +1,231 @@
-# [ URL Modules ] Iframe Overlay Analyzer (with CSS z-index + display/size/position analysis)
+# [ Core ] Module - HTML : html_iframe.py
+
+# Tag - Iframe / Object / Embed + Style ( Hidden / Absolute / Z-Index )
+
+from plugins._base_module import BaseModule
 
 import sys
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse
 import tldextract
-import tinycss2  # pip install tinycss2
+import tinycss2 # pip install tinycss2
 
-class HtmlIframe:
-    def __init__(self, input_url):
-        self.input_url = input_url
+class HtmlIframe(BaseModule) :
+    def __init__(self, input_url) :
+        super().__init__(input_url)
 
-    def get_registered_domain(self, url: str) -> str:
-        ext = tldextract.extract(url)
-        return f"{ext.domain}.{ext.suffix}"
+    """
+    IN : 
+    OUT : 
+    """
+    def get_domain_suffix(self, url) :
+        tldextract_result = tldextract.extract(url)
 
-    def is_external_domain(self, base_url: str, target_url: str) -> bool:
-        base_domain = self.get_registered_domain(base_url)
-        target_domain = self.get_registered_domain(target_url)
-        return base_domain != target_domain
+        return f"{tldextract_result.domain}.{tldextract_result.suffix}"
 
-    def extract_z_index(self, style_string: str) -> int | None:
-        try:
-            for rule in style_string.split(';'):
-                if 'z-index' in rule:
-                    key, value = rule.split(':')
-                    if 'z-index' in key.strip().lower():
+    """
+    IN : 
+    OUT : 
+    """
+    def is_external_domain(self, base_url, input_url) :
+        base_domain = self.get_domain_suffix(base_url)
+
+        input_domain = self.get_domain_suffix(input_url)
+
+        return base_domain != input_domain
+
+    """
+    IN : 
+    OUT : 
+    """
+    def get_z_index(self, style_string) :
+        try :
+            for rule in style_string.split(";") :
+
+                if "z-index" in rule :
+
+                    key, value = rule.split(":")
+
+                    if "z-index" in key.strip().lower() :
+
                         return int(value.strip())
-        except:
+        
+        except :
             pass
 
-        try:
-            declarations = tinycss2.parse_declaration_list(style_string)
-            for decl in declarations:
-                if decl.type == 'declaration' and decl.name == 'z-index' and not decl.invalid:
-                    for token in decl.value:
-                        if token.type == 'number':
+        try :
+            declaration_list = tinycss2.parse_declaration_list(style_string)
+
+            for declaration in declaration_list :
+
+                if declaration.type == "declaration" and declaration.name == "z-index" and not declaration.invalid :
+
+                    for token in declaration.value :
+                        
+                        if token.type == "number" :
+                            
                             return int(token.value)
-        except:
+        except :
             pass
 
         return None
 
-    def scan(self):
-        ##print("📦 Iframe Overlay Analyzer Module Start.\n")
-
+    """
+    IN : 
+    OUT : 
+    """
+    def scan(self) :
         headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/121.0.0.0 Safari/537.36"
+            "User-Agent" : "Mozilla/5.0"
         }
 
-        try:
-            response = requests.get(self.input_url, headers=headers, timeout=5)
-            response.raise_for_status()
-            html = response.text
-        except requests.exceptions.RequestException as e:
-            ##print(f"[❌] URL 요청 실패: {str(e)}")
-            return False
+        try :
+            response = requests.get(self.input_url, headers = headers, timeout = 5)
 
-        soup = BeautifulSoup(html, 'html.parser')
+            response.raise_for_status()
+
+            html = response.text
+
+        except requests.RequestException as e :
+
+            self.module_result_flag = False
+            self.module_result_data["reason"] = f"Fail to Get HTML."
+
+            self.create_module_result()
+
+            return self.module_result_dictionary
+
+        bs = BeautifulSoup(html, "html.parser")
+
         base_url = self.input_url
 
-        iframe_tags = soup.find_all('iframe', src=True)
-        object_tags = soup.find_all('object', data=True)
-        embed_tags = soup.find_all('embed', src=True)
+        iframe_tag_list = bs.find_all("iframe", src = True)
+        object_tag_list = bs.find_all("object", data = True)
+        embed_tag_list = bs.find_all("embed", src = True)
 
-        suspicious_count = 0
+        all_tag_list = iframe_tag_list + object_tag_list + embed_tag_list
 
-        total_tags = iframe_tags + object_tags + embed_tags
-        ##print(f"🔍 포함된 태그 개수 (iframe/object/embed): {len(total_tags)}")
+        if not all_tag_list :
 
-        if not total_tags:
-            ##print("\n✅ iframe/object/embed 태그 없음 → 피싱 가능성 낮음 (0%)")
-            return False
+            self.module_result_flag = False
+            self.module_result_data["reason"] = "Tag ( Iframe / Object / Embed ) Not Exist."
 
-        for tag in total_tags:
-            src_attr = 'src' if tag.name in ['iframe', 'embed'] else 'data'
-            src = tag.get(src_attr, '')
-            if self.is_external_domain(base_url, src):
-                suspicious_count += 1
+            self.create_module_result()
 
-            style = tag.get('style', '').lower()
-            if any(keyword in style for keyword in ['display:none', 'opacity:0', 'visibility:hidden']):
-                ##print("⚠️ 숨김 속성 감지됨")
-                suspicious_count += 1
+            # print(f"[ DEBUG ] Module Result Dictionary : {self.module_result_dictionary}")
 
-            if tag.get('width') == '100%' or tag.get('height') == '100%':
-                ##print("⚠️ 화면 전체를 덮는 태그 감지 (width/height=100%)")
-                suspicious_count += 1
+            return self.module_result_dictionary
 
-        fake_login = soup.find('input', {'type': 'password'})
-        high_zindex_elements = soup.find_all(style=True)
-        high_zindex_found = False
+        for tag in all_tag_list :
 
-        for el in high_zindex_elements:
-            style = el['style']
-            z = self.extract_z_index(style)
-            if z is not None and z >= 100:
-                high_zindex_found = True
-                break
+            # [ 1-1. ]
+            attribute = "src" if tag.name in ["iframe", "embed"] else "data"
+            
+            tag_url = tag.get(attribute, "")
 
-        absolute_overlay_found = False
-        for div in soup.find_all('div', style=True):
-            style = div['style'].lower()
-            if 'position:absolute' in style and fake_login:
-                absolute_overlay_found = True
-                suspicious_count += 1
-                ##print("⚠️ 로그인 UI를 덮는 position:absolute div 감지")
-                break
+            if self.is_external_domain(base_url, tag_url) :
+                
+                self.module_result_flag = True
+                self.module_result_data["reason"] = "External Resource is in Tag."
+                self.module_result_data["tag_name"] = tag.name
+                self.module_result_data["tag_url"] = tag_url
 
-        if fake_login and high_zindex_found:
-            suspicious_count += 1
-            ##print("⚠️ 위장 로그인 시도 감지됨 (패스워드 + 높은 z-index)")
+                self.create_module_result()
 
-        total_check = len(total_tags) + 3
-        ratio = suspicious_count / total_check
-        probability = round(ratio * 100, 2)
-        is_phishing = probability > 50.0
+                # print(f"[ DEBUG ] Module Result Dictionary : {self.module_result_dictionary}")
 
-        ##print(f"🚨 의심 요소 개수: {suspicious_count}/{total_check}")
-        ##print(f"\n📊 피싱 가능성: {probability}%")
-        ##print(f"🔐 최종 판단: {'Phishing O (위험)' if is_phishing else 'Phishing X (안전)'}")
-        ##print("\n✅ Module End.")
-        if is_phishing: return True 
-        else: return False
+                return self.module_result_dictionary
 
-if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        ##print("사용법: python3 iframe_overlay_analyzer.py <URL>")
+            # [ 1-2. ]
+            tag_style = tag.get("style", "").lower()
+
+            if any(keyword in tag_style for keyword in ["display:none", "opacity:0", "visibility:hidden"]) :
+
+                self.module_result_flag = True
+                self.module_result_data["reason"] = "Hide Style in Tag."
+                self.module_result_data["tag_name"] = tag.name
+                self.module_result_data["tag_style"] = tag_style
+
+                self.create_module_result()
+
+                # print(f"[ DEBUG ] Module Result Dictionary : {self.module_result_dictionary}")
+
+                return self.module_result_dictionary
+
+            # [ 1-3. ]
+            if tag.get("width") == "100%" or tag.get("height") == "100%" :
+
+                self.module_result_flag = True
+                self.module_result_data["reason"] = "Full Screen Overlay."
+                self.module_result_data["tag_name"] = tag.name
+                self.module_result_data["tag_data"] = tag
+
+                self.create_module_result()
+
+                # print(f"[ DEBUG ] Module Result Dictionary : {self.module_result_dictionary}")
+
+                return self.module_result_dictionary
+
+        password_tag = bs.find("input", {"type" : "password"})
+
+        if password_tag :
+
+            # [ 2-1.]
+            for tag in bs.find_all(style = True) :
+                
+                tag_style = tag["style"]
+                
+                z_index = self.get_z_index(tag_style)
+
+                if z_index is not None and z_index >= 100 :
+
+                    self.module_result_flag = True
+                    self.module_result_data["reason"] = "Password Tag + High Z-Index."
+                    self.module_result_data["z_index"] = z_index
+
+                    self.create_module_result()
+
+                    # print(f"[ DEBUG ] Module Result Dictionary : {self.module_result_dictionary}")
+
+                    return self.module_result_dictionary
+
+            # [ 2-2. ]
+            for tag in bs.find_all("div", style = True) :
+
+                if "position:absolute" in tag["style"].lower() :
+
+                    self.module_result_flag = True
+                    self.module_result_data["reason"] = "Password Tag + Absolute Position Overlay."
+                    self.module_result_data["tag"] = "div"
+
+                    self.create_module_result()
+
+                    # print(f"[ DEBUG ] Module Result Dictionary : {self.module_result_dictionary}")
+
+                    return self.module_result_dictionary
+
+        self.module_result_flag = False
+        self.module_result_data["reason"] = "Not in Tag."
+
+        self.create_module_result()
+
+        # print(f"[ DEBUG ] Module Result Dictionary : {self.module_result_dictionary}")
+
+        return self.module_result_dictionary
+
+# Module Main
+if __name__ == "__main__" :
+
+    # Input : URL
+    if len(sys.argv) != 2 :
+
+        print("How to Use : python3 html_iframe.py < URL >")
+
         sys.exit(1)
 
     input_url = sys.argv[1]
-    module = HtmlIframe(input_url)
-    module.scan()
+
+    module_instance = HtmlIframe(input_url)
+
+    module_instance.scan()

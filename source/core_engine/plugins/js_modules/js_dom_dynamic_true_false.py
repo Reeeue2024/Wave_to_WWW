@@ -1,4 +1,4 @@
-# [ Core ] Module - JS : js_dom_dynamic.py ( Score )
+# [ Core ] Module - JS : js_dom_dynamic.py ( True / False )
 
 from plugins._base_module import BaseModule
 
@@ -37,23 +37,18 @@ class JsDomDynamic(BaseModule) :
         try :
             result_object = json.loads(result_js)
 
-            self.module_result_data["log_list"] = result_object.get("log_list", [])
-            self.module_result_data["score"] = result_object.get("score", 0)
+            log_list = result_object.get("log_list", [])
+            flag = result_object.get("flag", False)
 
-            if result_object.get("score", 0) >= 50 :
-
-                self.module_result_flag = True
-                self.module_result_data["reason"] = "DOM Dynamic Score : High."
-            
-            elif result_object.get("score", 0) >= 20 :
+            if flag :
 
                 self.module_result_flag = True
-                self.module_result_data["reason"] = "DOM Dynamic Score : Not High / Not Low."
+                self.module_result_data["reason"] = "DOM Dynamic Exist."
+                self.module_result_data["log_list"] = log_list
             
             else :
-
                 self.module_result_flag = False
-                self.module_result_data["reason"] = "DOM Dynamic Score : Low."
+                self.module_result_data["reason"] = "DOM Dynamic Not Exist."
 
         except json.JSONDecodeError :
             self.module_result_flag = True

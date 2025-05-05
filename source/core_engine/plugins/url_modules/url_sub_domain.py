@@ -1,84 +1,38 @@
-# [ URL Modules ] Sub Domain
+# [ Core ] Module - URL : url_sub_domain.py
 
-import os
+from plugins._base_module import BaseModule
+
 import sys
 from urllib.parse import urlparse
-import tldextract
+import tldextract # pip install tldextract
 
-"""
-IN : URL
-OUT : Scan Result ( True : Phishing O / False : Phishing X )
-"""
-class UrlSubDomain :
-    # [ Class Level ] White List : Domain + Suffix
-    white_list_domain_suffix = None
-    # [ Class Level ] White List : Brand => To-Do
-    white_list_brand = [
-        "google", "paypal", "apple", "microsoft", "naver", "kakao"
-    ]
-
-    """
-    IN : 
-    OUT : 
-    """
+class UrlSubDomain(BaseModule) :
     def __init__(self, input_url) :
-        self.input_url = input_url
 
-        self.load_white_lists()
+        super().__init__(input_url)
 
-    """
-    IN : 
-    OUT : 
-    """
-    @classmethod
-    def load_white_lists(cls) :
-        if cls.white_list_domain_suffix is not None :
-            return
-        
-        BASE_PATH = os.path.dirname(os.path.abspath(__file__))
-        WHITE_LIST_DOMAIN_SUFFIX_PATH = os.path.abspath(
-            os.path.join(BASE_PATH, "../../_white_list/white_list_top-1m_domain.txt")
-        )
-
-        # White List : Domain + Suffix
-        cls.white_list_domain_suffix = []
-
-        try :
-            with open(WHITE_LIST_DOMAIN_SUFFIX_PATH, "r", encoding="utf-8") as f :
-                for line in f :
-                    line = line.strip().lower()
-
-                    if not line or line.startswith("#") :
-                        continue
-                    
-                    cls.white_list_domain_suffix.append(line)
-
-        except FileNotFoundError :
-            print(f"[ ERROR ] Fail to Load White List File ( Domain + Suffix ) : {WHITE_LIST_DOMAIN_SUFFIX_PATH}")
+        self.white_list_domain_suffix = self.get_kernel_resource("white_list_domain_suffix")
+        self.white_list_brand = self.get_kernel_resource("white_list_brand")
     
     """
     IN : 
-    OUT : True ( Suspicious ) / False ( OK )
+    OUT : 
     """
     def scan(self) :
-        # print("Module Start.\n")
-
-        flag = False
-
         urlparse_result = urlparse(self.input_url)
         hostname = urlparse_result.hostname
         path = urlparse_result.path
 
         if hostname is None :
-            print("* * * * * * * * * *")
-            print("[ ERROR ] Can't Get \"Host Name\" from Input URL.")
-            print(f">>>> Input URL : {self.input_url}")
-            print("* * * * * * * * * *")
-            # sys.exit(1)
-            return # ( For TEST ) To-Do
-                
-        # print(f"[ DEBUG ] Host Name : {hostname}")
-        # print(f"[ DEBUG ] Path : {path}")
+
+            self.module_result_flag = False
+            self.module_result_data["error"] = "Fail to Get Hostname."
+
+            self.create_module_result()
+
+            # print(f"[ DEBUG ] Module Result Dictionary : {self.module_result_dictionary}")
+
+            return self.module_result_dictionary
 
         tldextract_result = tldextract.extract(hostname)
 
@@ -94,50 +48,74 @@ class UrlSubDomain :
 
         # print(f"[ DEBUG ] Domain : {input_domain_suffix}")
 
-        # ( 1-1 ) "White List : Domain + Suffix"에 "input_domain_suffix" 없을 경우
+        # [ 1-1. ] "White List : Domain + Suffix"에 "input_domain_suffix" 없을 경우
         if input_domain_suffix not in self.white_list_domain_suffix :
-            for brand in self.white_list_brand :
-                # ( 2-1 ) 하지만 "Sub Domain"에 "White List : Brand" 있을 경우 => "Suspicious"
+
+            # print(f"[ DEBUG ] White List Domain + Suffix : {self.white_list_domain_suffix}")
+            # print(f"[ DEBUG ] White List Brand : {self.white_list_brand}")
+
+            for brand_element in self.white_list_brand :
+
+                brand = brand_element.get("brand")
+
+                # print(f"[ DEBUG ] ( White List ) Brand : {brand}")
+                
+                # [ 2-1. ] 하지만 "Sub Domain"에 "White List : Brand" 있을 경우 => True
                 if brand in subdomain :
-                    # print(f"[ ⚠️ Suspicious ]")
-                    # print(f">>>> ( Suspicious ) Brand : \"{brand}\"")
-                    # print(f">>>> ( Suspicious ) Sub Domain : {subdomain}")
-                    # print(f">>>> Domain + Suffix : {input_domain_suffix}")
-                    # print(f">>>> Input URL : {self.input_url}")
-                    return True
+
+                    self.module_result_flag = True
+                    self.module_result_data["reason"] = f"Brand in Sub Domain. ( {brand} )"
+
+                    self.create_module_result()
+
+                    # print(f"[ DEBUG ] Module Result Dictionary : {self.module_result_dictionary}")
+
+                    return self.module_result_dictionary
             
-                # ( 2-2 ) 그리고 "Sub Domain"에 "White List : Brand" 없을 경우
+                # [ 2-2. ] 그리고 "Sub Domain"에 "White List : Brand" 없을 경우
                 else :
-                    # ( 3-1 ) 하지만 "Path"에 "White List : Brand" 있을 경우 => "Suspicious"
+
+                    # [ 3-1. ] 하지만 "Path"에 "White List : Brand" 있을 경우 => True
                     if brand in path :
-                        # print(f"[ ⚠️ Suspicious ]")
-                        # print(f">>>> ( Suspicious ) Brand : \"{brand}\"")
-                        # print(f">>>> ( Suspicious ) Path : {path}")
-                        # print(f">>>> Domain + Suffix : {input_domain_suffix}")
-                        # print(f">>>> Input URL : {self.input_url}")
-                        return True
+
+                        self.module_result_flag = True
+                        self.module_result_data["reason"] = f"Brand in Path. ( {brand} )"
+
+                        self.create_module_result()
+
+                        # print(f"[ DEBUG ] Module Result Dictionary : {self.module_result_dictionary}")
+
+                        return self.module_result_dictionary
                     
-                    # ( 3-2 ) 그리고 "Path"에 "White List : Brand" 없을 경우 => "OK"
+                    # [ 3-2. ] 그리고 "Path"에 "White List : Brand" 없을 경우 => False
                     else :
-                        # print(f"[ OK - DEBUG ] N IN - White List : Brand")
-                        # print(f"[ ✅ OK ]")
-                        return False
+
+                        self.module_result_flag = False
+                        self.module_result_data["reason"] = "Brand Not in Sub Domain and Path."
         
-        # ( 1-2 ) "White List : Domain + Suffix"에 "input_domain_suffix" 있을 경우 => "OK"
+        # [ 1-2. ] "White List : Domain + Suffix"에 "input_domain_suffix" 있을 경우 => False
         else :
-            # print(f"[ OK - DEBUG ] IN - White List : Domain + Suffix")
-            # print(f"[ ✅ OK ]")
-            return False
+            self.module_result_flag = False
+            self.module_result_data["reason"] = "Domain + Suffix in White List."
         
-        # print("\nModule End.")
+        self.create_module_result()
+
+        # print(f"[ DEBUG ] Module Result Dictionary : {self.module_result_dictionary}")
+
+        return self.module_result_dictionary
 
 # Module Main
 if __name__ == "__main__" :
+
     # Input : URL
     if len(sys.argv) != 2 :
+
         print("How to Use : python3 url_sub_domain.py < URL >")
+
         sys.exit(1)
     
     input_url = sys.argv[1]
-    sub_domain_instance = UrlSubDomain(input_url)
-    sub_domain_instance.scan()
+
+    module_instance = UrlSubDomain(input_url)
+    
+    module_instance.scan()

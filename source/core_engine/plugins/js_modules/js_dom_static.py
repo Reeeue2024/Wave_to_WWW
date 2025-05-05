@@ -1,134 +1,118 @@
-#[ JS Modules ] js_dom_static.py
+# [ Core ] Module - JS : js_dom_static.py
 
+from plugins._base_module import BaseModule
+
+import sys
 import requests
 from bs4 import BeautifulSoup
 import re
 from urllib.parse import urlparse
 
-class JsDomStatic:
-    """
-    IN  : URL
-    OUT : 탐지 결과
-    """
-    def __init__(self, url):
-        """
-        초기화 및 탐지규칙 설정
-        """
-        self.url = url
-        self.logs = []
-        self.score = 0
-        self.status = "안전"
-        self.rules = [
+class JsDomStatic(BaseModule) :
+    def __init__(self, input_url) :
+        super().__init__(input_url)
+
+        self.pattern_list = [
             {
-                "name": "password_input",
-                "pattern": r'<input[^>]*type=["\']password["\']',
-                "score": 10,
-                "message": "비밀번호 입력창 존재 감지"
+                "pattern_type" : "hide_iframe",
+                "pattern" : r'<iframe[^>]*(display:\s*none|visibility:\s*hidden|width=["\']?0["\']?|height=["\']?0["\']?)',
+                "pattern_reason" : "Hide Iframe Exist."
             },
             {
-                "name": "hidden_iframe",
-                "pattern": r'<iframe[^>]*(display:\s*none|visibility:\s*hidden|width=["\']?0["\']?|height=["\']?0["\']?)',
-                "score": 10,
-                "message": "숨겨진 iframe 감지"
+                "pattern_type" : "external_script",
+                "pattern" : rf'<script[^>]+src=["\'](http|https)://(?!.*{re.escape(urlparse(self.input_url).netloc)})',
+                "pattern_reason" : "External Script Exist."
             },
             {
-                "name": "external_script",
-                "pattern": r'<script[^>]+src=["\'](http|https)://(?!.*' + re.escape(urlparse(self.url).netloc) + r')',
-                "score": 10,
-                "message": "외부 스크립트 삽입 감지"
+                "pattern_type" : "external_form",
+                "pattern" : rf'<form[^>]+action=["\'](http|https)://(?!.*{re.escape(urlparse(self.input_url).netloc)})',
+                "pattern_reason" : "External Form Exist."
             },
             {
-                "name": "external_form_action",
-                "pattern": r'<form[^>]+action=["\'](http|https)://(?!.*' + re.escape(urlparse(self.url).netloc) + r')',
-                "score": 10,
-                "message": "form 액션이 외부 도메인으로 지정됨"
+                "pattern_type" : "http_form",
+                "pattern" : r'<form[^>]+action=["\']http://[^>]*>.*?<input[^>]*type=["\']password["\']',
+                "pattern_reason" : "HTTP Form Exist."
             },
             {
-                "name": "insecure_login_form",
-                "pattern": r'<form[^>]+action=["\']http://[^>]*>.*?<input[^>]*type=["\']password["\']',
-                "score": 10,
-                "message": "비밀번호 전송에 HTTPS 미사용"
+                "pattern_type" : "hide_link",
+                "pattern" : r'<a[^>]*(display:\s*none|visibility:\s*hidden|width=["\']?0["\']?|height=["\']?0["\']?)',
+                "pattern_reason" : "Hide Link Exist."
             },
             {
-                "name": "suspicious_onclick",
-                "pattern": r'onclick\s*=\s*["\'].*(document\.location|window\.location|location\.href).*["\']',
-                "score": 10,
-                "message": "onclick 속성 내 의심스러운 리디렉션 감지"
+                "pattern_type" : "redirect_iframe",
+                "pattern" : rf'<iframe[^>]+src=["\'](http|https)://(?!.*{re.escape(urlparse(self.input_url).netloc)})',
+                "pattern_reason" : "Redirect Iframe Exist."
             },
             {
-                "name": "javascript_uri",
-                "pattern": r'href\s*=\s*["\']javascript:',
-                "score": 10,
-                "message": "href 속성에 javascript URI 사용 감지"
-            },
-            {
-                "name": "invisible_link",
-                "pattern": r'<a[^>]*(display:\s*none|visibility:\s*hidden|width=["\']?0["\']?|height=["\']?0["\']?)',
-                "score": 10,
-                "message": "숨겨진 링크 요소 감지"
-            },
-            {
-                "name": "iframe_redirect",
-                "pattern": r'<iframe[^>]+src=["\'](http|https)://(?!.*' + re.escape(urlparse(self.url).netloc) + r')',
-                "score": 10,
-                "message": "외부 도메인으로 연결된 iframe 감지"
-            },
-            {
-                "name": "meta_refresh_redirect",
-                "pattern": r'<meta[^>]+http-equiv=["\']refresh["\'][^>]+content=["\']\d+;\s*url=',
-                "score": 10,
-                "message": "meta refresh 태그를 통한 리디렉션 감지"
+                "pattern_type" : "meta_refresh",
+                "pattern" : r'<meta[^>]+http-equiv=["\']refresh["\'][^>]+content=["\']\d+;\s*url=',
+                "pattern_reason" : "Meta Refresh Exist."
             }
         ]
 
-    def run(self):
-        """
-        IN  : self.url
-        OUT : {
-            module: 모듈 이름,
-            score : 총 탐지 점수,
-            status: 안전 / 주의 / 위험,
-            logs  : 탐지 로그 리스트
-            }
-        """
-        try:
-            response = requests.get(self.url, timeout=5)
+    """
+    IN : 
+    OUT : 
+    """
+    def scan(self) :
+        try :   
+            response = requests.get(self.input_url, timeout = 5)
+
+            response.raise_for_status()
+
             html = response.text
-        except Exception as e:
-            self.logs.append(f"[접속 실패] {self.url} → {str(e)} (+10점)")
-            self.score += 20
-            self.status = "주의"
-            return self.result()
 
-        soup = BeautifulSoup(html, "html.parser")
-        dom = str(soup)
+        except Exception as e :
+            self.module_result_flag = False
+            self.module_result_data["reason"] = f"Fail to Get HTML."
 
-        for rule in self.rules:
-            if re.search(rule["pattern"], dom, re.IGNORECASE | re.DOTALL):
-                self.logs.append(f"{rule['message']} (+{rule['score']}점)")
-                self.score += rule["score"]
+            self.create_module_result()
 
-        if self.score >= 50:
-            self.status = "위험"
-        elif self.score >= 20:
-            self.status = "주의"
-        else:
-            self.status = "안전"
+            return self.module_result_dictionary
 
-        return self.result()
+        bs = BeautifulSoup(html, "html.parser")
 
-    def result(self):
-        return {
-            "module": "js_dom_static",
-            "score": self.score,
-            "status": self.status,
-            "logs": self.logs
-        }
+        dom = str(bs)
 
-    def scan(self):
-        result = self.run()
-        # for log in result["logs"]:
-        #     print("[ 탐지 로그 ]", log)
-        # print(f"[ 탐지 결과 ] 총점: {result['score']}점")
-        # print(f"[ 탐지 결과 ] 위험도: {result['status']}")
-        return result["status"] != "안전"
+        for pattern_element in self.pattern_list :
+
+            pattern_result = re.search(pattern_element["pattern"], dom, re.IGNORECASE | re.DOTALL)
+
+            if pattern_result :
+
+                reason_data = pattern_result.group(0).strip()
+
+                self.module_result_flag = True
+                self.module_result_data["pattern_type"] = pattern_element["pattern_type"]
+                self.module_result_data["pattern"] = pattern_element["pattern"]
+                self.module_result_data["reason"] = reason_data
+
+                self.create_module_result()
+
+                # print(f"[ DEBUG ] Module Result Dictionary : {self.module_result_dictionary}")
+
+                return self.module_result_dictionary
+
+        self.module_result_flag = False
+        self.module_result_data["reason"] = "DOM Pattern Not Exist."
+
+        self.create_module_result()
+
+        # print(f"[ DEBUG ] Module Result Dictionary : {self.module_result_dictionary}")
+
+        return self.module_result_dictionary
+
+# Module Main
+if __name__ == "__main__" :
+
+    if len(sys.argv) != 2 :
+
+        print("How to Use : python3 js_dom_static.py < URL >")
+
+        sys.exit(1)
+
+    input_url = sys.argv[1]
+
+    module_instance = JsDomStatic(input_url)
+
+    module_instance.scan()

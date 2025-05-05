@@ -1,4 +1,4 @@
-// [ Core ] Module - JS : js_script_dynamic.py - js_script_dynamic.js
+// [ Core ] Module - JS : js_obfuscate_dynamic.py - js_obfuscate_dynamic.js
 
 const puppeteer = require("puppeteer");
 
@@ -11,52 +11,70 @@ function addLog(logList, message) {
 function getPatternList() {
     return [
         {
-            patternType : "inline_event_script",
-            pattern : /<script[^>]*>.*(onerror|onload|onclick)=.*<\/script>/,
-            patternReason : "Inline Event Script Exist.",
-            patternWeight : 15,
+            patternType : "base64_obfuscate",
+            pattern : /atob\(|btoa\(/,
+            patternReason : "Base64 Obfuscate Exist.",
+            patternWeight : 5,
         },
         {
-            patternType : "data_uri_script",
-            pattern : /data:text\/javascript/,
-            patternReason : "Data URI Script Exist.",
-            patternWeight : 20,
+            patternType : "hex_obfuscate",
+            pattern : /\\x[0-9a-fA-F]{2}/,
+            patternReason : "Hex Obfuscate Exist.",
+            patternWeight : 5,
         },
         {
-            patternType : "document_write_script",
-            pattern : /document\.write(ln)?\s*\(/,
-            patternReason : "Document Write Script Exist.",
-            patternWeight : 15,
+            patternType : "split_join_obfuscate",
+            pattern : /"[a-zA-Z]"\s*\+\s*"[a-zA-Z]"/,
+            patternReason : "String Split + Join Obfuscate Exist.",
+            patternWeight : 5,
         },
         {
-            patternType : "base64_script",
-            pattern : /atob\s*\(|btoa\s*\(|[A-Za-z0-9+/]{50,}={0,2}/,
-            patternReason : "Base64 Script Exist.",
-            patternWeight : 10,
+            patternType : "reverse_join_obfuscate",
+            pattern : /split\(.*\)\s*\.\s*reverse\(\)\s*\.\s*join\(\)/,
+            patternReason : "Reverse + Join Obfuscate Exist.",
+            patternWeight : 5,
         },
         {
-            patternType : "inline_image_tag_script",
-            pattern : /<img[^>]+src=['"]javascript:/,
-            patternReason : "Inline Image Tag Script Exist.",
-            patternWeight : 20,
+            patternType : "random_variable_name_obfuscate",
+            pattern : /var\s+_0x[a-f0-9]{4,}/,
+            patternReason : "Random Variable Name Obfuscate Exist.",
+            patternWeight : 5,
         },
         {
-            patternType : "iframe_script",
-            pattern : /<iframe[^>]+src=['"]javascript:/,
-            patternReason : "Iframe Script Exist.",
-            patternWeight : 20,
+            patternType : "character_code_obfuscate",
+            pattern : /String\.fromCharCode\(/,
+            patternReason : "Character Code Obfuscate Exist.",
+            patternWeight : 5,
         },
         {
-            patternType : "document_cookie_script",
-            pattern : /document\.cookie/,
-            patternReason : "Document Cookie Script Exist.",
-            patternWeight : 10,
+            patternType : "new_function_obfuscate",
+            pattern : /new\s+Function\s*\(/,
+            patternReason : "New Function Obfuscate Exist.",
+            patternWeight : 5,
+        },
+        {
+            patternType : "iife_obfuscate",
+            pattern : /\(function\s*\(.*\)\s*{.*}\)\s*\(\)/s,
+            patternReason : "IIFE Obfuscate Exist.",
+            patternWeight : 5,
+        },
+        {
+            patternType : "self_invoke_function_obfuscate",
+            pattern : /var\s+\w+\s*=\s*function\s*\(.*\)\s*{.*};\s*\w+\(\)/s,
+            patternReason : "Self Invoke Function Obfuscate Exist.",
+            patternWeight : 5,
+        },
+        {
+            patternType : "replace_function_obfuscate",
+            pattern : /\.replace\(\s*\/.*\/\s*,\s*function\s*\(/,
+            patternReason : "Replace Function Obfuscate Exist.",
+            patternWeight : 5,
         },
     ];
 }
 
 // ( Main )
-async function runScriptDynamic() {
+async function runObfuscateDynamic() {
     const inputUrl = process.argv[2];
 
     let flag = false;
@@ -94,7 +112,7 @@ async function runScriptDynamic() {
         await page.exposeFunction("logExecute", (patternType, patternReason, patternWeight) => {
             if (existPatternList.has(patternType) && !executePatternList.has(patternType)) {
                 flag = true;
-                addLog(logList, `[ Execute ( Pattern ) ] ${patternReason} ( + ${patternWeight} )`);
+                addLog(logList, `[ Execute ] ${patternReason} ( + ${patternWeight} )`);
                 score += patternWeight;
 
                 executePatternList.add(patternType);
@@ -104,16 +122,19 @@ async function runScriptDynamic() {
         // [ 0-2. ] Set Hook
         await page.evaluateOnNewDocument(() => {
             const functionPatternList = {
-                inline_event_script : code => /<script[^>]*>.*(onerror|onload|onclick)=.*<\/script>/.test(code),
-                data_uri_script : code => /data:text\/javascript/.test(code),
-                document_write_script : code => /document\.write(ln)?\s*\(/.test(code),
-                base64_script : code => /atob\s*\(|btoa\s*\(|[A-Za-z0-9+/]{50,}={0,2}/.test(code),
-                inline_image_tag_script : code => /<img[^>]+src=['"]javascript:/.test(code),
-                iframe_script : code => /<iframe[^>]+src=['"]javascript:/.test(code),
-                document_cookie_script : code => /document\.cookie/.test(code)
+                base64_obfuscate : code => /atob\(|btoa\(/.test(code),
+                hex_obfuscate : code => /\\x[0-9a-fA-F]{2}/.test(code),
+                character_code_obfuscate : code => code.includes("String.fromCharCode"),
+                split_join_obfuscate : code => /"[a-zA-Z]"\s*\+\s*"[a-zA-Z]"/.test(code),
+                reverse_join_obfuscate : code => /split\(.*\)\s*\.\s*reverse\(\)\s*\.\s*join\(\)/.test(code),
+                random_variable_name_obfuscate : code => /var\s+_0x[a-f0-9]{4,}/.test(code),
+                new_function_obfuscate : code => /new\s+Function\s*\(/.test(code),
+                iife_obfuscate : code => /\(function\s*\(.*\)\s*{.*}\)\s*\(\)/s.test(code),
+                self_invoke_function_obfuscate : code => /var\s+\w+\s*=\s*function\s*\(.*\)\s*{.*};\s*\w+\(\)/s.test(code),
+                replace_function_obfuscate : code => /\.replace\(\s*\/.*\/\s*,\s*function\s*\(/.test(code),
             };
 
-            const createHook = (inputFunction, executeFunction, weight) => {
+            const createHook = (inputFunction, executeFunction, score) => {
                 return function (...args) {
                     try {
                         const code = args[0];
@@ -121,7 +142,7 @@ async function runScriptDynamic() {
                         if (typeof code === "string") {
                             for (const functionPattern in functionPatternList) {
                                 if (functionPatternList[functionPattern](code)) {
-                                    window.logExecute(functionPattern, `Execute from "${executeFunction}"`, weight);
+                                    window.logExecute(functionPattern, `Execute from "${executeFunction}"`, score);
                                 }
                             }
                         }
@@ -140,7 +161,7 @@ async function runScriptDynamic() {
 
         await page.goto(inputUrl, {
             waitUntil : "networkidle0",
-            timeout : 5000
+            timeout : 10000
         });
 
         const scriptList = await page.$$eval("script", elements =>
@@ -180,8 +201,8 @@ async function runScriptDynamic() {
     console.log(JSON.stringify({
         flag,
         log_list : logList,
-        score,
+        score
     }));
 }
 
-runScriptDynamic();
+runObfuscateDynamic();
