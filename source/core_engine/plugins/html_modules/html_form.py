@@ -1,12 +1,8 @@
-# [ Core ] Module - HTML : html_form.py
+# [ Kernel ] Module - HTML : html_form.py
 
-# Tag - Form ( Password )
-
-from plugins._base_module import BaseModule
+from core_engine.plugins._base_module import BaseModule
 
 import sys
-import requests
-from bs4 import BeautifulSoup # pip install beautifulsoup4
 from urllib.parse import urlparse
 import tldextract
 
@@ -29,66 +25,43 @@ class HtmlForm(BaseModule) :
     IN : 
     OUT : 
     """
-    def is_external_domain(self, base_url, input_url) :
-        base_domain = self.get_domain_suffix(base_url)
+    def is_external_url(self, one_url, two_url) :
+        one_domain_suffix = self.get_domain_suffix(one_url)
+        two_domain_suffix = self.get_domain_suffix(two_url)
 
-        input_domain = self.get_domain_suffix(input_url)
-
-        return base_domain != input_domain
+        return one_domain_suffix != two_domain_suffix
 
     """
     IN : 
     OUT : 
     """
     def scan(self) :
-        headers = {
-            "User-Agent" : "Mozilla/5.0"
-        }
+        html_file_bs_object = self.engine_resource.get("html_file_bs_object")
 
-        try :
-            response = requests.get(self.input_url, headers = headers, timeout = 5)
-
-            response.raise_for_status()
-
-            html = response.text
-
-        except requests.RequestException as e :
-
-            self.module_result_flag = False
-            self.module_result_data["reason"] = f"Fail to Get HTML."
-
-            self.create_module_result()
-
-            return self.module_result_dictionary
-
-        bs = BeautifulSoup(html, "html.parser")
-
-        base_url = self.input_url
-
-        form_list = bs.find_all("form")
+        form_list = html_file_bs_object.find_all("form")
 
         if not form_list :
 
             self.module_result_flag = False
-            self.module_result_data["reason"] = "Fail to Get Form Tag."
+            self.module_result_data["ERROR"] = "Fail to Get \"form\" Tag from HTML File."
 
             self.create_module_result()
 
-            # print(f"[ DEBUG ] Module Result Dictionary : {self.module_result_dictionary}")
+            return self.module_result_dictionary   
 
-            return self.module_result_dictionary
+        external_url_flag = False     
 
         for form in form_list :
 
             form_action_data = form.get("action", "")
 
-            form_password_flag = bool(form.find("input", {"type" : "password"}))
+            external_url_flag = self.is_external_url(self.input_url, form_action_data)
 
-            if self.is_external_domain(base_url, form_action_data) and form_password_flag :
+            if external_url_flag :
 
                 self.module_result_flag = True
-                self.module_result_data["reason"] = "Form Tag Use Password to External Domain."
-                self.module_result_data["form_action"] = form_action_data
+                self.module_result_data["reason"] = "Exist External URL in \"form\" Tag."
+                self.module_result_data["reason_data"] = form_action_data
 
                 self.create_module_result()
 
@@ -97,7 +70,8 @@ class HtmlForm(BaseModule) :
                 return self.module_result_dictionary
 
         self.module_result_flag = False
-        self.module_result_data["reason"] = "Form Tag Not Use Password to External Domain."
+        self.module_result_data["reason"] = "Not Exist External URL in \"form\" Tag."
+        self.module_result_data["reason_data"] = form_action_data
 
         self.create_module_result()
 

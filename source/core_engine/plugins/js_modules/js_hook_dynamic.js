@@ -1,4 +1,4 @@
-// [ Core ] Module - JS : js_hook_dynamic.py - js_hook_dynamic.js
+// [ Kernel ] Module - JS : js_hook_dynamic.py - js_hook_dynamic.js
 
 const puppeteer = require("puppeteer");
 

@@ -1,8 +1,6 @@
-# [ Core ] Module - HTML : html_resource_url.py
+# [ Kernel ] Module - HTML : html_resource_url.py
 
-# Tag - Link / Script / Image
-
-from plugins._base_module import BaseModule
+from core_engine.plugins._base_module import BaseModule
 
 import sys
 import requests
@@ -27,60 +25,53 @@ class HtmlResourceUrl(BaseModule) :
     IN : 
     OUT : 
     """
-    def is_external_domain(self, base_url, input_url) :
-        base_domain = self.get_domain_suffix(base_url)
+    def is_external_url(self, one_url, two_url) :
+        one_domain_suffix = self.get_domain_suffix(one_url)
+        two_domain_suffix = self.get_domain_suffix(two_url)
 
-        input_domain = self.get_domain_suffix(input_url)
-
-        return base_domain != input_domain
+        return one_domain_suffix != two_domain_suffix
 
     """
     IN : 
     OUT : 
     """
     def scan(self) :
-        headers = {
-            "User-Agent" : "Mozilla/5.0"
-        }
-
-        try :
-            response = requests.get(self.input_url, headers = headers, timeout = 5, allow_redirects = True)
-
-            response.raise_for_status()
-
-            html = response.text
-
-        except requests.RequestException as e :
-
-            self.module_result_flag = False
-            self.module_result_data["reason"] = "Fail to Get HTML."
-
-            self.create_module_result()
-
-            return self.module_result_dictionary
-
-        bs = BeautifulSoup(html, "html.parser")
-
-        base_url = self.input_url
+        html_file_bs_object = self.engine_resource.get("html_file_bs_object")
 
         resource_url_list = []
 
         # [ 1. ] Link
-        for tag in bs.find_all("link", href = True) :
+        for tag in html_file_bs_object.find_all("link", href = True) :
+
             resource_url_list.append(tag["href"])
 
         # [ 2. ] Script
-        for tag in bs.find_all("script", src = True) :
+        for tag in html_file_bs_object.find_all("script", src = True) :
+
             resource_url_list.append(tag["src"])
 
         # [ 3. ] Image
-        for tag in bs.find_all("img", src = True) :
+        for tag in html_file_bs_object.find_all("img", src = True) :
+
+            resource_url_list.append(tag["src"])
+
+        # [ 4. ] Input Image
+        for tag in html_file_bs_object.find_all("input", attrs={"type" : "image"}) :
+
+            if tag.get("src") :
+
+                resource_url_list.append(tag["src"])
+        
+        # [ 5. ] audio / video / source / track
+        for tag in html_file_bs_object.find_all(["audio", "video", "source", "track"], src = True) :
+
             resource_url_list.append(tag["src"])
 
         if not resource_url_list :
 
             self.module_result_flag = False
-            self.module_result_data["reason"] = "Resource URL Not Exist."
+            self.module_result_data["reason"] = "Not Exist URL in Resource."
+            self.module_result_data["reason_data"] = ""
 
             self.create_module_result()
 
@@ -90,11 +81,11 @@ class HtmlResourceUrl(BaseModule) :
 
         for resource_url in resource_url_list :
 
-            if resource_url.startswith("http://") or self.is_external_domain(base_url, resource_url) :
+            if self.is_external_url(self.input_url, resource_url) :
 
                 self.module_result_flag = True
-                self.module_result_data["reason"] = "Resource URL is External."
-                self.module_result_data["resource_url"] = resource_url
+                self.module_result_data["reason"] = "Exist External URL in Resource."
+                self.module_result_data["reason_data"] = resource_url
 
                 self.create_module_result()
 
@@ -103,7 +94,8 @@ class HtmlResourceUrl(BaseModule) :
                 return self.module_result_dictionary
 
         self.module_result_flag = False
-        self.module_result_data["reason"] = "Resource URL is Not External."
+        self.module_result_data["reason"] = "Not Exist External URL in Resource."
+        self.module_result_data["reason_data"] = ""
 
         self.create_module_result()
 

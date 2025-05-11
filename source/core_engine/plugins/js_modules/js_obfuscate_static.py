@@ -1,6 +1,6 @@
-# [ Core ] Module - JS : js_obfuscate_static.py
+# [ Kernel ] Module - JS : js_obfuscate_static.py
 
-from plugins._base_module import BaseModule
+from core_engine.plugins._base_module import BaseModule
 
 import sys
 import requests

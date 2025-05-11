@@ -1,8 +1,8 @@
-# [ Core ] Kernel - Kernel Resource : kernel_resource.py
+# [ Kernel ] Kernel Resource : kernel_resource.py
 
-from pymongo import MongoClient # pip install pymongo
+from pymongo import MongoClient
 from pymongo.server_api import ServerApi
-from dotenv import load_dotenv # pip install python-dotenv
+from dotenv import load_dotenv
 import os
 
 class KernelResource :
@@ -13,27 +13,29 @@ class KernelResource :
     IN : 
     OUT : 
     """
-    def load_resources(self) :
+    def load_resource(self) :
         print("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-        print(" [ Kernel Resource ] Load Resources ...")
+        print(" [ Kernel Resource ] Load Resource ...")
         print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
 
-        load_dotenv() # [ .env ] Load "MONGODB_URI"
+        load_dotenv() # [ .env ] Load "MONGO_URI"
 
         try :
-            uri = os.getenv("MONGODB_URI")
-            client = MongoClient(uri, server_api = ServerApi("1")) # [ MongoDB ] Stable API Version 1
+            uri = os.getenv("MONGO_URI")
+            client = MongoClient(uri, server_api = ServerApi("1")) # [ Mongo ] API Version 1
             db = client["kernel"]
 
-            print("  [ Start Log ]  Connect to \"MongoDB\"")
+            # print(f"[ DEBUG ] URI : {uri}")
+
+            print("  [ Start Log ]  Connect to \"Mongo\"")
 
         except Exception as e :
-            print("  [ Fail ]  Connect to \"MongoDB\"")
+            print("  [ Fail ]  Connect to \"Mongo\"")
 
             return
 
         function_dictionary = {
-            # Black List
+            # # Black List
             "black_list_url" : lambda : list(db["black_list_url"].find({}, {"_id" : 0})), # ( Example ) "https://google.com"
             "black_list_domain_suffix" : lambda : list(db["black_list_domain_suffix"].find({}, {"_id" : 0})),  # ( Example ) "google.com"
             "black_list_brand" : lambda : list(db["black_list_brand"].find({}, {"_id" : 0})),  # ( Example ) "google"
@@ -44,22 +46,24 @@ class KernelResource :
             "white_list_brand" : lambda : list(db["white_list_brand"].find({}, {"_id" : 0})),
 
             # ETC
-            "tiny_domain_list" : lambda : list(db["tiny_domain_list"].find({}, {"_id" : 0})),
+            "short_domain_list" : lambda : list(db["short_domain_list"].find({}, {"_id" : 0})),
             "ssl_free_ca_list" : lambda : list(db["ssl_free_ca_list"].find({}, {"_id" : 0})),
-            "ssl_low_trust_ca_list" : lambda : list(db["ssl_low_trust_ca_list"].find({}, {"_id" : 0})),
+            "ssl_not_trust_ca_list" : lambda : list(db["ssl_not_trust_ca_list"].find({}, {"_id" : 0})),
             "free_tld_list" : lambda : list(db["free_tld_list"].find({}, {"_id" : 0})),
             "country_tld_list" : lambda : list(db["country_tld_list"].find({}, {"_id" : 0})),
         }
 
         for resource_name, function in function_dictionary.items() :
 
+            # print(f"  [ DEBUG ] Load Resource : {resource_name}")
+
             try :
                 self.resource_dictionary[resource_name] = function()
 
-                print(f"  [ + ]  {resource_name:<15} ( Load Resource - Success )")
+                print(f"  [ + ]  {resource_name:<25} ( Load Resource - Success )")
             
             except Exception as e :
-                print(f"  [ ! ]  {resource_name:<15} ( Load Resource - Fail )")
+                print(f"  [ ! ]  {resource_name:<25} ( Load Resource - Fail )")
                 print(f"{e}")
         
         print()

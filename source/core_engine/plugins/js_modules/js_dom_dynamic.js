@@ -1,4 +1,4 @@
-// [ Core ] Module - JS : js_dom_dynamic.py - js_dom_dynamic.js
+// [ Kernel ] Module - JS : js_dom_dynamic.py - js_dom_dynamic.js
 
 const puppeteer = require("puppeteer");
 const { URL } = require("url");

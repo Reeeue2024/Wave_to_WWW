@@ -1,0 +1,23 @@
+# Kernel Server
+fastapi
+pydantic
+uvicorn
+
+# Kernel Resource
+pymongo
+python-dotenv
+
+# Kernel Service
+requests
+
+# Data
+
+# Engines
+
+# Modules
+cryptography
+tldextract
+python-whois
+beautifulsoup4
+tinycss2
+urllib3

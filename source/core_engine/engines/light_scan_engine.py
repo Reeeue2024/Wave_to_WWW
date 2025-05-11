@@ -1,6 +1,6 @@
-# [ Core ] Kernel - Kernel Service - Engine : light_scan_engine.py
+# [ Kernel ] Kernel Service - Engine : light_scan_engine.py
 
-from engines._base_scan_engine import BaseScanEngine, URL_MODULE_DIRECTORY_PATH, HTML_MODULE_DIRECTORY_PATH, JS_MODULE_DIRECTORY_PATH
+from core_engine.engines._base_scan_engine import BaseScanEngine, URL_MODULE_DIRECTORY_PATH, HTML_MODULE_DIRECTORY_PATH, JS_MODULE_DIRECTORY_PATH
 
 # [ Light ]
 ENGINE_RESULT_SCORE = 100
@@ -11,9 +11,10 @@ class LightScanEngine(BaseScanEngine) :
 
         # [ Light ] Module List
         self.module_path_list = [
+            (URL_MODULE_DIRECTORY_PATH, "url_short"),
+
             (URL_MODULE_DIRECTORY_PATH, "url_homograph"),
             (URL_MODULE_DIRECTORY_PATH, "url_http"),
-            (URL_MODULE_DIRECTORY_PATH, "url_tiny_domain"),
             (URL_MODULE_DIRECTORY_PATH, "url_ssl"),
             (URL_MODULE_DIRECTORY_PATH, "url_sub_domain"),
             (URL_MODULE_DIRECTORY_PATH, "url_whois"),
@@ -23,31 +24,31 @@ class LightScanEngine(BaseScanEngine) :
             (HTML_MODULE_DIRECTORY_PATH, "html_js_url"),
             (HTML_MODULE_DIRECTORY_PATH, "html_meta_refresh"),
             (HTML_MODULE_DIRECTORY_PATH, "html_resource_url"),
+            (HTML_MODULE_DIRECTORY_PATH, "html_style"),
 
-            (JS_MODULE_DIRECTORY_PATH, "js_dom_static"),
             (JS_MODULE_DIRECTORY_PATH, "js_external_static"),
             (JS_MODULE_DIRECTORY_PATH, "js_hook_static"),
             (JS_MODULE_DIRECTORY_PATH, "js_obfuscate_static"),
             (JS_MODULE_DIRECTORY_PATH, "js_redirect_static"),
             (JS_MODULE_DIRECTORY_PATH, "js_script_static"),
             
-            # (JS_MODULE_DIRECTORY_PATH, "js_dom_dynamic"),
-            # (JS_MODULE_DIRECTORY_PATH, "js_external_dynamic"),
-            # (JS_MODULE_DIRECTORY_PATH, "js_hook_dynamic"),
-            # (JS_MODULE_DIRECTORY_PATH, "js_obfuscate_dynamic"),
-            # (JS_MODULE_DIRECTORY_PATH, "js_redirect_dynamic"),
-            # (JS_MODULE_DIRECTORY_PATH, "js_script_dynamic"),
+            (JS_MODULE_DIRECTORY_PATH, "js_dom_dynamic"),
+            (JS_MODULE_DIRECTORY_PATH, "js_external_dynamic"),
+            (JS_MODULE_DIRECTORY_PATH, "js_hook_dynamic"),
+            (JS_MODULE_DIRECTORY_PATH, "js_obfuscate_dynamic"),
+            (JS_MODULE_DIRECTORY_PATH, "js_redirect_dynamic"),
+            (JS_MODULE_DIRECTORY_PATH, "js_script_dynamic"),
         ]
 
         # [ Light ] Module Order List - Synchronous
         self.module_order_list_synchronous = [
-            "UrlTinyDomain",
-            "UrlHttp",
-            "UrlSsl",
+            "UrlShort",
         ]
 
         # [ Light ] Module Order List - Asynchronous
         self.module_order_list_asynchronous = [
+            "UrlHttp",
+            "UrlSsl",
             "UrlHomograph",
             "UrlSubDomain",
             "UrlWhois",
@@ -57,27 +58,28 @@ class LightScanEngine(BaseScanEngine) :
             "HtmlJsUrl",
             "HtmlMetaRefresh",
             "HtmlResourceUrl",
+            "HtmlStyle",
 
-            "JsDomStatic",
             "JsExternalStatic",
             "JsHookStatic",
             "JsObfuscateStatic",
             "JsRedirectStatic",
             "JsScriptStatic",
 
-            # "JsDomDynamic",
-            # "JsExternalDynamic",
-            # "JsHookDynamic",
-            # "JsObfuscateDynamic",
-            # "JsRedirectDynamic",
-            # "JsScriptDynamic",
+            "JsDomDynamic",
+            "JsExternalDynamic",
+            "JsHookDynamic",
+            "JsObfuscateDynamic",
+            "JsRedirectDynamic",
+            "JsScriptDynamic",
         ]
 
         # [ Light ] Module Weight List
         self.module_weight_dictionary = {
+            "UrlShort" : 10,
+
             "UrlHomograph" : 10,
             "UrlHttp" : 10,
-            "UrlTinyDomain": 10,
             "UrlSsl" : 10,
             "UrlSubDomain" : 10,
             "UrlWhois" : 10,
@@ -87,18 +89,18 @@ class LightScanEngine(BaseScanEngine) :
             "HtmlJsUrl" : 10,
             "HtmlMetaRefresh" : 10,
             "HtmlResourceUrl" : 10,
+            "HtmlStyle" : 10,
 
-            "JsDomStatic" : 10,
             "JsExternalStatic" : 10,
             "JsHookStatic" : 10,
             "JsObfuscateStatic" : 10,
             "JsRedirectStatic" : 10,
             "JsScriptStatic" : 10,
 
-            # "JsDomDynamic" : 10,
-            # "JsExternalDynamic" : 10,
-            # "JsHookDynamic" : 10,
-            # "JsObfuscateDynamic" : 10,
-            # "JsRedirectDynamic" : 10,
-            # "JsScriptDynamic" : 10,
+            "JsDomDynamic" : 10,
+            "JsExternalDynamic" : 10,
+            "JsHookDynamic" : 10,
+            "JsObfuscateDynamic" : 10,
+            "JsRedirectDynamic" : 10,
+            "JsScriptDynamic" : 10,
         }

@@ -1,14 +1,13 @@
-# [ Core ] Module - URL : url_sub_domain.py
+# [ Kernel ] Module - URL : url_sub_domain.py
 
-from plugins._base_module import BaseModule
+from core_engine.plugins._base_module import BaseModule
 
 import sys
 from urllib.parse import urlparse
-import tldextract # pip install tldextract
+import tldextract
 
 class UrlSubDomain(BaseModule) :
     def __init__(self, input_url) :
-
         super().__init__(input_url)
 
         self.white_list_domain_suffix = self.get_kernel_resource("white_list_domain_suffix")
@@ -20,17 +19,16 @@ class UrlSubDomain(BaseModule) :
     """
     def scan(self) :
         urlparse_result = urlparse(self.input_url)
+
         hostname = urlparse_result.hostname
         path = urlparse_result.path
 
         if hostname is None :
 
             self.module_result_flag = False
-            self.module_result_data["error"] = "Fail to Get Hostname."
+            self.module_result_data["ERROR"] = "Fail to Get Host Name."
 
             self.create_module_result()
-
-            # print(f"[ DEBUG ] Module Result Dictionary : {self.module_result_dictionary}")
 
             return self.module_result_dictionary
 
@@ -48,7 +46,7 @@ class UrlSubDomain(BaseModule) :
 
         # print(f"[ DEBUG ] Domain : {input_domain_suffix}")
 
-        # [ 1-1. ] "White List : Domain + Suffix"에 "input_domain_suffix" 없을 경우
+        # [ 1-1. ] Not Exist "input_domain_suffix" in "White List : Domain + Suffix"
         if input_domain_suffix not in self.white_list_domain_suffix :
 
             # print(f"[ DEBUG ] White List Domain + Suffix : {self.white_list_domain_suffix}")
@@ -60,11 +58,12 @@ class UrlSubDomain(BaseModule) :
 
                 # print(f"[ DEBUG ] ( White List ) Brand : {brand}")
                 
-                # [ 2-1. ] 하지만 "Sub Domain"에 "White List : Brand" 있을 경우 => True
+                # [ 2-1. ] Exist "White List : Brand" in "Sub Domain" => True
                 if brand in subdomain :
 
                     self.module_result_flag = True
-                    self.module_result_data["reason"] = f"Brand in Sub Domain. ( {brand} )"
+                    self.module_result_data["reason"] = "Exist White List Brand in Sub Domain."
+                    self.module_result_data["reason_data"] = brand
 
                     self.create_module_result()
 
@@ -72,14 +71,15 @@ class UrlSubDomain(BaseModule) :
 
                     return self.module_result_dictionary
             
-                # [ 2-2. ] 그리고 "Sub Domain"에 "White List : Brand" 없을 경우
+                # [ 2-2. ] Not Exist "White List : Brand" in "Sub Domain"
                 else :
 
-                    # [ 3-1. ] 하지만 "Path"에 "White List : Brand" 있을 경우 => True
+                    # [ 3-1. ] Exist "White List : Brand" in "Path" => True
                     if brand in path :
 
                         self.module_result_flag = True
-                        self.module_result_data["reason"] = f"Brand in Path. ( {brand} )"
+                        self.module_result_data["reason"] = "Exist White List Brand in Path."
+                        self.module_result_data["reason_data"] = brand
 
                         self.create_module_result()
 
@@ -87,16 +87,19 @@ class UrlSubDomain(BaseModule) :
 
                         return self.module_result_dictionary
                     
-                    # [ 3-2. ] 그리고 "Path"에 "White List : Brand" 없을 경우 => False
+                    # [ 3-2. ] Not Exist "White List : Brand" in "Path" => False
                     else :
 
                         self.module_result_flag = False
-                        self.module_result_data["reason"] = "Brand Not in Sub Domain and Path."
+                        self.module_result_data["reason"] = "Not Exist White List Brand in Sub Domain and Path."
+                        self.module_result_data["reason_data"] = ""
         
-        # [ 1-2. ] "White List : Domain + Suffix"에 "input_domain_suffix" 있을 경우 => False
+        # [ 1-2. ] Exist "input_domain_suffix" in "White List : Domain + Suffix" => False
         else :
+
             self.module_result_flag = False
-            self.module_result_data["reason"] = "Domain + Suffix in White List."
+            self.module_result_data["reason"] = "Exist \"Domain + Suffix\" in White List."
+            self.module_result_data["reason_data"] = ""
         
         self.create_module_result()
 

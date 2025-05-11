@@ -1,8 +1,6 @@
-# [ Core ] Module - HTML : html_js_url.py
+# [ Kernel ] Module - HTML : html_js_url.py
 
-# JS Event / Script → External Domain URL
-
-from plugins._base_module import BaseModule
+from core_engine.plugins._base_module import BaseModule
 
 import sys
 import requests
@@ -28,71 +26,48 @@ class HtmlJsUrl(BaseModule) :
     IN : 
     OUT : 
     """
-    def is_external_domain(self, base_url, input_url) :
-        base_domain = self.get_domain_suffix(base_url)
+    def is_external_url(self, one_url, two_url) :
+        one_domain_suffix = self.get_domain_suffix(one_url)
+        two_domain_suffix = self.get_domain_suffix(two_url)
 
-        input_domain = self.get_domain_suffix(input_url)
-
-        return base_domain != input_domain
+        return one_domain_suffix != two_domain_suffix
 
     """
     IN : 
     OUT : 
     """
-    def get_url_list(self, js_code) :
-        pattern = r"""['"]((http|https)://[a-zA-Z0-9\-._~:/?#@!$&'()*+,;=%]+)['"]"""
+    def get_url_list(self, tag_event_attribute) :
+        pattern = r"""['"](https?:?//[^'"]+)['"]"""
 
-        return [pattern_result[0] for pattern_result in re.findall(pattern, js_code)]
+        return re.findall(pattern, tag_event_attribute)
 
     """
     IN : 
     OUT : 
     """
     def scan(self) :
-        headers = {
-            "User-Agent" : "Mozilla/5.0"
-        }
-
-        try :
-            response = requests.get(self.input_url, headers = headers, timeout = 5)
-
-            response.raise_for_status()
-
-            html = response.text
-
-        except requests.RequestException as e :
-            self.module_result_flag = False
-
-            self.module_result_data["reason"] = "Fail to Get HTML."
-
-            self.create_module_result()
-
-            return self.module_result_dictionary
-
-        bs = BeautifulSoup(html, "html.parser")
-
-        base_url = self.input_url
+        html_file_bs_object = self.engine_resource.get("html_file_bs_object")
 
         event_attribute_list = ["onclick", "onmouseover", "onload", "onfocus"]
 
+        # [ 1. ] Event Attribute
         for event_attribute in event_attribute_list :
 
-            # [ 1. ] Event Attribute
-            for tag in bs.find_all(attrs = {event_attribute : True}) :
+            for tag in html_file_bs_object.find_all(attrs = {event_attribute : True}) :
 
-                js_code = tag.get(event_attribute, "")
+                tag_event_attribute = tag.get(event_attribute, "")
 
-                if not js_code :
+                if not tag_event_attribute :
 
                     continue
 
-                for url_element in self.get_url_list(js_code) :
+                for url_element in self.get_url_list(tag_event_attribute) :
 
-                    if self.is_external_domain(base_url, url_element) :
+                    if self.is_external_url(self.input_url, url_element) :
 
                         self.module_result_flag = True
                         self.module_result_data["reason"] = "External URL in Event Attribute."
-                        self.module_result_data["url"] = url_element
+                        self.module_result_data["reason_data"] = url_element
 
                         self.create_module_result()
 
@@ -101,17 +76,17 @@ class HtmlJsUrl(BaseModule) :
                         return self.module_result_dictionary
 
         # [ 2. ] Script Tag
-        for script_element in bs.find_all("script") :
+        for script_tag in html_file_bs_object.find_all("script") :
 
-            if script_element.string :
+            if script_tag.string :
 
-                for url_element in self.get_url_list(script_element.string) :
+                for url_element in self.get_url_list(script_tag.string) :
 
-                    if self.is_external_domain(base_url, url_element) :
+                    if self.is_external_url(self.input_url, url_element) :
 
                         self.module_result_flag = True
                         self.module_result_data["reason"] = "External URL in Script Tag."
-                        self.module_result_data["url"] = url_element
+                        self.module_result_data["reason_data"] = url_element
 
                         self.create_module_result()
 
@@ -120,7 +95,8 @@ class HtmlJsUrl(BaseModule) :
                         return self.module_result_dictionary
 
         self.module_result_flag = False
-        self.module_result_data["reason"] = "Not External URL."
+        self.module_result_data["reason"] = "Not Exist External URL in Event Attribute and Script Tag."
+        self.module_result_data["reason_data"] = ""
 
         self.create_module_result()
 

@@ -1,18 +1,16 @@
-# [ Core ] Kernel - Kernel Service : kernel_service.py
+# [ Kernel ] Kernel Service : kernel_service.py
 
-from kernel_resource import kernel_resource_instance
-from engines.full_scan_engine import FullScanEngine
-from engines.light_scan_engine import LightScanEngine
+from core_engine.kernel_resource import kernel_resource_instance
+from core_engine.engines.full_scan_engine import FullScanEngine
+from core_engine.engines.light_scan_engine import LightScanEngine
 
-import requests # pip install requests
+import requests
 import json
 
 class KernelService :
     def __init__(self) :
-        
         # ( Engine ) Result
         self.engine_result_dictionary = {}
-
         # ( Kernel ) Result
         self.kernel_result_dictionary = {}
 
@@ -28,7 +26,7 @@ class KernelService :
         print(f"  [ + ]  Input URL : {input_url}")
         print(f"  [ + ]  Engine Type : {engine_type}")
         
-        # [ 1. ] Get Resources
+        # [ 1. ] Get Resource
         # black_list_url = kernel_resource_instance.get_resource("black_list_url")
         # white_list_url = kernel_resource_instance.get_resource("white_list_url")
         
@@ -69,11 +67,11 @@ class KernelService :
         print(f"  [ + ]  Engine Type : {self.kernel_result_dictionary.get("engine_type")}")
         print(f"  [ + ]  Engine Result Flag : {self.kernel_result_dictionary.get("engine_result_flag")}")
         print(f"  [ + ]  Engine Result Score : {self.kernel_result_dictionary.get("engine_result_score")}")
-        print(f"  [ + ]  Module Result Dictionary List : ( PASS )")
-
-        module_result_list = self.kernel_result_dictionary.get("module_result_dictionary_list")
+        print(f"  [ + ]  Module Result Dictionary List : ( ... )")
 
         print()
+
+        module_result_list = self.kernel_result_dictionary.get("module_result_dictionary_list")
         
         # for index, module_result_element in enumerate(module_result_list, 1) :
         #     print(f"  [ {index:02} ]  Module : {module_result_element['module_class_name']}")

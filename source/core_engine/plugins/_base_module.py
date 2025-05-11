@@ -1,12 +1,16 @@
-# [ Core ] Module : _base_module.py
+# [ Kernel ] Module : _base_module.py
 
-from kernel_resource import kernel_resource_instance
+from core_engine.kernel_resource import kernel_resource_instance
 
 import sys
 
 class BaseModule :
     def __init__(self, input_url) :
         self.input_url = input_url
+        self.redirect_url = None
+
+        # ( Engine ) Resource
+        self.engine_resource = {}
 
         # ( Module ) Result
         self.module_result_flag = False
@@ -19,6 +23,13 @@ class BaseModule :
     """
     def get_kernel_resource(self, key) :
         return kernel_resource_instance.get_resource(key)
+
+    """
+    IN : 
+    OUT : 
+    """
+    def get_engine_resource(self, engine_resource) :
+        self.engine_resource = engine_resource
 
     """
     IN : 

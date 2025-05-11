@@ -3,13 +3,12 @@
   "version": "1.0.0",
   "main": "",
   "scripts": {
-    "test": "echo \"Error : No Test\" && exit 1"
+    "test": "echo \"ERROR : Not Exist\" && exit 1"
   },
-  "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "puppeteer": "^24.8.0"
+    "puppeteer": "^24.8.2"
   }
 }

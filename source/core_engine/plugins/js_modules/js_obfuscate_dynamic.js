@@ -1,4 +1,4 @@
-// [ Core ] Module - JS : js_obfuscate_dynamic.py - js_obfuscate_dynamic.js
+// [ Kernel ] Module - JS : js_obfuscate_dynamic.py - js_obfuscate_dynamic.js
 
 const puppeteer = require("puppeteer");
 

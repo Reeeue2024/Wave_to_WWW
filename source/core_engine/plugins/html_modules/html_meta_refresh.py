@@ -1,8 +1,6 @@
-# [ Core ] Module - HTML : html_meta_refresh.py
+# [ Kernel ] Module - HTML : html_meta_refresh.py
 
-# Tag - Meta ( Refresh )
-
-from plugins._base_module import BaseModule
+from core_engine.plugins._base_module import BaseModule
 
 import sys
 import requests
@@ -28,14 +26,11 @@ class HtmlMetaRefresh(BaseModule) :
     IN : 
     OUT : 
     """
-    def is_external_domain(self, base_url, input_url) :
-        base_domain = self.get_domain_suffix(base_url)
+    def is_external_url(self, one_url, two_url) :
+        one_domain_suffix = self.get_domain_suffix(one_url)
+        two_domain_suffix = self.get_domain_suffix(two_url)
 
-        input_url_full = urljoin(base_url, input_url)
-
-        input_domain = self.get_domain_suffix(input_url_full)
-
-        return base_domain != input_domain
+        return one_domain_suffix != two_domain_suffix
 
     """
     IN : 
@@ -68,36 +63,15 @@ class HtmlMetaRefresh(BaseModule) :
     OUT : 
     """
     def scan(self) :
-        headers = {
-            "User-Agent" : "Mozilla/5.0"
-        }
+        html_file_bs_object = self.engine_resource.get("html_file_bs_object")
 
-        try :
-            response = requests.get(self.input_url, headers = headers, timeout = 5)
-
-            response.raise_for_status()
-
-            html = response.text
-
-        except requests.RequestException :
-
-            self.module_result_flag = False
-            self.module_result_data["reason"] = "Fail to Get HTML."
-
-            self.create_module_result()
-
-            return self.module_result_dictionary
-
-        bs = BeautifulSoup(html, "html.parser")
-
-        base_url = self.input_url
-
-        meta_refresh_tag_list = bs.find_all("meta", attrs = {"http-equiv" : lambda x : x and x.lower() == "refresh"})
+        meta_refresh_tag_list = html_file_bs_object.find_all("meta", attrs = {"http-equiv" : lambda x : x and x.lower() == "refresh"})
 
         if not meta_refresh_tag_list :
 
             self.module_result_flag = False
-            self.module_result_data["reason"] = "Meta Refresh Not Exist."
+            self.module_result_data["reason"] = "Not Exist Meta Refresh."
+            self.module_result_data["reason_data"] = ""
 
             self.create_module_result()
 
@@ -116,12 +90,11 @@ class HtmlMetaRefresh(BaseModule) :
 
                 continue
 
-            if redirect_url and self.is_external_domain(base_url, redirect_url) :
+            if redirect_url and self.is_external_url(self.input_url, redirect_url) :
 
                 self.module_result_flag = True
-                self.module_result_data["reason"] = "Meta Refresh Exist. External."
-                self.module_result_data["redirect_url"] = redirect_url
-                self.module_result_data["redirect_delay"] = redirect_delay
+                self.module_result_data["reason"] = "Exist External URL in Meta Refresh."
+                self.module_result_data["reason_data"] = redirect_url
 
                 self.create_module_result()
 
@@ -130,9 +103,8 @@ class HtmlMetaRefresh(BaseModule) :
                 return self.module_result_dictionary
 
         self.module_result_flag = False
-        self.module_result_data["reason"] = "Meta Refresh Exist. Not External."
-        self.module_result_data["redirect_url"] = redirect_url
-        self.module_result_data["redirect_delay"] = redirect_delay
+        self.module_result_data["reason"] = "Not Exist External URL in Meta Refresh."
+        self.module_result_data["reason_data"] = ""
 
         self.create_module_result()
 

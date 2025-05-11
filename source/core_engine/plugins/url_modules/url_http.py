@@ -1,10 +1,10 @@
-# [ Core ] Module - URL : url_http.py
+# [ Kernel ] Module - URL : url_http.py
 
-from plugins._base_module import BaseModule
+from core_engine.plugins._base_module import BaseModule
 
 import sys
 import requests
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urlunparse
 
 class UrlHttp(BaseModule) :
     def __init__(self, input_url) :
@@ -14,25 +14,40 @@ class UrlHttp(BaseModule) :
     IN : 
     OUT : 
     """
-    def get_url_protocol(self, domain) :
+    def get_url_protocol(self) :
+        if "://" not in self.input_url :
+
+            self.input_url = "http://" + self.input_url
+
+        urlparse_result = urlparse(self.input_url)
+        netloc = urlparse_result.netloc
+        path = urlparse_result.path
+        params = urlparse_result.params
+        query = urlparse_result.query
+        fragment = urlparse_result.fragment
+
+        # [ 1. ] HTTPS
         try :
-            response = requests.head(f"https://{domain}", timeout = 2)
+            url = urlunparse(("http", netloc, path, params, query, fragment))
+
+            response = requests.head(url, timeout = 2, allow_redirects = True)
 
             if response.status_code < 400 :
-
-                return "https" + self.input_url[4:] if self.input_url.startswith("http://") else self.input_url
-
-        except :
+                
+                return url
+        except requests.RequestException :
             pass
 
+        # [ 2. ] HTTP
         try :
-            response = requests.head(f"http://{domain}", timeout = 2)
+            url = urlunparse(("https", netloc, path, params, query, fragment))
+
+            response = requests.head(url, timeout = 2, allow_redirects = True)
 
             if response.status_code < 400 :
-
-                return "http" + self.input_url[4:] if self.input_url.startswith("https://") else self.input_url
-        
-        except :
+                
+                return url
+        except requests.RequestException :
             pass
 
         return None
@@ -42,40 +57,24 @@ class UrlHttp(BaseModule) :
     OUT : 
     """
     def scan(self) :
-        urlparse_result = urlparse(self.input_url)
-        hostname = urlparse_result.hostname
+        url_with_protocol = self.get_url_protocol()
 
-        if not hostname :
+        if url_with_protocol is None :
 
             self.module_result_flag = False
-            self.module_result_data["reason"] = "Fail to Get Hostname."
+            self.module_result_data["ERROR"] = "Fail to Get HTTP / HTTPS Protocol."
 
-            self.create_module_result()
-
-            return self.module_result_dictionary
-
-        url_with_protocol = self.get_url_protocol(hostname)
-
-        if url_with_protocol and url_with_protocol.startswith("http://") :
+        elif url_with_protocol.startswith("http://") :
 
             self.module_result_flag = True
-            self.module_result_data["url_protocol"] = "http"
-            self.module_result_data["url"] = url_with_protocol
-            self.module_result_data["reason"] = "Service is HTTP."
+            self.module_result_data["reason"] = "Use HTTP."
+            self.module_result_data["reason_data"] = url_with_protocol
 
-        elif url_with_protocol and url_with_protocol.startswith("https://") :
-
-            self.module_result_flag = False
-            self.module_result_data["url_protocol"] = "https"
-            self.module_result_data["url"] = url_with_protocol
-            self.module_result_data["reason"] = "Service is HTTPS."
-
-        else :
+        elif url_with_protocol.startswith("https://") :
 
             self.module_result_flag = False
-            self.module_result_data["url_protocol"] = None
-            self.module_result_data["url"] = self.input_url
-            self.module_result_data["reason"] = "Service is Not HTTP and HTTPS."
+            self.module_result_data["reason"] = "Use HTTPS."
+            self.module_result_data["reason_data"] = url_with_protocol
 
         self.create_module_result()
 

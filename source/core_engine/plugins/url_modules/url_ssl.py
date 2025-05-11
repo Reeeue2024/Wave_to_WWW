@@ -1,12 +1,12 @@
-# [ Core ] Module - URL : url_ssl.py
+# [ Kernel ] Module - URL : url_ssl.py
 
-from plugins._base_module import BaseModule
+from core_engine.plugins._base_module import BaseModule
 
 import sys
 import ssl
 import socket
 from urllib.parse import urlparse
-from cryptography import x509 # pip install cryptography
+from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 import certifi
 
@@ -14,10 +14,10 @@ class UrlSsl(BaseModule) :
     def __init__(self, input_url) :
         super().__init__(input_url)
 
-        self.certificate = None
+        self.ssl_free_ca_list = self.get_kernel_resource("ssl_free_ca_list")
+        self.ssl_not_trust_ca_list = self.get_kernel_resource("ssl_not_trust_ca_list")
 
-        self.free_ca_list = self.get_kernel_resource("ssl_free_ca_list")
-        self.low_trust_ca_list = self.get_kernel_resource("ssl_low_trust_ca_list")
+        self.certificate = None
 
     """
     IN : 
@@ -50,34 +50,34 @@ class UrlSsl(BaseModule) :
 
         # print(f"[ DEBUG ] Issuer ( String ) : {issuer_string}")
         
-        for free_ca_element in self.free_ca_list :
+        for ssl_free_ca_element in self.ssl_free_ca_list :
 
-            free_ca = free_ca_element.get("free_ca")
+            ssl_free_ca = ssl_free_ca_element.get("ssl_free_ca")
 
-            if free_ca and free_ca in issuer_string :
+            if ssl_free_ca and ssl_free_ca in issuer_string :
 
-                return True, f"Free CA ( {free_ca} )"
+                return True, ssl_free_ca
         
-        return False, "Not Free CA"
+        return False, None
 
     """
     IN : 
     OUT : 
     """
-    def scan_low_trust_ca(self) :
+    def scan_not_trust_ca(self) :
         issuer_string = self.certificate.issuer.rfc4514_string()
 
         # print(f"[ DEBUG ] Issuer ( String ) : {issuer_string}")
 
-        for low_trust_ca_element in self.low_trust_ca_list :
+        for not_trust_ca_element in self.ssl_not_trust_ca_list :
 
-            low_trust_ca = low_trust_ca_element.get("low_trust_ca")
+            not_trust_ca = not_trust_ca_element.get("not_trust_ca")
 
-            if low_trust_ca and low_trust_ca in issuer_string :
+            if not_trust_ca and not_trust_ca in issuer_string :
 
-                return True, f"Low Trust CA ( {low_trust_ca} )"
+                return True, not_trust_ca
         
-        return False, "Not Low Trust CA"
+        return False, None
 
     """
     IN : 
@@ -87,7 +87,7 @@ class UrlSsl(BaseModule) :
         """
         Not CA => False
         Free CA => True
-        Low Trust CA => True
+        Not Trust CA => True
         ETC CA => False
         """
 
@@ -96,27 +96,41 @@ class UrlSsl(BaseModule) :
         if not self.certificate :
 
             self.module_result_flag = False
-            self.module_result_data["reason"] = "Fail to Get SSL Certificate."
+            self.module_result_data["ERROR"] = "Fail to Get SSL Certificate."
 
             self.create_module_result()
 
             return self.module_result_dictionary
 
-        free_flag, free_data = self.scan_free_ca()
-        low_trust_flag, low_trust_data = self.scan_low_trust_ca()
+        # [ 1. ] Free CA
+        free_ca_flag, free_ca_data = self.scan_free_ca()
 
-        self.module_result_data["free_ca"] = free_data
-        self.module_result_data["low_trust_ca"] = low_trust_data
-
-        if free_flag or low_trust_flag :
+        if free_ca_flag :
 
             self.module_result_flag = True
-            self.module_result_data["reason"] = "Free CA" if free_flag else "Low Trust CA"
+            self.module_result_data["reason"] = "Use Free CA in SSL Certificate."
+            self.module_result_data["reason_data"] = free_ca_data
 
-        else :
+            self.create_module_result()
 
-            self.module_result_flag = False
-            self.module_result_data["reason"] = ""
+            return self.module_result_dictionary
+
+        # [ 2. ] Not Trust CA
+        not_trust_flag, not_trust_data = self.scan_not_trust_ca()
+
+        if not_trust_flag :
+
+            self.module_result_flag = True
+            self.module_result_data["reason"] = "Use Not Trust CA in SSL Certificate."
+            self.module_result_data["reason_data"] = not_trust_data
+
+            self.create_module_result()
+
+            return self.module_result_dictionary
+
+        self.module_result_flag = False
+        self.module_result_data["reason"] = "Not Use Free CA / Not Trust CA in SSL Certificate."
+        self.module_result_data["reason_data"] = ""
         
         self.create_module_result()
 

@@ -1,24 +1,32 @@
-# [ Core ] Kernel - Kernel Service - Engine : _base_scan_engine.py
+# [ Kernel ] Kernel Service - Engine : _base_scan_engine.py
 
 import os
 import importlib
+import requests
+from urllib.parse import urljoin
+from bs4 import BeautifulSoup
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-URL_MODULE_DIRECTORY_PATH = "plugins.url_modules"
-HTML_MODULE_DIRECTORY_PATH = "plugins.html_modules"
-JS_MODULE_DIRECTORY_PATH = "plugins.js_modules"
+URL_MODULE_DIRECTORY_PATH = "core_engine.plugins.url_modules"
+HTML_MODULE_DIRECTORY_PATH = "core_engine.plugins.html_modules"
+JS_MODULE_DIRECTORY_PATH = "core_engine.plugins.js_modules"
 
+# [ Default ]
 ENGINE_RESULT_SCORE = 100
 
 class BaseScanEngine :
     def __init__(self, input_url) :
         self.input_url = input_url
+        self.redirect_url = None
+
+        self.engine_resource = {}
 
         # [ Default ] Module List
         self.module_path_list = [
+            (URL_MODULE_DIRECTORY_PATH, "url_short"),
+            
             (URL_MODULE_DIRECTORY_PATH, "url_homograph"),
             (URL_MODULE_DIRECTORY_PATH, "url_http"),
-            (URL_MODULE_DIRECTORY_PATH, "url_tiny_domain"),
             (URL_MODULE_DIRECTORY_PATH, "url_ssl"),
             (URL_MODULE_DIRECTORY_PATH, "url_sub_domain"),
             (URL_MODULE_DIRECTORY_PATH, "url_whois"),
@@ -28,6 +36,7 @@ class BaseScanEngine :
             (HTML_MODULE_DIRECTORY_PATH, "html_js_url"),
             (HTML_MODULE_DIRECTORY_PATH, "html_meta_refresh"),
             (HTML_MODULE_DIRECTORY_PATH, "html_resource_url"),
+            (HTML_MODULE_DIRECTORY_PATH, "html_style"),
 
             (JS_MODULE_DIRECTORY_PATH, "js_dom_static"),
             (JS_MODULE_DIRECTORY_PATH, "js_external_static"),
@@ -48,13 +57,13 @@ class BaseScanEngine :
 
         # [ Default ] Module Order List - Synchronous
         self.module_order_list_synchronous = [
-            "UrlTinyDomain",
-            "UrlHttp",
-            "UrlSsl",
+            "UrlShort",
         ]
 
         # [ Default ] Module Order List - Asynchronous
         self.module_order_list_asynchronous = [
+            "UrlHttp",
+            "UrlSsl",
             "UrlHomograph",
             "UrlSubDomain",
             "UrlWhois",
@@ -64,6 +73,7 @@ class BaseScanEngine :
             "HtmlJsUrl",
             "HtmlMetaRefresh",
             "HtmlResourceUrl",
+            "HtmlStyle",
 
             "JsDomStatic",
             "JsExternalStatic",
@@ -84,9 +94,10 @@ class BaseScanEngine :
 
         # [ Default ] Module Weight List
         self.module_weight_dictionary = {
+            "UrlShort": 10,
+
             "UrlHomograph" : 10,
             "UrlHttp" : 10,
-            "UrlTinyDomain": 10,
             "UrlSsl" : 10,
             "UrlSubDomain" : 10,
             "UrlWhois" : 10,
@@ -96,6 +107,7 @@ class BaseScanEngine :
             "HtmlJsUrl" : 10,
             "HtmlMetaRefresh" : 10,
             "HtmlResourceUrl" : 10,
+            "HtmlStyle" : 10,
 
             "JsDomStatic" : 10,
             "JsExternalStatic" : 10,
@@ -121,6 +133,57 @@ class BaseScanEngine :
     IN : 
     OUT : 
     """
+    def set_engine_resource(self) :
+        print("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        print(" [ Kernel Service - Engine ] Set Engine Resource ...")
+        print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
+
+        try :
+            headers = {
+                "User-Agent" : (
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+                )
+            }
+
+            response = requests.get(self.input_url, headers = headers, timeout = 5)
+
+            response.raise_for_status()
+
+            bs = BeautifulSoup(response.text, "html.parser")
+
+            html_file_script_tag_list = []
+            js_file_dictionary = {}
+
+            for script_tag in bs.find_all("script") :
+
+                if script_tag.get("src") :
+
+                    js_file_url = urljoin(self.input_url, script_tag["src"])
+
+                    try :
+                        js_file = requests.get(js_file_url, timeout = 5).text
+
+                        js_file_dictionary[js_file_url] = js_file
+                    except :
+                        continue
+                else :
+
+                    if script_tag.string :
+
+                        html_file_script_tag_list.append(script_tag.string.strip())
+                
+            self.engine_resource["html_file_bs_object"] = bs
+            self.engine_resource["html_file_script_tag_list"] = html_file_script_tag_list
+            self.engine_resource["js_file_dictionary_list"] = js_file_dictionary
+
+        except Exception as e :
+            print(f"[ ERROR ] Fail to Set Engine Reousrce : {self.input_url}")
+            print(f"{e}")
+    
+    """
+    IN : 
+    OUT : 
+    """
     def get_module_class_name(self, module_name) :
         return "".join(word.capitalize() for word in module_name.split("_"))
 
@@ -128,9 +191,9 @@ class BaseScanEngine :
     IN : 
     OUT : 
     """
-    def load_modules(self) :
+    def load_module(self) :
         print("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-        print(" [ Kernel Service - Engine ] Load Modules ...")
+        print(" [ Kernel Service - Engine ] Load Module ...")
         print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
 
         for module_directory_path, module_file_name in self.module_path_list :
@@ -147,6 +210,8 @@ class BaseScanEngine :
                 module_instance = module_class(self.input_url) # To Do : input_url => module_context
                 module_instance._file_path = module_file_path
 
+                module_instance.get_engine_resource(self.engine_resource) # Get Engine Resource
+
                 self.module_instance_list.append(module_instance)
 
                 print(f"  [ + ]  {module_class_name:<25} {module_file_path}")
@@ -155,7 +220,7 @@ class BaseScanEngine :
                 print(f"[ ERROR ] Fail to Load Module : \"{module_file_path}\"")
                 print(f"{e}")
         
-        print(f"  [ End Log ]  Number of Modules : {len(self.module_instance_list)}")
+        print(f"  [ End Log ]  Number of Module : {len(self.module_instance_list)}")
         
         # print(f"[ DEBUG ] Module Instance List : {self.module_instance_list}")
     
@@ -187,14 +252,16 @@ class BaseScanEngine :
             })
 
             print(f"  [ ! ]  {module_class_name:<25} ( Run Module - Fail )")
+
+            print(f"{e}")
             
     """
     IN : 
     OUT : 
     """
-    def run_modules_synchronous(self) :
+    def run_module_synchronous(self) :
         print("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-        print(" [ Kernel Service - Engine ] Run Modules ( Synchronous ) ...")
+        print(" [ Kernel Service - Engine ] Run Module ( Synchronous ) ...")
         print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
 
         for module_instance in self.module_instance_list :
@@ -205,13 +272,21 @@ class BaseScanEngine :
                 
                 self.run_a_module(module_instance)
 
+                if module_class_name == "UrlShort" :
+
+                    redirect_url = self.engine_resource.get("redirect_url")
+
+                    if redirect_url and self.input_url != redirect_url :
+
+                        self.input_url = redirect_url
+
     """
     IN : 
     OUT : 
     """
-    def run_modules_asynchronous(self) :
+    def run_module_asynchronous(self) :
         print("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-        print(" [ Kernel Service - Engine ] Run Modules ( Asynchronous ) ...")
+        print(" [ Kernel Service - Engine ] Run Module ( Asynchronous ) ...")
         print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
 
         with ThreadPoolExecutor() as executor :
@@ -234,13 +309,13 @@ class BaseScanEngine :
     IN : 
     OUT : 
     """
-    def run_modules(self) :
+    def run_module(self) :
         # print("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-        # print(" [ Kernel Service - Engine ] Run Modules ...")
+        # print(" [ Kernel Service - Engine ] Run Module ...")
         # print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
 
-        self.run_modules_synchronous()
-        self.run_modules_asynchronous()
+        self.run_module_synchronous()
+        self.run_module_asynchronous()
 
         # print(f"[ DEBUG ] Engine Result Dictionary : {self.engine_result_dictionary}")
     
@@ -248,9 +323,9 @@ class BaseScanEngine :
     IN : 
     OUT : 
     """
-    def create_engine_result_dictionary(self) :
+    def create_engine_result(self) :
         # print("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-        # print(" [ Kernel Service - Engine ] Create Engine Result Dictionary ...")
+        # print(" [ Kernel Service - Engine ] Create Engine Result ...")
         # print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
         
         module_result_dictionary_list = []
@@ -285,14 +360,16 @@ class BaseScanEngine :
     OUT : 
     """
     def run_engine(self) :
+        # [ 1. ] Set Engine Resource
+        self.set_engine_resource()
 
-        # [ 1. ] Load Modules
-        self.load_modules()
+        # [ 2. ] Load Module
+        self.load_module()
 
-        # [ 2. ] Run Modules
-        self.run_modules()
+        # [ 3. ] Run Module
+        self.run_module()
 
-        # [ 3. ] Create Engine Result
-        self.create_engine_result_dictionary()
+        # [ 4. ] Create Engine Result
+        self.create_engine_result()
 
         return self.engine_result_dictionary

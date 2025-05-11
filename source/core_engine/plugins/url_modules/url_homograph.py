@@ -1,8 +1,7 @@
-# [ Core ] Module - URL : url_homograph.py
+# [ Kernel ] Module - URL : url_homograph.py
 
-from plugins._base_module import BaseModule
+from core_engine.plugins._base_module import BaseModule
 
-import os
 import sys
 from urllib.parse import urlparse
 import subprocess
@@ -10,7 +9,6 @@ import json
 
 class UrlHomograph(BaseModule) :
     def __init__(self, input_url) :
-
         super().__init__(input_url)
 
         self.white_list_domain_suffix = self.get_kernel_resource("white_list_domain_suffix")
@@ -22,9 +20,9 @@ class UrlHomograph(BaseModule) :
     def scan_hostname_ascii(self, hostname) :
         if not hostname.isascii() :
 
-            return True, "Hostname is Not ASCII Only."
+            return True
         
-        return False, "Hostname is ASCII Only."
+        return False
 
     """
     IN : 
@@ -36,14 +34,16 @@ class UrlHomograph(BaseModule) :
 
             if "xn--" in punycode :
 
-                return True, f"Hostname Contains Punycode. ( {punycode} )"
+                return True, punycode
             
             else :
 
-                return False, "Hostname Not Contains Punycode."
+                return False, punycode
             
-        except UnicodeError as e :
-            return False, f"[ ERROR ] Fail to Encode / Decode Punycode : {e}"
+        except UnicodeError :
+            self.module_result_data["ERROR"] = "Fail to Encode / Decode Punycode."
+
+            return False, None
 
     """
     IN : 
@@ -55,7 +55,7 @@ class UrlHomograph(BaseModule) :
 
         try :
             dnstwist_result = subprocess.run(
-                ["python3", "Tools/dnstwist/dnstwist.py", "--format", "json", domain],
+                ["python3", "core_engine/Tools/dnstwist/dnstwist.py", "--format", "json", domain],
                 capture_output=True,
                 text=True,
                 check=True
@@ -111,12 +111,20 @@ class UrlHomograph(BaseModule) :
 
                 # print(f"[ DEBUG ] Domain Element : {domain_element["domain"]}")
 
-                return True, f"Match Domain Exist. ( {domain_element['domain']} )"
+                return True, domain_element
         
-        return False, "Match Domain Not Exist."
-        
-        # To Do : Close
-            
+        for domain_element in domain_list_close :
+                    
+                    # print(domain_element)
+
+                    if domain_element["domain"] in white_list_set :
+
+                        # print(f"[ DEBUG ] Domain Element : {domain_element["domain"]}")
+
+                        return True, domain_element
+
+        return False, None
+                    
     """
     IN : 
     OUT : 
@@ -125,12 +133,10 @@ class UrlHomograph(BaseModule) :
         urlparse_result = urlparse(self.input_url)
         hostname = urlparse_result.hostname
 
-        # print(f"[ DEBUG ] Hostname : {hostname}")
-
         if hostname is None :
 
             self.module_result_flag = False
-            self.module_result_data["error"] = "Fail to Get Hostname."
+            self.module_result_data["ERROR"] = "Fail to Get Host Name."
 
             self.create_module_result()
 
@@ -138,20 +144,19 @@ class UrlHomograph(BaseModule) :
 
         # [ 1. ] ASCII
 
-        ascii_flag, ascii_data = self.scan_hostname_ascii(hostname)
-        self.module_result_data["ascii"] = ascii_data
+        ascii_flag = self.scan_hostname_ascii(hostname)
         
         if ascii_flag :
 
             # [ 2. ] Punycode
 
             punycode_flag, punycode_data = self.scan_hostname_punycode(hostname)
-            self.module_result_data["punycode"] = punycode_data 
 
             if punycode_flag :
                 
                 self.module_result_flag = True
-                self.module_result_data["reason"] = "Punycode"
+                self.module_result_data["reason"] = "Exist Punycode in Host Name."
+                self.module_result_data["reason_data"] = punycode_data
 
                 self.create_module_result()
 
@@ -165,12 +170,14 @@ class UrlHomograph(BaseModule) :
         if dnstwist_flag :
 
             self.module_result_flag = True
-            self.module_result_data["reason"] = "dnstwist"
+            self.module_result_data["reason"] = "Exist White List in \"dnstwist\" Result."
+            self.module_result_data["reason_data"] = dnstwist_data
         
         else :
 
             self.module_result_flag = False
-            self.module_result_data["reason"] = ""
+            self.module_result_data["reason"] = "Not Exist Punycode in Host Name. / Not Exist White List in \"dnstwist\" Result."
+            self.module_result_data["reason_data"] = dnstwist_data
         
         self.create_module_result()
 

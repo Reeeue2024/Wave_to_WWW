@@ -1,0 +1,12 @@
+StartCom
+WoSign
+WoTrus
+TrustAsia
+CNNIC
+Symantec
+Unizeto
+Comodo
+SwissSign
+Certum
+DigiNotar
+PKIoverheid

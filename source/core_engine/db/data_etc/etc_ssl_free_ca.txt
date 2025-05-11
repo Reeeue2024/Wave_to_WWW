@@ -1,0 +1,10 @@
+Let's Encrypt
+ZeroSSL
+Buypass
+SSL For Free
+FreeSSL
+Basic DV
+GeoTrust DV
+cPanel Inc
+Sectigo (DV Only)
+RapidSSL

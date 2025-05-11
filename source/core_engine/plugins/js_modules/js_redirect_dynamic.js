@@ -1,4 +1,4 @@
-// [ Core ] Module - JS : js_redirect_dynamic.py - js_redirect_dynamic.js
+// [ Kernel ] Module - JS : js_redirect_dynamic.py - js_redirect_dynamic.js
 
 const { after } = require("node:test");
 const puppeteer = require("puppeteer");
