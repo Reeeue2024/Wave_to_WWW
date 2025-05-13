@@ -1,4 +1,5 @@
-# server/sessions/sessions.py
+# [ Server ] sessions.py
+# source/server/sessions/sessions.py
 
 from typing import Dict, Any
 import json
