@@ -11,12 +11,17 @@ from server.app.utils.logger import logger
 from server.app.schemas.request_schema import UrlDetectRequest
 from configs.config import ALLOWED_ORIGINS
 from core_engine.kernel_service import KernelService
+from core_engine.kernel_resource import kernel_resource_instance
 from server.app.db_connector import check_url_in_db, insert_url_result
 import uuid
 import time
 import json
 
 app = FastAPI()
+
+@app.on_event("startup")
+def load_kernel_resources():
+    kernel_resource_instance.load_resource()
 
 # CORS 설정
 app.add_middleware(
@@ -46,8 +51,8 @@ def health_check():
 # 탐지 실행 엔드포인트
 @app.post("/detect/url")
 async def detect_url(request: UrlDetectRequest):
-    url = request.url
-    engine_type = "full"  # 기본값 고정
+    url = str(request.url)
+    engine_type = "full"
     session_id = str(uuid.uuid4())
     start_time = time.time()
 
@@ -57,14 +62,13 @@ async def detect_url(request: UrlDetectRequest):
         logger.info(f"이미 검사된 URL: {url}")
         response_payload = {
             "session_id": session_id,
-            "url": str(url),
+            "url": url,
             "is_phishing": existing_result["is_phishing"],
-            "total score": existing_result["total_score"],
-            "scores": existing_result["scores"],
-            "results": existing_result["results"]
+            "total score": existing_result["total_score"]
         }
+        logger.info(f"Exist in DB! : \n{json.dumps(response_payload, ensure_ascii=False, indent=2)}")
         return success_response(response_payload)
-    
+
     else:
         logger.info(f"새로 검사되는 URL: {url}")
         try:
@@ -74,42 +78,25 @@ async def detect_url(request: UrlDetectRequest):
             logger.exception("[ ERROR ] Kernel execution failed.")
             return error_response(message="Kernel execution failed", status_code=500)
 
+        # DB 저장 (scores, results 없이)
         insert_url_result(
-            url, 
-            result.get("engine_result_flag"), 
-            result.get("engine_result_score"),
-            {
-                r["module_class_name"]: r["module_score"]
-                for r in result.get("module_result_dictionary_list", [])
-            },
-            result.get("module_result_dictionary_list", [])
+            url,
+            result.get("engine_result_flag"),
+            result.get("engine_result_score")
         )
-        
+
         duration = round((time.time() - start_time) * 1000)
         logger.info(f"[ Time ] Detection completed in {duration}ms")
 
         response_payload = {
             "session_id": session_id,
-            "url": str(url),
+            "url": url,
             "is_phishing": result.get("engine_result_flag"),
-            "total score": result.get("engine_result_score"),
-            "scores": {
-                r["module_class_name"]: r["module_score"]
-                for r in result.get("module_result_dictionary_list", [])
-            },
-            "results": [
-                {
-                    "module_class_name": r["module_class_name"],
-                    "module_result_flag": r["module_result_flag"],  # 모듈 실행 결과
-                    "module_result_data": r["module_result_data"],  # 모듈 결과 데이터
-                }
-                for r in result.get("module_result_dictionary_list", [])
-            ]
+            "total score": result.get("engine_result_score")
         }
 
         store_result(session_id, response_payload)
         return success_response(response_payload)
-
 
 # 결과 조회 엔드포인트
 @app.get("/detect/result/{session_id}")
