@@ -58,9 +58,12 @@ async def detect_url(
 
     # 클라이언트 타입 판별 (기본: web)
     client_type = request.headers.get("client-type", "web").lower()
+    if client_type not in ("web", "extension"):
+        logger.warning(f"[ Warning ] Invalid client-type header: {client_type}")
+        return error_response(message = "Invalid client-type", status_code=400)
     engine_type = "light" if client_type == "extension" else "full"
 
-    logger.info(f"Client Type: {client_type} → Engine Type: {engine_type}")
+    logger.info(f"[ Client Type ] {client_type.upper()} → Engine Type: {engine_type}")
     session_id = str(uuid.uuid4())
     start_time = time.time()
 
