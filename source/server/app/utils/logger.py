@@ -12,6 +12,7 @@ os.makedirs(LOG_DIR, exist_ok=True)
 # 로거 생성
 logger = logging.getLogger("phishing_logger")
 logger.setLevel(logging.INFO)
+logger.propagate = False
 
 # 포맷 정의
 formatter = logging.Formatter("[%(asctime)s] %(levelname)-8s %(message)s")

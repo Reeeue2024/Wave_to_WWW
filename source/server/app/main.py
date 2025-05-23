@@ -1,7 +1,7 @@
-# [ Server ] main.py (db ver.)
+# [ Server ] main.py (db-linked + extension ver.)
 # source/server/app/main.py
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Body
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError
@@ -50,53 +50,64 @@ def health_check():
 
 # 탐지 실행 엔드포인트
 @app.post("/detect/url")
-async def detect_url(request: UrlDetectRequest):
-    url = str(request.url)
-    engine_type = "full"
+async def detect_url(
+    request: Request,
+    data: UrlDetectRequest = Body(...)
+):
+    url = str(data.url)
+
+    # 클라이언트 타입 판별 (기본: web)
+    client_type = request.headers.get("client-type", "web").lower()
+    engine_type = "light" if client_type == "extension" else "full"
+
+    logger.info(f"Client Type: {client_type} → Engine Type: {engine_type}")
     session_id = str(uuid.uuid4())
     start_time = time.time()
 
+    # DB 조회
     existing_result = check_url_in_db(url)
-
     if existing_result:
-        logger.info(f"이미 검사된 URL: {url}")
-        response_payload = {
-            "session_id": session_id,
-            "url": url,
-            "is_phishing": existing_result["is_phishing"],
-            "total score": existing_result["total_score"]
-        }
-        logger.info(f"Exist in DB! : \n{json.dumps(response_payload, ensure_ascii=False, indent=2)}")
-        return success_response(response_payload)
+        logger.info(f"[ Exist in DB! ] {url}")
+        if engine_type == "light":
+            return success_response({
+                "input_url": str(data.url),
+                "engine_result_flag": existing_result["engine_result_flag"]
+            })
+        else:
+            return success_response({
+                **existing_result
+            })
 
+    logger.info(f"[ New URL ] {url}")
+    try:
+        kernel_service = KernelService()
+        result = kernel_service.run_kernel(input_url=url, engine_type=engine_type)
+    except Exception as e:
+        logger.exception("[ ERROR ] Kernel execution failed.")
+        return error_response(message="Kernel execution failed", status_code=500)
+
+    duration = round((time.time() - start_time) * 1000)
+    logger.info(f"[ Time ] Detection completed in {duration}ms")
+
+    if engine_type == "light":
+        response_payload = {
+            "input_url": str(data.url),
+            "engine_result_flag": result.get("engine_result_flag")
+        }
     else:
-        logger.info(f"새로 검사되는 URL: {url}")
-        try:
-            kernel_service = KernelService()
-            result = kernel_service.run_kernel(input_url=url, engine_type=engine_type)
-        except Exception as e:
-            logger.exception("[ ERROR ] Kernel execution failed.")
-            return error_response(message="Kernel execution failed", status_code=500)
-
-        # DB 저장 (scores, results 없이)
-        insert_url_result(
-            url,
-            result.get("engine_result_flag"),
-            result.get("engine_result_score")
-        )
-
-        duration = round((time.time() - start_time) * 1000)
-        logger.info(f"[ Time ] Detection completed in {duration}ms")
-
         response_payload = {
-            "session_id": session_id,
-            "url": url,
-            "is_phishing": result.get("engine_result_flag"),
-            "total score": result.get("engine_result_score")
+            **result
         }
+        insert_url_result(
+            input_url = result.get("input_url"),
+            engine_result_flag = result.get("engine_result_flag"),
+            engine_result_score = result.get("engine_result_score"),
+            module_result_dictionary_list = result.get("module_result_dictionary_list")
+        )
+    
+    store_result(session_id, response_payload)
+    return success_response(response_payload)
 
-        store_result(session_id, response_payload)
-        return success_response(response_payload)
 
 # 결과 조회 엔드포인트
 @app.get("/detect/result/{session_id}")

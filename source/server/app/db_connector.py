@@ -4,6 +4,7 @@
 import mysql.connector
 import logging
 from dotenv import load_dotenv
+import json
 import os
 
 # 환경변수 로드
@@ -31,7 +32,11 @@ def get_db_connection():
 
 # DB에 URL 존재 여부 및 결과 조회
 def check_url_in_db(url):
-    query = "SELECT url, is_phishing, total_score FROM url_table WHERE url = %s"
+    query = """
+        SELECT input_url, engine_result_flag, engine_result_score, module_result_dictionary_list
+        FROM url_table
+        WHERE input_url = %s
+    """
     connection = None
     cursor = None
 
@@ -42,11 +47,13 @@ def check_url_in_db(url):
         result = cursor.fetchone()
 
         if result:
+            import json
+            module_result_dict = json.loads(result[3]) if result[3] else []
             return {
-                "is_phishing": result[1],
-                "total_score": result[2],
-                "scores": None,
-                "results": None
+                "input_url": result[0],
+                "engine_result_flag": result[1],
+                "engine_result_score": result[2],
+                "module_result_dictionary_list": module_result_dict
             }
         return None
 
@@ -61,19 +68,24 @@ def check_url_in_db(url):
             connection.close()
 
 # URL 검사 결과를 삽입하는 함수
-def insert_url_result(url, is_phishing, total_score):
+def insert_url_result(input_url, engine_result_flag, engine_result_score, module_result_dictionary_list):
     query = """
-        INSERT INTO url_table (url, is_phishing, total_score)
-        VALUES (%s, %s, %s)
+        INSERT INTO url_table (
+            input_url, engine_result_flag, engine_result_score, module_result_dictionary_list
+        )
+        VALUES (%s, %s, %s, %s)
         ON DUPLICATE KEY UPDATE
-            is_phishing = VALUES(is_phishing),
-            total_score = VALUES(total_score)
+            engine_result_flag = VALUES(engine_result_flag),
+            engine_result_score = VALUES(engine_result_score),
+            module_result_dictionary_list = VALUES(module_result_dictionary_list)
     """
 
-    values = (url, is_phishing, total_score)
+    module_json = json.dumps(module_result_dictionary_list, ensure_ascii=False)
+    values = (input_url, engine_result_flag, engine_result_score, module_json)
 
     connection = None
     cursor = None
+    
     try:
         connection = get_db_connection()
         cursor = connection.cursor()
