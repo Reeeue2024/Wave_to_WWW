@@ -3,7 +3,7 @@
 from core_engine.engines._base_scan_engine import BaseScanEngine, URL_MODULE_DIRECTORY_PATH, HTML_MODULE_DIRECTORY_PATH, JS_MODULE_DIRECTORY_PATH
 
 # [ Full ]
-ENGINE_RESULT_SCORE = 100
+ENGINE_RESULT_SCORE = 60
 
 class FullScanEngine(BaseScanEngine) :
     def __init__(self, input_url) :
@@ -22,22 +22,22 @@ class FullScanEngine(BaseScanEngine) :
             (HTML_MODULE_DIRECTORY_PATH, "html_form"),
             (HTML_MODULE_DIRECTORY_PATH, "html_iframe"),
             (HTML_MODULE_DIRECTORY_PATH, "html_js_url"),
+            (HTML_MODULE_DIRECTORY_PATH, "html_link"),
             (HTML_MODULE_DIRECTORY_PATH, "html_meta_refresh"),
             (HTML_MODULE_DIRECTORY_PATH, "html_resource_url"),
             (HTML_MODULE_DIRECTORY_PATH, "html_style"),
 
-            (JS_MODULE_DIRECTORY_PATH, "js_external_static"),
-            (JS_MODULE_DIRECTORY_PATH, "js_hook_static"),
-            (JS_MODULE_DIRECTORY_PATH, "js_obfuscate_static"),
-            (JS_MODULE_DIRECTORY_PATH, "js_redirect_static"),
-            (JS_MODULE_DIRECTORY_PATH, "js_script_static"),
-            
-            (JS_MODULE_DIRECTORY_PATH, "js_dom_dynamic"),
-            (JS_MODULE_DIRECTORY_PATH, "js_external_dynamic"),
-            (JS_MODULE_DIRECTORY_PATH, "js_hook_dynamic"),
-            (JS_MODULE_DIRECTORY_PATH, "js_obfuscate_dynamic"),
-            (JS_MODULE_DIRECTORY_PATH, "js_redirect_dynamic"),
-            (JS_MODULE_DIRECTORY_PATH, "js_script_dynamic"),
+            (JS_MODULE_DIRECTORY_PATH, "js_static_external"),
+            (JS_MODULE_DIRECTORY_PATH, "js_static_hook"),
+            (JS_MODULE_DIRECTORY_PATH, "js_static_obfuscate"),
+            (JS_MODULE_DIRECTORY_PATH, "js_static_redirect"),
+            (JS_MODULE_DIRECTORY_PATH, "js_static_script"),
+
+            (JS_MODULE_DIRECTORY_PATH, "js_dynamic_dom"),
+            (JS_MODULE_DIRECTORY_PATH, "js_dynamic_external"),
+            (JS_MODULE_DIRECTORY_PATH, "js_dynamic_hook"),
+            (JS_MODULE_DIRECTORY_PATH, "js_dynamic_obfuscate"),
+            (JS_MODULE_DIRECTORY_PATH, "js_dynamic_redirect"),
         ]
 
         # [ Full ] Module Order List - Synchronous
@@ -47,60 +47,60 @@ class FullScanEngine(BaseScanEngine) :
 
         # [ Full ] Module Order List - Asynchronous
         self.module_order_list_asynchronous = [
+            "UrlHomograph",
             "UrlHttp",
             "UrlSsl",
-            "UrlHomograph",
             "UrlSubDomain",
             "UrlWhois",
 
             "HtmlForm",
             "HtmlIframe",
             "HtmlJsUrl",
+            "HtmlLink",
             "HtmlMetaRefresh",
             "HtmlResourceUrl",
             "HtmlStyle",
 
-            "JsExternalStatic",
-            "JsHookStatic",
-            "JsObfuscateStatic",
-            "JsRedirectStatic",
-            "JsScriptStatic",
+            "JsStaticExternal",
+            "JsStaticHook",
+            "JsStaticObfuscate",
+            "JsStaticRedirect",
+            "JsStaticScript",
 
-            "JsExternalDynamic",
-            "JsHookDynamic",
-            "JsObfuscateDynamic",
-            "JsRedirectDynamic",
-            "JsScriptDynamic",
+            "JsDynamicDom",
+            "JsDynamicExternal",
+            "JsDynamicHook",
+            "JsDynamicObfuscate",
+            "JsDynamicRedirect",
         ]
 
         # [ Full ] Module Weight List
         self.module_weight_dictionary = {
-            "UrlShort": 10,
+            "UrlShort" : 5, # LOW
 
-            "UrlHomograph" : 10,
-            "UrlHttp" : 10,
-            "UrlSsl" : 10,
+            "UrlHomograph" : 20, # HIGH
+            "UrlHttp" : 5, # LOW
+            "UrlSsl" : 15, # NOT LOW + NOT HIGH #2
             "UrlSubDomain" : 10,
             "UrlWhois" : 10,
 
-            "HtmlForm" : 10,
-            "HtmlIframe" : 10,
-            "HtmlJsUrl" : 10,
-            "HtmlMetaRefresh" : 10,
-            "HtmlResourceUrl" : 10,
-            "HtmlStyle" : 10,
+            "HtmlForm" : 15, # NOT LOW + NOT HIGH #2
+            "HtmlIframe" : 15, # NOT LOW + NOT HIGH #2
+            "HtmlJsUrl" : 10, # NOT LOW + NOT HIGH #1
+            "HtmlLink" : 10, # NOT LOW + NOT HIGH #1
+            "HtmlMetaRefresh" : 15, # NOT LOW + NOT HIGH #2
+            "HtmlResourceUrl" : 10, # NOT LOW + NOT HIGH #1
+            "HtmlStyle" : 20, # HIGH ( ? )
             
-            "JsDomStatic" : 10,
-            "JsExternalStatic" : 10,
-            "JsHookStatic" : 10,
-            "JsObfuscateStatic" : 10,
-            "JsRedirectStatic" : 10,
-            "JsScriptStatic" : 10,
+            "JsStaticExternal" : 10, # NOT LOW + NOT HIGH #1
+            "JsStaticHook" : 15, # NOT LOW + NOT HIGH #2
+            "JsStaticObfuscate" : 10, # NOT LOW + NOT HIGH #1
+            "JsStaticRedirect" : 15, # NOT LOW + NOT HIGH #2
+            "JsStaticScript" : 10, # NOT LOW + NOT HIGH #1
 
-            "JsDomDynamic" : 10,
-            "JsExternalDynamic" : 10,
-            "JsHookDynamic" : 10,
-            "JsObfuscateDynamic" : 10,
-            "JsRedirectDynamic" : 10,
-            "JsScriptDynamic" : 10,
+            "JsDynamicDom" : 20, # HIGH
+            "JsDynamicExternal" : 15, # NOT LOW + NOT HIGH #2
+            "JsDynamicHook" : 15, # NOT LOW + NOT HIGH #2
+            "JsDynamicObfuscate" : 20, # HIGH
+            "JsDynamicRedirect" : 20, # HIGH
         }

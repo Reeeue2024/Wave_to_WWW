@@ -3,8 +3,6 @@
 from core_engine.plugins._base_module import BaseModule
 
 import sys
-import requests
-from bs4 import BeautifulSoup
 from urllib.parse import urlparse
 import tldextract
 
@@ -35,8 +33,20 @@ class HtmlResourceUrl(BaseModule) :
     IN : 
     OUT : 
     """
-    def scan(self) :
+    async def scan(self) :
         html_file_bs_object = self.engine_resource.get("html_file_bs_object")
+
+        # Run Fail Case #1
+        if not html_file_bs_object :
+
+            self.module_run = False
+            self.module_error = "[ ERROR ] Fail to Get HTML File from Engine."
+            self.module_result_flag = False
+            self.module_result_data = None
+
+            self.create_module_result()
+
+            return self.module_result_dictionary
 
         resource_url_list = []
 
@@ -67,35 +77,47 @@ class HtmlResourceUrl(BaseModule) :
 
             resource_url_list.append(tag["src"])
 
+        # [ 6. ] To Do
+
+        # Run Fail Case #2
         if not resource_url_list :
 
+            self.module_run = False
+            self.module_error = "[ ERROR ] Fail to Get \"URL\" in Resource from HTML File."
             self.module_result_flag = False
-            self.module_result_data["reason"] = "Not Exist URL in Resource."
-            self.module_result_data["reason_data"] = ""
+            self.module_result_data = None
 
             self.create_module_result()
 
-            # print(f"[ DEBUG ] Module Result Dictionary : {self.module_result_dictionary}")
-
             return self.module_result_dictionary
+        
+        reason_list = []
+        reason_data_list = []
 
         for resource_url in resource_url_list :
 
             if self.is_external_url(self.input_url, resource_url) :
 
-                self.module_result_flag = True
-                self.module_result_data["reason"] = "Exist External URL in Resource."
-                self.module_result_data["reason_data"] = resource_url
+                reason_list.append("Exist External URL in Resource.")
+                reason_data_list.append(resource_url)
 
-                self.create_module_result()
+        # ( Run : True ) + ( Scan : True )
+        if reason_list or reason_data_list :
 
-                # print(f"[ DEBUG ] Module Result Dictionary : {self.module_result_dictionary}")
+            self.module_run = True
+            self.module_error = None
+            self.module_result_flag = True
+            self.module_result_data["reason"] = reason_list
+            self.module_result_data["reason_data"] = reason_data_list
 
-                return self.module_result_dictionary
+        # ( Run : True ) + ( Scan : False )
+        else :
 
-        self.module_result_flag = False
-        self.module_result_data["reason"] = "Not Exist External URL in Resource."
-        self.module_result_data["reason_data"] = ""
+            self.module_run = True
+            self.module_error = None
+            self.module_result_flag = False
+            self.module_result_data["reason"] = "Not Exist External URL in Resource."
+            self.module_result_data["reason_data"] = None
 
         self.create_module_result()
 

@@ -21,7 +21,11 @@ class KernelResource :
         load_dotenv() # [ .env ] Load "MONGO_URI"
 
         try :
-            uri = os.getenv("MONGO_URI")
+            uri = os.getenv("MONGODB_URI")
+
+            if not uri or not isinstance(uri, str) :
+                raise ValueError("[ ERROR ] \"MONGODB_URI\" is INVALID.")
+            
             client = MongoClient(uri, server_api = ServerApi("1")) # [ Mongo ] API Version 1
             db = client["kernel"]
 
@@ -30,20 +34,21 @@ class KernelResource :
             print("  [ Start Log ]  Connect to \"Mongo\"")
 
         except Exception as e :
-            print("  [ Fail ]  Connect to \"Mongo\"")
+            print(f"[ ERROR ] Fail to Run - Kernel Resource : {type(e).__name__}")
+            print(f"{e}")
 
             return
 
         function_dictionary = {
             # # Black List
-            "black_list_url" : lambda : list(db["black_list_url"].find({}, {"_id" : 0})), # ( Example ) "https://google.com"
-            "black_list_domain_suffix" : lambda : list(db["black_list_domain_suffix"].find({}, {"_id" : 0})),  # ( Example ) "google.com"
-            "black_list_brand" : lambda : list(db["black_list_brand"].find({}, {"_id" : 0})),  # ( Example ) "google"
+            # "black_list_url" : lambda : list(db["black_list_url"].find({}, {"_id" : 0})), # ( Example ) "https://google.com"
+            # "black_list_domain_suffix" : lambda : list(db["black_list_domain_suffix"].find({}, {"_id" : 0})),  # ( Example ) "google.com"
+            # "black_list_brand" : lambda : list(db["black_list_brand"].find({}, {"_id" : 0})),  # ( Example ) "google"
 
-            # White List
-            "white_list_url" : lambda : list(db["white_list_url"].find({}, {"_id" : 0})),
-            "white_list_domain_suffix" : lambda : list(db["white_list_domain_suffix"].find({}, {"_id" : 0})),
-            "white_list_brand" : lambda : list(db["white_list_brand"].find({}, {"_id" : 0})),
+            # # White List
+            # "white_list_url" : lambda : list(db["white_list_url"].find({}, {"_id" : 0})),
+            # "white_list_domain_suffix" : lambda : list(db["white_list_domain_suffix"].find({}, {"_id" : 0})),
+            # "white_list_brand" : lambda : list(db["white_list_brand"].find({}, {"_id" : 0})),
 
             # ETC
             "short_domain_list" : lambda : list(db["short_domain_list"].find({}, {"_id" : 0})),
@@ -63,6 +68,8 @@ class KernelResource :
                 print(f"  [ + ]  {resource_name:<25} ( Load Resource - Success )")
             
             except Exception as e :
+                self.resource_dictionary[resource_name] = []
+                
                 print(f"  [ ! ]  {resource_name:<25} ( Load Resource - Fail )")
                 print(f"{e}")
         
@@ -73,7 +80,7 @@ class KernelResource :
     OUT : 
     """
     def get_resource(self, resource_name) :
-        return self.resource_dictionary.get(resource_name)
+        return self.resource_dictionary.get(resource_name, [])
 
 # Single Instance
 kernel_resource_instance = KernelResource()

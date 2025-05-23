@@ -35,21 +35,39 @@ class HtmlForm(BaseModule) :
     IN : 
     OUT : 
     """
-    def scan(self) :
+    async def scan(self) :
         html_file_bs_object = self.engine_resource.get("html_file_bs_object")
+
+        # Run Fail Case #1
+        if not html_file_bs_object :
+
+            self.module_run = False
+            self.module_error = "[ ERROR ] Fail to Get HTML File from Engine."
+            self.module_result_flag = False
+            self.module_result_data = None
+
+            self.create_module_result()
+
+            return self.module_result_dictionary
 
         form_list = html_file_bs_object.find_all("form")
 
+        # Run Fail Case #2
         if not form_list :
 
+            self.module_run = False
+            self.module_error = "[ ERROR ] Fail to Get \"form\" Tag from HTML File."
             self.module_result_flag = False
-            self.module_result_data["ERROR"] = "Fail to Get \"form\" Tag from HTML File."
+            self.module_result_data = None
 
             self.create_module_result()
 
             return self.module_result_dictionary   
 
-        external_url_flag = False     
+        reason_list = []
+        reason_data_list = []
+
+        external_url_flag = False
 
         for form in form_list :
 
@@ -59,19 +77,30 @@ class HtmlForm(BaseModule) :
 
             if external_url_flag :
 
-                self.module_result_flag = True
-                self.module_result_data["reason"] = "Exist External URL in \"form\" Tag."
-                self.module_result_data["reason_data"] = form_action_data
+                reason_list.append("Exist External URL in \"form\" Tag.")
+                reason_data_list.append(form_action_data)
+            
+            else :
 
-                self.create_module_result()
+                continue
+        
+        # ( Run : True ) + ( Scan : True )
+        if reason_list or reason_data_list :
 
-                # print(f"[ DEBUG ] Module Result Dictionary : {self.module_result_dictionary}")
+            self.module_run = True
+            self.module_error = None
+            self.module_result_flag = True
+            self.module_result_data["reason"] = reason_list
+            self.module_result_data["reason_data"] = reason_data_list
 
-                return self.module_result_dictionary
+        # ( Run : True ) + ( Scan : False )
+        else :
 
-        self.module_result_flag = False
-        self.module_result_data["reason"] = "Not Exist External URL in \"form\" Tag."
-        self.module_result_data["reason_data"] = form_action_data
+            self.module_run = True
+            self.module_error = None
+            self.module_result_flag = False
+            self.module_result_data["reason"] = "Not Exist External URL in \"form\" Tag."
+            self.module_result_data["reason_data"] = None
 
         self.create_module_result()
 

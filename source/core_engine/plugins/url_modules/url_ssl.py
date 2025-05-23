@@ -83,30 +83,28 @@ class UrlSsl(BaseModule) :
     IN : 
     OUT : 
     """
-    def scan(self) :
-        """
-        Not CA => False
-        Free CA => True
-        Not Trust CA => True
-        ETC CA => False
-        """
-
+    async def scan(self) :
         self.certificate = self.get_certificate()
 
+        # Run Fail Case #1
         if not self.certificate :
 
+            self.module_run = False
+            self.module_error = "[ ERROR ] Fail to Get SSL Certificate."
             self.module_result_flag = False
-            self.module_result_data["ERROR"] = "Fail to Get SSL Certificate."
+            self.module_result_data = None
 
             self.create_module_result()
 
             return self.module_result_dictionary
 
-        # [ 1. ] Free CA
+        # [ 1. ] Free CA => ( Run : True ) + ( Scan : True )
         free_ca_flag, free_ca_data = self.scan_free_ca()
 
         if free_ca_flag :
 
+            self.module_run = True
+            self.module_error = None
             self.module_result_flag = True
             self.module_result_data["reason"] = "Use Free CA in SSL Certificate."
             self.module_result_data["reason_data"] = free_ca_data
@@ -115,11 +113,13 @@ class UrlSsl(BaseModule) :
 
             return self.module_result_dictionary
 
-        # [ 2. ] Not Trust CA
+        # [ 2. ] Not Trust CA => ( Run : True ) + ( Scan : True )
         not_trust_flag, not_trust_data = self.scan_not_trust_ca()
 
         if not_trust_flag :
 
+            self.module_run = True
+            self.module_error = None
             self.module_result_flag = True
             self.module_result_data["reason"] = "Use Not Trust CA in SSL Certificate."
             self.module_result_data["reason_data"] = not_trust_data
@@ -128,9 +128,12 @@ class UrlSsl(BaseModule) :
 
             return self.module_result_dictionary
 
+        # ( Run : True ) + ( Scan : False )
+        self.module_run = True
+        self.module_error = None
         self.module_result_flag = False
         self.module_result_data["reason"] = "Not Use Free CA / Not Trust CA in SSL Certificate."
-        self.module_result_data["reason_data"] = ""
+        self.module_result_data["reason_data"] = None
         
         self.create_module_result()
 

@@ -4,9 +4,6 @@ from core_engine.kernel_resource import kernel_resource_instance
 from core_engine.engines.full_scan_engine import FullScanEngine
 from core_engine.engines.light_scan_engine import LightScanEngine
 
-import requests
-import json
-
 class KernelService :
     def __init__(self) :
         # ( Engine ) Result
@@ -23,41 +20,66 @@ class KernelService :
         print(" [ Kernel Service ] Receive Request ...")
         print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
 
-        print(f"  [ + ]  Input URL : {input_url}")
-        print(f"  [ + ]  Engine Type : {engine_type}")
-        
-        # [ 1. ] Get Resource
-        # black_list_url = kernel_resource_instance.get_resource("black_list_url")
-        # white_list_url = kernel_resource_instance.get_resource("white_list_url")
-        
-        # print(f"[ DEBUG ] {black_list_url}")
-        # print(f"[ DEBUG ] {white_list_url}")
+        try :
+            if not input_url or not isinstance(input_url, str) :
+                raise ValueError("[ ERROR ] \"Input URL\" is INVALID.")
 
-        # [ 2. ] Select Engine
-        if engine_type == "full" :
-            engine_instance = FullScanEngine(input_url)
-        elif engine_type == "light" :
-            engine_instance = LightScanEngine(input_url)
+            if not engine_type or engine_type not in ("full", "light") :
+                raise ValueError("[ ERROR ] \"Engine Type\" is INVALID.")
 
-        # [ 3. ] Run Engine ( Receive Engine Result )
-        self.engine_result_dictionary = engine_instance.run_engine()
+            print(f"  [ + ]  Input URL : {input_url}")
+            print(f"  [ + ]  Engine Type : {engine_type}")
+            
+            # [ 1. ] Get Resource
+            # black_list_url = kernel_resource_instance.get_resource("black_list_url")
+            # white_list_url = kernel_resource_instance.get_resource("white_list_url")
+            
+            # print(f"[ DEBUG ] {black_list_url}")
+            # print(f"[ DEBUG ] {white_list_url}")
 
-        engine_result_flag = False
-        engine_result_score = 0
-        module_result_dictionary_list = []
+            # [ 2. ] Select Engine
+            if engine_type == "full" :
+                engine_instance = FullScanEngine(input_url)
+            if engine_type == "light" :
+                engine_instance = LightScanEngine(input_url)
 
-        engine_result_flag = self.engine_result_dictionary.get("engine_result_flag")
-        engine_result_score = self.engine_result_dictionary.get("engine_result_score") 
-        module_result_dictionary_list = self.engine_result_dictionary.get("module_result_dictionary_list")    
+            # [ 3. ] Run Engine ( Receive Engine Result )
+            self.engine_result_dictionary = engine_instance.run_engine()
 
-        # [ 5. ] Send Response ( Send Kernel Result )
-        self.kernel_result_dictionary = {
-            "input_url" : input_url,
-            "engine_type" : engine_type,
-            "engine_result_flag" : engine_result_flag,
-            "engine_result_score" : engine_result_score,
-            "module_result_dictionary_list" : module_result_dictionary_list,
-        }
+            engine_result_flag = self.engine_result_dictionary.get("engine_result_flag")
+            engine_result_score = self.engine_result_dictionary.get("engine_result_score")
+            engine_result_run_true_score = self.engine_result_dictionary.get("engine_result_run_true_score")
+            engine_result_run_true_weight = self.engine_result_dictionary.get("engine_result_run_true_weight")
+            module_result_dictionary_list = self.engine_result_dictionary.get("module_result_dictionary_list")    
+
+            # [ 5. ] Send Response ( Send Kernel Result )
+            self.kernel_result_dictionary = {
+                "input_url" : input_url,
+                "engine_type" : engine_type,
+                "engine_result_flag" : engine_result_flag,
+                "engine_result_score" : engine_result_score,
+                "engine_result_run_true_score" : engine_result_run_true_score,
+                "engine_result_run_true_weight" : engine_result_run_true_weight,
+                "module_result_dictionary_list" : module_result_dictionary_list,
+                "error_flag" : False,
+                "error_type" : None,
+            }
+
+        except Exception as e :
+            print(f"[ ERROR ] Fail to Run - Kernel Service : {type(e).__name__}")
+            print(f"{e}")
+
+            self.kernel_result_dictionary = {
+                "input_url" : input_url,
+                "engine_type" : engine_type,
+                "engine_result_flag" : False,
+                "engine_result_score" : 0,
+                "engine_result_run_true_score" : 0,
+                "engine_result_run_true_weight" : 0,
+                "module_result_dictionary_list" : None,
+                "error_flag" : True,
+                "error_type" : type(e).__name__,
+            }
 
         print("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
         print(" [ Kernel Service ] Send Response ...")
@@ -67,18 +89,12 @@ class KernelService :
         print(f"  [ + ]  Engine Type : {self.kernel_result_dictionary.get("engine_type")}")
         print(f"  [ + ]  Engine Result Flag : {self.kernel_result_dictionary.get("engine_result_flag")}")
         print(f"  [ + ]  Engine Result Score : {self.kernel_result_dictionary.get("engine_result_score")}")
+        print(f"  [ + ]  Engine Result Run True Score : {self.kernel_result_dictionary.get("engine_result_run_true_score")}")
+        print(f"  [ + ]  Engine Result Run True Weight : {self.kernel_result_dictionary.get("engine_result_run_true_weight")}")
         print(f"  [ + ]  Module Result Dictionary List : ( ... )")
+        print(f"  [ + ]  ERROR Flag : {self.kernel_result_dictionary.get("error_flag")}")
+        print(f"  [ + ]  ERROR Type : {self.kernel_result_dictionary.get("error_type")}")
 
         print()
-
-        module_result_list = self.kernel_result_dictionary.get("module_result_dictionary_list")
-        
-        # for index, module_result_element in enumerate(module_result_list, 1) :
-        #     print(f"  [ {index:02} ]  Module : {module_result_element['module_class_name']}")
-        #     print(f"        ├─ Flag    : {module_result_element['module_result_flag']}")
-        #     print(f"        ├─ Score   : {module_result_element['module_score']}")
-        #     print(f"        └─ Reason  : {module_result_element['module_result_data']}")
-        
-        # print()
 
         return self.kernel_result_dictionary

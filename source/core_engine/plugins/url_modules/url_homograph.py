@@ -4,8 +4,8 @@ from core_engine.plugins._base_module import BaseModule
 
 import sys
 from urllib.parse import urlparse
-import subprocess
 import json
+import asyncio
 
 class UrlHomograph(BaseModule) :
     def __init__(self, input_url) :
@@ -34,36 +34,56 @@ class UrlHomograph(BaseModule) :
 
             if "xn--" in punycode :
 
-                return True, punycode
+                return True, punycode, False
             
             else :
 
-                return False, punycode
+                return False, punycode, False
             
         except UnicodeError :
-            self.module_result_data["ERROR"] = "Fail to Encode / Decode Punycode."
+            self.module_run = False
+            self.module_error = "[ ERROR ] Fail to Encode / Decode Punycode."
+            self.module_result_flag = False
+            self.module_result_data = None
 
-            return False, None
+            return False, None, True
 
     """
     IN : 
     OUT : 
     """
-    def run_dnstwist(self, domain) :
+    async def run_dnstwist(self, domain) :
         domain_list_open = [] # ( IPV4 / IPV6 : True )
         domain_list_close = [] # ( IPV4 / IPV6 : False ) + ( Name Server / Mail Server : True ) 
 
         try :
-            dnstwist_result = subprocess.run(
-                ["python3", "core_engine/Tools/dnstwist/dnstwist.py", "--format", "json", domain],
-                capture_output=True,
-                text=True,
-                check=True
+            # [ 1. ] Create Asynchronous Process - "dnstwist"
+            process = await asyncio.create_subprocess_exec(
+                "python3", "core_engine/tools/dnstwist/dnstwist.py", "--format", "json", domain,
+                stdout = asyncio.subprocess.PIPE,
+                stderr = asyncio.subprocess.PIPE
             )
 
-            # print(f"[ DEBUG ] {dnstwist_result.stdout}")
+            # [ 2. ] Get "Time-Out" From Engine
+            time_out = getattr(self, "time_out_module", 30)
 
-            dnstwist_result_domain_list = json.loads(dnstwist_result.stdout)
+            # [ 3. ] Set "Time-Out"
+            try :
+                stdout, stderr = await asyncio.wait_for(process.communicate(), timeout = time_out)
+
+            except asyncio.TimeoutError :
+                process.kill()
+
+                await process.communicate()
+
+                self.module_run = False
+                self.module_error = f"[ ERROR ] TIME OUT : {time_out}"
+                self.module_result_flag = False
+                self.module_result_data = None
+
+                return domain_list_open, domain_list_close, True
+            
+            dnstwist_result_domain_list = json.loads(stdout.decode())
             dnstwist_result_domain_list = [item for item in dnstwist_result_domain_list if item["fuzzer"] != "*original"]
 
             for item in dnstwist_result_domain_list :
@@ -85,16 +105,21 @@ class UrlHomograph(BaseModule) :
                     domain_list_close.append(item)
 
         except Exception as e :
-                print(f"[ ERROR ] Fail to Run \"dnstwist\" : {e}")
+            self.module_run = False
+            self.module_error = f"[ ERROR ] {e}"
+            self.module_result_flag = False
+            self.module_result_data = None
+
+            return domain_list_open, domain_list_close, True
         
-        return domain_list_open, domain_list_close
+        return domain_list_open, domain_list_close, False
 
     """
     IN : 
     OUT : 
     """
-    def scan_tools_dnstwist(self, hostname) :
-        domain_list_open, domain_list_close = self.run_dnstwist(hostname)
+    async def scan_tools_dnstwist(self, hostname) :
+        domain_list_open, domain_list_close, dnstwist_error_flag = await self.run_dnstwist(hostname)
 
         # print(f"[ DEBUG ] Number of Open : {len(domain_list_open)}")
         # print(f"[ DEBUG ] Number of Close : {len(domain_list_close)}")
@@ -111,7 +136,7 @@ class UrlHomograph(BaseModule) :
 
                 # print(f"[ DEBUG ] Domain Element : {domain_element["domain"]}")
 
-                return True, domain_element
+                return True, domain_element, dnstwist_error_flag
         
         for domain_element in domain_list_close :
                     
@@ -121,22 +146,25 @@ class UrlHomograph(BaseModule) :
 
                         # print(f"[ DEBUG ] Domain Element : {domain_element["domain"]}")
 
-                        return True, domain_element
+                        return True, domain_element, dnstwist_error_flag
 
-        return False, None
+        return False, None, dnstwist_error_flag
                     
     """
     IN : 
     OUT : 
     """
-    def scan(self) :
+    async def scan(self) :
         urlparse_result = urlparse(self.input_url)
         hostname = urlparse_result.hostname
 
+        # Run Fail Case #1
         if hostname is None :
 
+            self.module_run = False
+            self.module_error = "[ ERROR ] Fail to Get Host Name."
             self.module_result_flag = False
-            self.module_result_data["ERROR"] = "Fail to Get Host Name."
+            self.module_result_data = None
 
             self.create_module_result()
 
@@ -150,10 +178,20 @@ class UrlHomograph(BaseModule) :
 
             # [ 2. ] Punycode
 
-            punycode_flag, punycode_data = self.scan_hostname_punycode(hostname)
+            punycode_flag, punycode_data, punycode_error_flag = self.scan_hostname_punycode(hostname)
 
+            # Run Fail Case #2
+            if punycode_error_flag :
+
+                self.create_module_result()
+
+                return self.module_result_dictionary
+
+            # ( Run : True ) + ( Scan : True )
             if punycode_flag :
                 
+                self.module_run = True
+                self.module_error = None
                 self.module_result_flag = True
                 self.module_result_data["reason"] = "Exist Punycode in Host Name."
                 self.module_result_data["reason_data"] = punycode_data
@@ -164,20 +202,32 @@ class UrlHomograph(BaseModule) :
         
         # [ 3. ] "dnstwist"
 
-        dnstwist_flag, dnstwist_data = self.scan_tools_dnstwist(hostname)
-        self.module_result_data["dnstwist"] = dnstwist_data
+        dnstwist_flag, dnstwist_data, dnstwist_error_flag = await self.scan_tools_dnstwist(hostname)
 
+        # Run Fail Case #3
+        if dnstwist_error_flag :
+
+            self.create_module_result()
+
+            return self.module_result_dictionary
+
+        # ( Run : True ) + ( Scan : True )
         if dnstwist_flag :
 
+            self.module_run = True
+            self.module_error = None
             self.module_result_flag = True
             self.module_result_data["reason"] = "Exist White List in \"dnstwist\" Result."
             self.module_result_data["reason_data"] = dnstwist_data
         
+        # ( Run : True ) + ( Scan : False )
         else :
 
+            self.module_run = True
+            self.module_error = None
             self.module_result_flag = False
             self.module_result_data["reason"] = "Not Exist Punycode in Host Name. / Not Exist White List in \"dnstwist\" Result."
-            self.module_result_data["reason_data"] = dnstwist_data
+            self.module_result_data["reason_data"] = None
         
         self.create_module_result()
 

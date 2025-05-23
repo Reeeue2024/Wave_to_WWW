@@ -33,8 +33,20 @@ class HtmlIframe(BaseModule) :
     IN : 
     OUT : 
     """
-    def scan(self) :
+    async def scan(self) :
         html_file_bs_object = self.engine_resource.get("html_file_bs_object")
+
+        # Run Fail Case #1
+        if not html_file_bs_object :
+
+            self.module_run = False
+            self.module_error = "[ ERROR ] Fail to Get HTML File from Engine."
+            self.module_result_flag = False
+            self.module_result_data = None
+
+            self.create_module_result()
+
+            return self.module_result_dictionary
 
         iframe_tag_list = html_file_bs_object.find_all("iframe", src = True)
         object_tag_list = html_file_bs_object.find_all("object", data = True)
@@ -42,17 +54,50 @@ class HtmlIframe(BaseModule) :
 
         all_tag_list = iframe_tag_list + object_tag_list + embed_tag_list
 
+        # Run Fail Case #2
         if not all_tag_list :
 
+            self.module_run = False
+            self.module_error = "[ ERROR ] Fail to Get \"iframe / object / embed\" Tag from HTML File."
             self.module_result_flag = False
-            self.module_result_data["reason"] = "Not Exist \"iframe / object / embed\" Tag in HTML File."
-            self.module_result_data["reason_data"] = ""
+            self.module_result_data = None
 
             self.create_module_result()
 
             # print(f"[ DEBUG ] Module Result Dictionary : {self.module_result_dictionary}")
 
             return self.module_result_dictionary
+
+        reason_list = []
+        reason_data_list = []
+
+        # To Do
+        hide_style_list = [
+            "display:none",
+            "opacity:0",
+            "visibility:hidden",
+            "height:0",
+            "width:0",
+            "max-height:0",
+            "max-width:0",
+            "transform:scale(0)",
+            "overflow:hidden",
+        ]
+
+        # To Do
+        overlay_style_list = [
+            ("width", "100%"),
+            ("height", "100%"),
+            ("max-width", "100%"),
+            ("max-height", "100%"),
+            ("top", "0"),
+            ("left", "0"),
+            ("bottom", "0"),
+            ("right", "0"),
+            ("inset", "0"),
+            ("position", "absolute"),
+            ("position", "fixed"),
+        ]
 
         for tag in all_tag_list :
 
@@ -67,74 +112,41 @@ class HtmlIframe(BaseModule) :
             tag_url = tag.get(attribute, "")
 
             if self.is_external_url(self.input_url, tag_url) :
-                
-                self.module_result_flag = True
-                self.module_result_data["reason"] = f"Exist External URL in \"{tag.name}\" Tag."
-                self.module_result_data["reason_data"] = tag_url
 
-                self.create_module_result()
-
-                # print(f"[ DEBUG ] Module Result Dictionary : {self.module_result_dictionary}")
-
-                return self.module_result_dictionary
+                reason_list.append(f"Exist External URL in \"{tag.name}\" Tag.")
+                reason_data_list.append(tag_url)
             
             tag_style = tag.get("style", "").lower()
 
             # [ 2-1. ] Hide Style
-            hide_style_list = [
-                "display:none",
-                "opacity:0",
-                "visibility:hidden",
-                "height:0",
-                "width:0",
-                "max-height:0",
-                "max-width:0",
-                "transform:scale(0)",
-                "overflow:hidden",
-            ]
-
             if any(hide_style in tag_style for hide_style in hide_style_list) :
 
-                self.module_result_flag = True
-                self.module_result_data["reason"] = f"Exist Hide Style in \"{tag.name}\" Tag."
-                self.module_result_data["reason_data"] = tag_style
-
-                self.create_module_result()
-
-                # print(f"[ DEBUG ] Module Result Dictionary : {self.module_result_dictionary}")
-
-                return self.module_result_dictionary
+                reason_list.append(f"Exist Hide Style in \"{tag.name}\" Tag.")
+                reason_data_list.append(tag_style)
 
             # [ 2-2. ] Overlay Style
-            overlay_style_list = [
-                ("width", "100%"),
-                ("height", "100%"),
-                ("max-width", "100%"),
-                ("max-height", "100%"),
-                ("top", "0"),
-                ("left", "0"),
-                ("bottom", "0"),
-                ("right", "0"),
-                ("inset", "0"),
-                ("position", "absolute"),
-                ("position", "fixed"),
-            ]
-
             if any(tag.get(attribute) == value for attribute, value in overlay_style_list) :
-            
-                self.module_result_flag = True
-                self.module_result_data["reason"] = "Exist Overlay Style in \"{tag.name}\" Tag.."
-                self.module_result_data["reason_data"] = tag_style
 
-                self.create_module_result()
+                reason_list.append(f"Exist Overlay Style in \"{tag.name}\" Tag.")
+                reason_data_list.append(tag_style)
+        
+        # ( Run : True ) + ( Scan : True )
+        if reason_list or reason_data_list :
 
-                # print(f"[ DEBUG ] Module Result Dictionary : {self.module_result_dictionary}")
+            self.module_run = True
+            self.module_error = None
+            self.module_result_flag = True
+            self.module_result_data["reason"] = reason_list
+            self.module_result_data["reason_data"] = reason_data_list
+        
+        # ( Run : True ) + ( Scan : False )
+        else :
 
-                return self.module_result_dictionary
-
-        self.module_result_flag = False
-        self.module_result_data["reason"] = "Not Exist Hide Style / Overlay Style in \"iframe / object / embed\" Tag."
-        self.module_result_data["reason_data"] = ""
+            self.module_run = True
+            self.module_error = None
+            self.module_result_flag = False
+            self.module_result_data["reason"] = "Not Exist Hide Style / Overlay Style in \"iframe / object / embed\" Tag."
+            self.module_result_data["reason_data"] = None
 
         self.create_module_result()
 

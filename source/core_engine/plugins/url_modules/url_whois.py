@@ -6,6 +6,8 @@ import sys
 from urllib.parse import urlparse
 from datetime import datetime, timedelta
 import whois
+import asyncio
+import json
 
 class UrlWhois(BaseModule) :
     def __init__(self, input_url) :
@@ -22,7 +24,7 @@ class UrlWhois(BaseModule) :
     IN : 
     OUT : 
     """
-    def get_whois_data(self) :
+    async def get_whois_data(self) :
         try :
             self.whois_data = whois.whois(self.hostname)
 
@@ -30,6 +32,39 @@ class UrlWhois(BaseModule) :
         
         except Exception as e :
             return False
+        
+        # try :
+        #     # [ 1. ] Create Asynchronous Process - "WHOIS"
+        #     process = await asyncio.create_subprocess_exec(
+        #         "python3", "tools/whois/whois_get.py", self.hostname,
+        #         stdout = asyncio.subprocess.PIPE,
+        #         stderr = asyncio.subprocess.PIPE
+        #     )
+
+        #     # [ 2. ] Get "Time-Out" From Engine
+        #     time_out = getattr(self, "time_out_module", 30)
+
+        #     # [ 3. ] Set "Time-Out"
+        #     try :
+        #         stdout, stderr = await asyncio.wait_for(process.communicate(), timeout = time_out)
+
+        #     except asyncio.TimeoutError :
+        #         process.kill()
+
+        #         await process.communicate()
+
+        #         return False
+
+        #     if process.returncode != 0 :
+
+        #         return False
+
+        #     self.whois_data = json.loads(stdout.decode())
+
+        #     return True
+        
+        # except Exception as e :
+        #     return False
 
     """
     IN : 
@@ -108,88 +143,85 @@ class UrlWhois(BaseModule) :
     IN : 
     OUT : 
     """
-    def scan(self) :
+    async def scan(self) :
+        # Run Fail Case #1
         if self.hostname is None :
 
+            self.module_run = False
+            self.module_error = "[ ERROR ] Fail to Get Host Name."
             self.module_result_flag = False
-            self.module_result_data["ERROR"] = "Fail to Get Host Name."
+            self.module_result_data = None
 
             self.create_module_result()
 
             return self.module_result_dictionary
         
-        whois_flag = self.get_whois_data()
+        whois_flag = await self.get_whois_data()
 
+        # Run Fail Case #2
         if not whois_flag :
-            
+
+            self.module_run = False
+            self.module_error = "[ ERROR ] Fail to Get WHOIS Data."
             self.module_result_flag = False
-            self.module_result_data["ERROR"] = "Fail to Get WHOIS Data."
+            self.module_result_data = None
 
             self.create_module_result()
 
             return self.module_result_dictionary
 
         reason_list = []
+        reason_data_list = []
 
-        # [ 1. ] Create Date
+        # [ 1. ] Recent Create
         create_date_flag, create_date_data = self.scan_create_date()
 
         if create_date_flag :
 
-            reason_dictionary = {}
-
-            reason_dictionary["reason"] = "Create Date is Recent."
-            reason_dictionary["reason_data"] = create_date_data
-
-            reason_list.append(reason_dictionary)
+            reason_list.append("Create Date is Recent.")
+            reason_data_list.append(create_date_data)
 
         # [ 2. ] Private Information
         private_information_flag, private_information_data = self.scan_private_information()
 
         if private_information_flag :
 
-            reason_dictionary = {}
-
-            reason_dictionary["reason"] = "Use Private Information."
-            reason_dictionary["reason_data"] = private_information_data
-
-            reason_list.append(reason_dictionary)
+            reason_list.append("Use Private Information.")
+            reason_data_list.append(private_information_data)
 
         # [ 3. ] Free TLD
         free_tld_flag, free_tld_data = self.scan_free_tld()
 
         if free_tld_flag :
 
-            reason_dictionary = {}
+            reason_list.append("Use Free TLD.")
+            reason_data_list.append(free_tld_data)
 
-            reason_dictionary["reason"] = "Use Free TLD."
-            reason_dictionary["reason_data"] = free_tld_data
-
-            reason_list.append(reason_dictionary)
-
-        # [ 4. ] Country
+        # [ 4. ] Different Country
         tld_whois_country_flag, tld_whois_country_data = self.scan_tld_whois_country()
 
         if tld_whois_country_flag :
 
-            reason_dictionary = {}
+            reason_list.append("Country ( TLD ) is Different with \"WHOIS\" Data.")
+            reason_data_list.append(tld_whois_country_data)
 
-            reason_dictionary["reason"] = "Country ( TLD ) is Different with \"WHOIS\"."
-            reason_dictionary["reason_data"] = tld_whois_country_data
-
-            reason_list.append(reason_dictionary)
-
+        # ( Run : True ) + ( Scan : True )
         if create_date_flag or private_information_flag or free_tld_flag or tld_whois_country_flag :
 
+            self.module_run = True
+            self.module_error = None
             self.module_result_flag = True
-            self.module_result_data["reason"] = " / ".join([reason_element["reason"] for reason_element in reason_list])
-            self.module_result_data["reason_data"] = " / ".join([str(reason_element["reason_data"]) for reason_element in reason_list])
+            self.module_result_data["reason"] = reason_list
+            self.module_result_data["reason_data"] = reason_data_list
 
+        # ( Run : True ) + ( Scan : False )
         else :
 
+            self.module_run = True
+            self.module_error = None
             self.module_result_flag = False
-            self.module_result_data["reason"] = ""
-            self.module_result_data["reason_data"] = ""
+            self.module_result_data["reason"] = "Not Exist \"Recent Create / Private Information / Free TLD / Diffeernt Country\" in \"WHOIS\" Data."
+            self.module_result_data["reason_data"] = None
 
         self.create_module_result()
 

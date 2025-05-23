@@ -4,7 +4,6 @@ from core_engine.plugins._base_module import BaseModule
 
 import sys
 from urllib.parse import urlparse
-import tldextract
 import tinycss2
 
 class HtmlStyle(BaseModule) :
@@ -51,88 +50,114 @@ class HtmlStyle(BaseModule) :
     IN : 
     OUT : 
     """
-    def scan(self) :
+    async def scan(self) :
         html_file_bs_object = self.engine_resource.get("html_file_bs_object")
+
+        # Run Fail Case #1
+        if not html_file_bs_object :
+
+            self.module_run = False
+            self.module_error = "[ ERROR ] Fail to Get HTML File from Engine."
+            self.module_result_flag = False
+            self.module_result_data = None
+
+            self.create_module_result()
+
+            return self.module_result_dictionary
         
         password_tag = html_file_bs_object.find("input", {"type" : "password"})
 
-        if password_tag :
+        # Run Fail Case #2
+        if not password_tag :
 
-            for style_element in html_file_bs_object.find_all(style = True) :
+            self.module_run = False
+            self.module_error = "[ ERROR ] Fail to Get \"Password Tag\" from HTML File."
+            self.module_result_flag = False
+            self.module_result_data = None
 
-                style = style_element.get("style", "").replace(" ", "").lower()
-                
-                # [ 1. ] Z Index
-                z_index = self.get_z_index(style_element)
+            self.create_module_result()
 
-                if z_index is not None and z_index >= 100 :
+            return self.module_result_dictionary
+        
+        reason_list = []
+        reason_data_list = []
 
-                    self.module_result_flag = True
-                    self.module_result_data["reason"] = "Exist High Z Index with Password Tag."
-                    self.module_result_data["reason_data"] = style_element
+        # To Do
+        hide_style_list = [
+            "display:none",
+            "opacity:0",
+            "visibility:hidden",
+            "height:0",
+            "width:0",
+            "max-height:0",
+            "max-width:0",
+            "transform:scale(0)",
+            "overflow:hidden",
+        ]
+        
+        # To Do
+        overlay_position_list = [
+            "position:absolute",
+            "position:fixed",
+        ]
+        
+        # To Do
+        overlay_size_list = [
+            "width:100%",
+            "height:100%",
+            "width:9999px",
+            "height:9999px",
+            "top:0",
+            "left:0",
+            "bottom:0",
+            "right:0",
+            "inset:0",
+        ]
 
-                    self.create_module_result()
+        for style_element in html_file_bs_object.find_all(style = True) :
 
-                    # print(f"[ DEBUG ] Module Result Dictionary : {self.module_result_dictionary}")
+            style = style_element.get("style", "").replace(" ", "").lower()
+            
+            # [ 1. ] Z Index
+            z_index = self.get_z_index(style_element)
 
-                    return self.module_result_dictionary
+            if z_index is not None and z_index >= 100 :
 
-                # [ 2. ] Hide Style
-                hide_style_list = [
-                    "display:none",
-                    "opacity:0",
-                    "visibility:hidden",
-                    "height:0",
-                    "width:0",
-                    "max-height:0",
-                    "max-width:0",
-                    "transform:scale(0)",
-                    "overflow:hidden",
-                ]
-                
-                if any(hide_style in style for hide_style in hide_style_list) :
-                    
-                    self.module_result_flag = True
-                    self.module_result_data["reason"] = "Exist Hide Style with Password Tag."
-                    self.module_result_data["reason_data"] = style
-                    
-                    self.create_module_result()
-                    
-                    return self.module_result_dictionary
+                reason_list.append("Exist High Z Index with Password Tag.")
+                reason_data_list.append(style_element)
 
-                # [ 3. ] Overlay Style
-                overlay_position_list = [
-                    "position:absolute",
-                    "position:fixed",
-                ]
-                overlay_size_list = [
-                    "width:100%",
-                    "height:100%",
-                    "width:9999px",
-                    "height:9999px",
-                    "top:0",
-                    "left:0",
-                    "bottom:0",
-                    "right:0",
-                    "inset:0",
-                ]
+            # [ 2. ] Hide Style
+            if any(hide_style in style for hide_style in hide_style_list) :
 
-                overlay_position_flag = any(overlay_position in style for overlay_position in overlay_position_list)
-                overlay_size_flag = any(overlay_size in style for overlay_size in overlay_size_list)
+                reason_list.append("Exist Hide Style with Password Tag.")
+                reason_data_list.append(style)
 
-                if overlay_position_flag and overlay_size_flag :
+            # [ 3. ] Overlay Style
+            overlay_position_flag = any(overlay_position in style for overlay_position in overlay_position_list)
+            overlay_size_flag = any(overlay_size in style for overlay_size in overlay_size_list)
 
-                    self.module_result_flag = True
-                    self.module_result_data["reason"] = "Exist Overlay Style with Password Tag."
-                    self.module_result_data["reason_data"] = style
+            if overlay_position_flag and overlay_size_flag :
 
-                    self.create_module_result()
-                    
-                    return self.module_result_dictionary
+                reason_list.append("Exist Overlay Style with Password Tag.")
+                reason_data_list.append(style)
 
-        self.module_result_flag = False
-        self.module_result_data["reason"] = "Not Exist Z Index / Hide Style / Overlay Style with Password Tag."
-        self.module_result_data["reason_data"] = ""
+        # ( Run : True ) + ( Scan : True )
+        if reason_list or reason_data_list :
+
+            self.module_run = True
+            self.module_error = None
+            self.module_result_flag = True
+            self.module_result_data["reason"] = reason_list
+            self.module_result_data["reason_data"] = reason_data_list
+
+        # ( Run : True ) + ( Scan : False )
+        else :
+
+            self.module_run = True
+            self.module_error = None
+            self.module_result_flag = False
+            self.module_result_data["reason"] = "Not Exist Z Index / Hide Style / Overlay Style with Password Tag."
+            self.module_result_data["reason_data"] = None
 
         self.create_module_result()
 

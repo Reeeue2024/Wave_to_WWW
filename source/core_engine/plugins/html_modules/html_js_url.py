@@ -3,8 +3,6 @@
 from core_engine.plugins._base_module import BaseModule
 
 import sys
-import requests
-from bs4 import BeautifulSoup
 from urllib.parse import urlparse
 import tldextract
 import re
@@ -45,9 +43,25 @@ class HtmlJsUrl(BaseModule) :
     IN : 
     OUT : 
     """
-    def scan(self) :
+    async def scan(self) :
         html_file_bs_object = self.engine_resource.get("html_file_bs_object")
 
+        # Run Fail Case #1
+        if not html_file_bs_object :
+
+            self.module_run = False
+            self.module_error = "[ ERROR ] Fail to Get HTML File from Engine."
+            self.module_result_flag = False
+            self.module_result_data = None
+
+            self.create_module_result()
+
+            return self.module_result_dictionary
+
+        reason_list = []
+        reason_data_list = []
+
+        # To Do
         event_attribute_list = ["onclick", "onmouseover", "onload", "onfocus"]
 
         # [ 1. ] Event Attribute
@@ -65,15 +79,8 @@ class HtmlJsUrl(BaseModule) :
 
                     if self.is_external_url(self.input_url, url_element) :
 
-                        self.module_result_flag = True
-                        self.module_result_data["reason"] = "External URL in Event Attribute."
-                        self.module_result_data["reason_data"] = url_element
-
-                        self.create_module_result()
-
-                        # print(f"[ DEBUG ] Module Result Dictionary : {self.module_result_dictionary}")
-
-                        return self.module_result_dictionary
+                        reason_list.append("External URL in Event Attribute.")
+                        reason_data_list.append(url_element)
 
         # [ 2. ] Script Tag
         for script_tag in html_file_bs_object.find_all("script") :
@@ -84,19 +91,26 @@ class HtmlJsUrl(BaseModule) :
 
                     if self.is_external_url(self.input_url, url_element) :
 
-                        self.module_result_flag = True
-                        self.module_result_data["reason"] = "External URL in Script Tag."
-                        self.module_result_data["reason_data"] = url_element
+                        reason_list.append("External URL in Script Tag.")
+                        reason_data_list.append(url_element)
 
-                        self.create_module_result()
+        # ( Run : True ) + ( Scan : True )
+        if reason_list or reason_data_list :
 
-                        # print(f"[ DEBUG ] Module Result Dictionary : {self.module_result_dictionary}")
+            self.module_run = True
+            self.module_error = None
+            self.module_result_flag = True
+            self.module_result_data["reason"] = reason_list
+            self.module_result_data["reason_data"] = reason_data_list
 
-                        return self.module_result_dictionary
+        # ( Run : True ) + ( Scan : False )
+        else :
 
-        self.module_result_flag = False
-        self.module_result_data["reason"] = "Not Exist External URL in Event Attribute and Script Tag."
-        self.module_result_data["reason_data"] = ""
+            self.module_run = True
+            self.module_error = None
+            self.module_result_flag = False
+            self.module_result_data["reason"] = "Not Exist External URL in Event Attribute and Script Tag."
+            self.module_result_data["reason_data"] = None
 
         self.create_module_result()
 

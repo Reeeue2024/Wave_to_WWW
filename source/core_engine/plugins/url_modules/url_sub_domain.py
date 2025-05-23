@@ -17,16 +17,19 @@ class UrlSubDomain(BaseModule) :
     IN : 
     OUT : 
     """
-    def scan(self) :
+    async def scan(self) :
         urlparse_result = urlparse(self.input_url)
 
         hostname = urlparse_result.hostname
         path = urlparse_result.path
 
+        # Run Fail Case #1
         if hostname is None :
 
+            self.module_run = False
+            self.module_error = "[ ERROR ] Fail to Get Host Name."
             self.module_result_flag = False
-            self.module_result_data["ERROR"] = "Fail to Get Host Name."
+            self.module_result_data = None
 
             self.create_module_result()
 
@@ -58,9 +61,11 @@ class UrlSubDomain(BaseModule) :
 
                 # print(f"[ DEBUG ] ( White List ) Brand : {brand}")
                 
-                # [ 2-1. ] Exist "White List : Brand" in "Sub Domain" => True
+                # [ 2-1. ] Exist "White List : Brand" in "Sub Domain" => ( Run : True ) + ( Scan : True )
                 if brand in subdomain :
 
+                    self.module_run = True
+                    self.module_error = None
                     self.module_result_flag = True
                     self.module_result_data["reason"] = "Exist White List Brand in Sub Domain."
                     self.module_result_data["reason_data"] = brand
@@ -74,9 +79,11 @@ class UrlSubDomain(BaseModule) :
                 # [ 2-2. ] Not Exist "White List : Brand" in "Sub Domain"
                 else :
 
-                    # [ 3-1. ] Exist "White List : Brand" in "Path" => True
+                    # [ 3-1. ] Exist "White List : Brand" in "Path" => ( Run : True ) + ( Scan : True )
                     if brand in path :
 
+                        self.module_run = True
+                        self.module_error = None
                         self.module_result_flag = True
                         self.module_result_data["reason"] = "Exist White List Brand in Path."
                         self.module_result_data["reason_data"] = brand
@@ -87,19 +94,23 @@ class UrlSubDomain(BaseModule) :
 
                         return self.module_result_dictionary
                     
-                    # [ 3-2. ] Not Exist "White List : Brand" in "Path" => False
+                    # [ 3-2. ] Not Exist "White List : Brand" in "Path" => ( Run : True ) + ( Scan : False )
                     else :
 
+                        self.module_run = True
+                        self.module_error = None
                         self.module_result_flag = False
                         self.module_result_data["reason"] = "Not Exist White List Brand in Sub Domain and Path."
-                        self.module_result_data["reason_data"] = ""
+                        self.module_result_data["reason_data"] = None
         
-        # [ 1-2. ] Exist "input_domain_suffix" in "White List : Domain + Suffix" => False
+        # [ 1-2. ] Exist "input_domain_suffix" in "White List : Domain + Suffix" => ( Run : True ) + ( Scan : False )
         else :
 
+            self.module_run = True
+            self.module_error = None
             self.module_result_flag = False
             self.module_result_data["reason"] = "Exist \"Domain + Suffix\" in White List."
-            self.module_result_data["reason_data"] = ""
+            self.module_result_data["reason_data"] = None
         
         self.create_module_result()
 

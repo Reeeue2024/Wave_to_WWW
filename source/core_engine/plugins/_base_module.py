@@ -13,8 +13,11 @@ class BaseModule :
         self.engine_resource = {}
 
         # ( Module ) Result
+        self.module_run = False
+        self.module_error = None
         self.module_result_flag = False
         self.module_result_data = {}
+
         self.module_result_dictionary = {}
     
     """
@@ -37,6 +40,8 @@ class BaseModule :
     """
     def create_module_result(self) :
         self.module_result_dictionary = {
+            "module_run" : self.module_run,
+            "module_error" : self.module_error,
             "module_result_flag" : self.module_result_flag,
             "module_result_data" : self.module_result_data,
         }
@@ -45,7 +50,7 @@ class BaseModule :
     IN : 
     OUT : 
     """
-    def scan(self) :
+    async def scan(self) :
         print()
     
         return self.module_result_dictionary

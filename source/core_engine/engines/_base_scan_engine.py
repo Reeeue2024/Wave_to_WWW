@@ -3,6 +3,8 @@
 import os
 import importlib
 import requests
+import asyncio
+import time
 from urllib.parse import urljoin
 from bs4 import BeautifulSoup
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -11,20 +13,29 @@ URL_MODULE_DIRECTORY_PATH = "core_engine.plugins.url_modules"
 HTML_MODULE_DIRECTORY_PATH = "core_engine.plugins.html_modules"
 JS_MODULE_DIRECTORY_PATH = "core_engine.plugins.js_modules"
 
+# 0 ~ 9 : Low Suspicious ( Not Malicious )
+# 10 ~ 19 : Suspicious
+# 20 ~ 29 : High Suspicious ( Malicious )
+LOW_SUSPICIOUS_WEIGHT = 0
+SUSPICIOUS_WEIGHT = 10
+HIGH_SUSPICIOUS_WEIGHT = 20
+
 # [ Default ]
-ENGINE_RESULT_SCORE = 100
+ENGINE_RESULT_SCORE = 60
 
 class BaseScanEngine :
-    def __init__(self, input_url) :
+    def __init__(self, input_url, time_out_module = 20) :
         self.input_url = input_url
         self.redirect_url = None
+
+        self.time_out_module = time_out_module
 
         self.engine_resource = {}
 
         # [ Default ] Module List
         self.module_path_list = [
             (URL_MODULE_DIRECTORY_PATH, "url_short"),
-            
+
             (URL_MODULE_DIRECTORY_PATH, "url_homograph"),
             (URL_MODULE_DIRECTORY_PATH, "url_http"),
             (URL_MODULE_DIRECTORY_PATH, "url_ssl"),
@@ -34,23 +45,22 @@ class BaseScanEngine :
             (HTML_MODULE_DIRECTORY_PATH, "html_form"),
             (HTML_MODULE_DIRECTORY_PATH, "html_iframe"),
             (HTML_MODULE_DIRECTORY_PATH, "html_js_url"),
+            (HTML_MODULE_DIRECTORY_PATH, "html_link"),
             (HTML_MODULE_DIRECTORY_PATH, "html_meta_refresh"),
             (HTML_MODULE_DIRECTORY_PATH, "html_resource_url"),
             (HTML_MODULE_DIRECTORY_PATH, "html_style"),
 
-            (JS_MODULE_DIRECTORY_PATH, "js_dom_static"),
-            (JS_MODULE_DIRECTORY_PATH, "js_external_static"),
-            (JS_MODULE_DIRECTORY_PATH, "js_hook_static"),
-            (JS_MODULE_DIRECTORY_PATH, "js_obfuscate_static"),
-            (JS_MODULE_DIRECTORY_PATH, "js_redirect_static"),
-            (JS_MODULE_DIRECTORY_PATH, "js_script_static"),
+            (JS_MODULE_DIRECTORY_PATH, "js_static_external"),
+            (JS_MODULE_DIRECTORY_PATH, "js_static_hook"),
+            (JS_MODULE_DIRECTORY_PATH, "js_static_obfuscate"),
+            (JS_MODULE_DIRECTORY_PATH, "js_static_redirect"),
+            (JS_MODULE_DIRECTORY_PATH, "js_static_script"),
 
-            (JS_MODULE_DIRECTORY_PATH, "js_dom_dynamic"),
-            (JS_MODULE_DIRECTORY_PATH, "js_external_dynamic"),
-            (JS_MODULE_DIRECTORY_PATH, "js_hook_dynamic"),
-            (JS_MODULE_DIRECTORY_PATH, "js_obfuscate_dynamic"),
-            (JS_MODULE_DIRECTORY_PATH, "js_redirect_dynamic"),
-            (JS_MODULE_DIRECTORY_PATH, "js_script_dynamic"),
+            (JS_MODULE_DIRECTORY_PATH, "js_dynamic_dom"),
+            (JS_MODULE_DIRECTORY_PATH, "js_dynamic_external"),
+            (JS_MODULE_DIRECTORY_PATH, "js_dynamic_hook"),
+            (JS_MODULE_DIRECTORY_PATH, "js_dynamic_obfuscate"),
+            (JS_MODULE_DIRECTORY_PATH, "js_dynamic_redirect"),
         ]
 
         self.module_instance_list = []
@@ -71,57 +81,55 @@ class BaseScanEngine :
             "HtmlForm",
             "HtmlIframe",
             "HtmlJsUrl",
+            "HtmlLink",
             "HtmlMetaRefresh",
             "HtmlResourceUrl",
             "HtmlStyle",
 
-            "JsDomStatic",
-            "JsExternalStatic",
-            "JsHookStatic",
-            "JsObfuscateStatic",
-            "JsRedirectStatic",
-            "JsScriptStatic",
+            "JsStaticExternal",
+            "JsStaticHook",
+            "JsStaticObfuscate",
+            "JsStaticRedirect",
+            "JsStaticScript",
 
-            "JsDomDynamic",
-            "JsExternalDynamic",
-            "JsHookDynamic",
-            "JsObfuscateDynamic",
-            "JsRedirectDynamic",
-            "JsScriptDynamic",
+            "JsDynamicDom",
+            "JsDynamicExternal",
+            "JsDynamicHook",
+            "JsDynamicObfuscate",
+            "JsDynamicRedirect",
         ]
 
         self.module_result_dictionary_list = []
 
         # [ Default ] Module Weight List
         self.module_weight_dictionary = {
-            "UrlShort": 10,
+            "UrlShort" : 10,
 
-            "UrlHomograph" : 10,
-            "UrlHttp" : 10,
-            "UrlSsl" : 10,
-            "UrlSubDomain" : 10,
-            "UrlWhois" : 10,
+            "UrlHomograph" : 28,
+            "UrlHttp" : 12,
+            "UrlSsl" : 12,
+            "UrlSubDomain" : 12,
+            "UrlWhois" : 4,
 
-            "HtmlForm" : 10,
-            "HtmlIframe" : 10,
-            "HtmlJsUrl" : 10,
-            "HtmlMetaRefresh" : 10,
-            "HtmlResourceUrl" : 10,
-            "HtmlStyle" : 10,
+            "HtmlForm" : 24,
+            "HtmlIframe" : 14,
+            "HtmlJsUrl" : 14,
+            "HtmlLink" : 14,
+            "HtmlMetaRefresh" : 24,
+            "HtmlResourceUrl" : 14,
+            "HtmlStyle" : 4,
 
-            "JsDomStatic" : 10,
-            "JsExternalStatic" : 10,
-            "JsHookStatic" : 10,
-            "JsObfuscateStatic" : 10,
-            "JsRedirectStatic" : 10,
-            "JsScriptStatic" : 10,
+            "JsStaticExternal" : 12,
+            "JsStaticHook" : 18,
+            "JsStaticObfuscate" : 14,
+            "JsStaticRedirect" : 18,
+            "JsStaticScript" : 12,
 
-            "JsDomDynamic" : 10,
-            "JsExternalDynamic" : 10,
-            "JsHookDynamic" : 10,
-            "JsObfuscateDynamic" : 10,
-            "JsRedirectDynamic" : 10,
-            "JsScriptDynamic" : 10,
+            "JsDynamicDom" : 18,
+            "JsDynamicExternal" : 14,
+            "JsDynamicHook" : 18,
+            "JsDynamicObfuscate" : 18,
+            "JsDynamicRedirect" : 28,
         }
 
         # ( Engine ) Result
@@ -142,7 +150,10 @@ class BaseScanEngine :
             headers = {
                 "User-Agent" : (
                     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
-                )
+                ),
+                "Accept-Language" : "en-US, en;q=0.9",
+                "Accept" : "text/html, application/xhtml+xml, application/xml;q=0.9, image/webp, */*;q=0.8",
+                "Connection" : "keep-alive",
             }
 
             response = requests.get(self.input_url, headers = headers, timeout = 5)
@@ -164,8 +175,10 @@ class BaseScanEngine :
                         js_file = requests.get(js_file_url, timeout = 5).text
 
                         js_file_dictionary[js_file_url] = js_file
+                    
                     except :
                         continue
+                
                 else :
 
                     if script_tag.string :
@@ -176,9 +189,22 @@ class BaseScanEngine :
             self.engine_resource["html_file_script_tag_list"] = html_file_script_tag_list
             self.engine_resource["js_file_dictionary_list"] = js_file_dictionary
 
-        except Exception as e :
-            print(f"[ ERROR ] Fail to Set Engine Reousrce : {self.input_url}")
+        except requests.exceptions.HTTPError as e :
+            print(f"[ ERROR ] Fail to Set Engine Resource ( Get HTML ) - HTTP ERROR : {self.input_url}")
             print(f"{e}")
+        
+        except requests.exceptions.RequestException as e :
+            print(f"[ ERROR ] Fail to Set Engine Resource ( Get HTML ) - Request ERROR : {self.input_url}")
+            print(f"{e}")
+        
+        except Exception as e :
+            print(f"[ ERROR ] Fail to Set Engine Resource : {self.input_url}")
+            print(f"{e}")
+        
+        finally :
+            self.engine_resource.setdefault("html_file_bs_object", None)
+            self.engine_resource.setdefault("html_file_script_tag_list", None)
+            self.engine_resource.setdefault("js_file_dictionary_list", None)
     
     """
     IN : 
@@ -228,27 +254,108 @@ class BaseScanEngine :
     IN : 
     OUT : 
     """
+    def run_a_module_with_time_out(self, module_instance) :
+        event_loop = asyncio.new_event_loop()
+
+        asyncio.set_event_loop(event_loop)
+
+        start_time = time.time()
+
+        try :
+            run_result = event_loop.run_until_complete(
+                asyncio.wait_for(module_instance.scan(), timeout = self.time_out_module)
+            )
+
+            return {
+                "run_status" : "Success",
+                "run_time" : round(time.time() - start_time, 2),
+                "run_result" : run_result,
+            }
+        
+        # ERROR - Time Out : O
+        except asyncio.TimeoutError :
+            return {
+                "run_status" : "Time Out",
+                "run_time" : round(time.time() - start_time, 2),
+                "run_result" : None,
+                "run_error" : "[ ERROR ] Time Out",
+
+            }
+        
+        # ERROR - Time Out : X
+        except Exception as e :
+            return {
+                "run_status" : "Error",
+                "run_time" : round(time.time() - start_time, 2),
+                "run_result" : None,
+                "run_error" : f"[ ERROR ] {e}",
+            }
+        
+        finally :
+            try:
+                task_list = asyncio.all_tasks(event_loop)
+
+                for task in task_list :
+
+                    task.cancel()
+
+                event_loop.run_until_complete(asyncio.gather(*task_list, return_exceptions = True))
+
+            except Exception as e :
+                print(f"[ ERROR ] Fail to Clean Task.")
+                print(f"{e}")
+
+            finally :
+                event_loop.close()
+    
+    """
+    IN : 
+    OUT : 
+    """
     def run_a_module(self, module_instance) :
         module_class_name = module_instance.__class__.__name__
 
         try :
-            module_result_dictionary = module_instance.scan()
+            run_a_module_with_time_out_result = self.run_a_module_with_time_out(module_instance)
+            
+            module_run_status = run_a_module_with_time_out_result["run_status"]
+            module_run_time = run_a_module_with_time_out_result["run_time"]
 
-            self.module_result_dictionary_list.append({
-                "module_class_name" : module_class_name,
-                "module_run" : True,
-                "module_weight" : self.module_weight_dictionary.get(module_class_name),
-                "module_result_flag" : module_result_dictionary.get("module_result_flag"),
-                "module_result_data" : module_result_dictionary.get("module_result_data"),
-            })
+            if module_run_status == "Success" :
 
-            print(f"  [ + ]  {module_class_name:<25} ( Run Module - Success )")
+                module_result_dictionary = run_a_module_with_time_out_result["run_result"]
+
+                self.module_result_dictionary_list.append({
+                    "module_class_name" : module_class_name,
+                    "module_weight" : self.module_weight_dictionary.get(module_class_name),
+                    "module_run" : True,
+                    "module_result_flag" : module_result_dictionary.get("module_result_flag"),
+                    "module_result_data" : module_result_dictionary.get("module_result_data"),
+                })
+
+                print(f"  [ + ]  {module_class_name:<25} ( Run Module - {module_run_status} : {module_run_time}s )")
+
+            else :
+
+                self.module_result_dictionary_list.append({
+                    "module_class_name" : module_class_name,
+                    "module_weight" : self.module_weight_dictionary.get(module_class_name),
+                    "module_run" : False,
+                    "module_error" : run_a_module_with_time_out_result.get("run_error"),
+                    "module_result_flag" : False,
+                    "module_result_data" : None,
+                })
+
+                print(f"  [ ! ]  {module_class_name:<25} ( Run Module - {module_run_status} : {module_run_time}s )")
 
         except Exception as e :
             self.module_result_dictionary_list.append({
                 "module_class_name" : module_class_name,
+                "module_weight" : self.module_weight_dictionary.get(module_class_name),
                 "module_run" : False,
-                "module_error" : {e},
+                "module_error" : f"{e}",
+                "module_result_flag" : False,
+                "module_result_data" : None,
             })
 
             print(f"  [ ! ]  {module_class_name:<25} ( Run Module - Fail )")
@@ -278,7 +385,11 @@ class BaseScanEngine :
 
                     if redirect_url and self.input_url != redirect_url :
 
+                        print(f"  ( Redirect By Short URL ) Before URL : {self.input_url}")
+
                         self.input_url = redirect_url
+
+                        print(f"  ( Redirect By Short URL ) After URL : {self.input_url}")
 
     """
     IN : 
@@ -327,31 +438,73 @@ class BaseScanEngine :
         # print("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
         # print(" [ Kernel Service - Engine ] Create Engine Result ...")
         # print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
+
+        run_true_score = 0
+        run_true_weight = 0
         
         module_result_dictionary_list = []
+
+        high_suspicious_flag = False
+
+        engine_result_rate_score_weight = 0.0
         
         for module_result_dictionary in self.module_result_dictionary_list :
 
-            module_score = 0
+            module_weight = 0
 
-            if module_result_dictionary["module_result_flag"] :
+            try :
 
-                module_score = module_result_dictionary["module_weight"]
+                if module_result_dictionary.get("module_run") :
 
-                self.engine_result_score += module_score
+                    module_weight = module_result_dictionary.get("module_weight", 0)
 
-            module_result_dictionary_list.append({
-                "module_score" : module_score,
-                **module_result_dictionary,
-            })
+                    if module_result_dictionary.get("module_result_flag") :
+
+                        run_true_score += module_weight
+
+                        if module_weight >= HIGH_SUSPICIOUS_WEIGHT :
+    
+                            high_suspicious_flag = True
+                    
+                    run_true_weight += module_weight
+
+            except Exception as e :
+                print(f"[ ERROR ] Fail to Get Result from Module : \"{module_result_dictionary.get('module_class_name')}\"")
+                print(f"{e}")
+
+                module_weight = 0
+                    
+            try :
+                module_result_dictionary_list.append({
+                    "module_score" : module_weight,
+                    **module_result_dictionary,
+                })
+
+            except Exception as e :
+                print(f"[ ERROR ] Fail to Set Result Dictionary from Module : \"{module_result_dictionary.get('module_class_name')}\"")
+                print(f"{e}")
+    
+        engine_result_rate_score_weight = run_true_score / run_true_weight
+
+        self.engine_result_score = round(engine_result_rate_score_weight * 100)
         
-        if self.engine_result_score >= ENGINE_RESULT_SCORE :
+        if high_suspicious_flag :
+            
+            self.engine_result_flag = True
+
+        elif self.engine_result_score >= ENGINE_RESULT_SCORE :
 
             self.engine_result_flag = True
+
+        else :
+            
+            self.engine_result_flag = False
         
         self.engine_result_dictionary = {
             "engine_result_flag" : self.engine_result_flag,
             "engine_result_score" : self.engine_result_score,
+            "engine_result_run_true_score" : run_true_score,
+            "engine_result_run_true_weight" : run_true_weight,
             "module_result_dictionary_list" : module_result_dictionary_list,
         }
 

@@ -56,25 +56,34 @@ class UrlHttp(BaseModule) :
     IN : 
     OUT : 
     """
-    def scan(self) :
+    async def scan(self) :
         url_with_protocol = self.get_url_protocol()
 
+        # Run Fail Case #1
         if url_with_protocol is None :
 
+            self.module_run = False
+            self.module_error = "[ ERROR ] Fail to Get HTTP / HTTPS Protocol."
             self.module_result_flag = False
-            self.module_result_data["ERROR"] = "Fail to Get HTTP / HTTPS Protocol."
+            self.module_result_data = None
 
+        # ( Run : True ) + ( Scan : True )
         elif url_with_protocol.startswith("http://") :
 
+            self.module_run = True
+            self.module_error = None
             self.module_result_flag = True
             self.module_result_data["reason"] = "Use HTTP."
             self.module_result_data["reason_data"] = url_with_protocol
 
+        # ( Run : True ) + ( Scan : False )
         elif url_with_protocol.startswith("https://") :
 
+            self.module_run = True
+            self.module_error = None
             self.module_result_flag = False
             self.module_result_data["reason"] = "Use HTTPS."
-            self.module_result_data["reason_data"] = url_with_protocol
+            self.module_result_data["reason_data"] = None
 
         self.create_module_result()
 
