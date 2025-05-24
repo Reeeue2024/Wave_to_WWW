@@ -1,9 +1,9 @@
 # [ Kernel ] Kernel Service - Engine : full_scan_engine.py
 
-from core_engine.engines._base_scan_engine import BaseScanEngine, URL_MODULE_DIRECTORY_PATH, HTML_MODULE_DIRECTORY_PATH, JS_MODULE_DIRECTORY_PATH
+from core_engine.engines._base_scan_engine import BaseScanEngine, URL_MODULE_DIRECTORY_PATH, HTML_MODULE_DIRECTORY_PATH, JS_MODULE_DIRECTORY_PATH, AI_MODULE_DIRECTORY_PATH
 
 # [ Full ]
-ENGINE_RESULT_SCORE = 60
+ENGINE_RESULT_SCORE = 70
 
 class FullScanEngine(BaseScanEngine) :
     def __init__(self, input_url) :
@@ -12,6 +12,8 @@ class FullScanEngine(BaseScanEngine) :
         # [ Full ] Module List
         self.module_path_list = [
             (URL_MODULE_DIRECTORY_PATH, "url_short"),
+
+            (AI_MODULE_DIRECTORY_PATH, "ai_url"),
 
             (URL_MODULE_DIRECTORY_PATH, "url_homograph"),
             (URL_MODULE_DIRECTORY_PATH, "url_http"),
@@ -47,6 +49,8 @@ class FullScanEngine(BaseScanEngine) :
 
         # [ Full ] Module Order List - Asynchronous
         self.module_order_list_asynchronous = [
+            "AiUrl",
+
             "UrlHomograph",
             "UrlHttp",
             "UrlSsl",
@@ -78,6 +82,8 @@ class FullScanEngine(BaseScanEngine) :
         self.module_weight_dictionary = {
             "UrlShort" : 5, # LOW
 
+            "AiUrl": 0, # Special ( Dynamic )
+
             "UrlHomograph" : 20, # HIGH
             "UrlHttp" : 5, # LOW
             "UrlSsl" : 15, # NOT LOW + NOT HIGH #2
@@ -102,5 +108,5 @@ class FullScanEngine(BaseScanEngine) :
             "JsDynamicExternal" : 15, # NOT LOW + NOT HIGH #2
             "JsDynamicHook" : 15, # NOT LOW + NOT HIGH #2
             "JsDynamicObfuscate" : 20, # HIGH
-            "JsDynamicRedirect" : 20, # HIGH
+            "JsDynamicRedirect" : 15, # NOT LOW + NOT HIGH #2
         }

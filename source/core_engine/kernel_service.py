@@ -85,15 +85,15 @@ class KernelService :
         print(" [ Kernel Service ] Send Response ...")
         print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
 
-        print(f"  [ + ]  Input URL : {self.kernel_result_dictionary.get("input_url")}")
-        print(f"  [ + ]  Engine Type : {self.kernel_result_dictionary.get("engine_type")}")
-        print(f"  [ + ]  Engine Result Flag : {self.kernel_result_dictionary.get("engine_result_flag")}")
-        print(f"  [ + ]  Engine Result Score : {self.kernel_result_dictionary.get("engine_result_score")}")
-        print(f"  [ + ]  Engine Result Run True Score : {self.kernel_result_dictionary.get("engine_result_run_true_score")}")
-        print(f"  [ + ]  Engine Result Run True Weight : {self.kernel_result_dictionary.get("engine_result_run_true_weight")}")
+        print(f"  [ + ]  Input URL : {self.kernel_result_dictionary.get('input_url')}")
+        print(f"  [ + ]  Engine Type : {self.kernel_result_dictionary.get('engine_type')}")
+        print(f"  [ + ]  Engine Result Flag : {self.kernel_result_dictionary.get('engine_result_flag')}")
+        print(f"  [ + ]  Engine Result Score : {self.kernel_result_dictionary.get('engine_result_score')}")
+        print(f"  [ + ]  Engine Result Run True Score : {self.kernel_result_dictionary.get('engine_result_run_true_score')}")
+        print(f"  [ + ]  Engine Result Run True Weight : {self.kernel_result_dictionary.get('engine_result_run_true_weight')}")
         print(f"  [ + ]  Module Result Dictionary List : ( ... )")
-        print(f"  [ + ]  ERROR Flag : {self.kernel_result_dictionary.get("error_flag")}")
-        print(f"  [ + ]  ERROR Type : {self.kernel_result_dictionary.get("error_type")}")
+        print(f"  [ + ]  ERROR Flag : {self.kernel_result_dictionary.get('error_flag')}")
+        print(f"  [ + ]  ERROR Type : {self.kernel_result_dictionary.get('error_type')}")
 
         print()
 

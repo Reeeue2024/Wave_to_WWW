@@ -4,6 +4,7 @@ from pymongo import MongoClient
 from pymongo.server_api import ServerApi
 from dotenv import load_dotenv
 import os
+import pickle
 
 class KernelResource :
     def __init__(self) :
@@ -73,6 +74,28 @@ class KernelResource :
                 print(f"  [ ! ]  {resource_name:<25} ( Load Resource - Fail )")
                 print(f"{e}")
         
+        try :
+            base_directory = os.path.dirname(os.path.abspath(__file__))
+            pkl_file_path = os.path.join(base_directory, "plugins", "ai_modules", "ai_model", "sprint4_phase3.pkl")
+
+            if not os.path.exists(pkl_file_path) :
+
+                raise FileNotFoundError(f"[ ERROR ] Fail to Get AI Model File : {pkl_file_path}")
+
+            with open(pkl_file_path, "rb") as f :
+
+                bundle = pickle.load(f)
+
+            self.resource_dictionary["ai_model_bundle"] = bundle
+
+            print(f"  [ + ]  {"ai_model_bundle":<25} ( Load Resource - Success )")
+
+        except Exception as e :
+            self.resource_dictionary["ai_model_bundle"] = None
+            
+            print(f"  [ ! ]  {"ai_model_bundle":<25} ( Load Resource - Fail )")
+            print(f"{e}")
+
         print()
 
     """

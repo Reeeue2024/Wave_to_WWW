@@ -12,6 +12,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 URL_MODULE_DIRECTORY_PATH = "core_engine.plugins.url_modules"
 HTML_MODULE_DIRECTORY_PATH = "core_engine.plugins.html_modules"
 JS_MODULE_DIRECTORY_PATH = "core_engine.plugins.js_modules"
+AI_MODULE_DIRECTORY_PATH = "core_engine.plugins.ai_modules"
 
 # 0 ~ 9 : Low Suspicious ( Not Malicious )
 # 10 ~ 19 : Suspicious
@@ -21,7 +22,7 @@ SUSPICIOUS_WEIGHT = 10
 HIGH_SUSPICIOUS_WEIGHT = 20
 
 # [ Default ]
-ENGINE_RESULT_SCORE = 60
+ENGINE_RESULT_SCORE = 70
 
 class BaseScanEngine :
     def __init__(self, input_url, time_out_module = 20) :
@@ -34,14 +35,20 @@ class BaseScanEngine :
 
         # [ Default ] Module List
         self.module_path_list = [
+            # Synchronous
             (URL_MODULE_DIRECTORY_PATH, "url_short"),
 
+            # Asynchronous #1 - AI
+            (AI_MODULE_DIRECTORY_PATH, "ai_url"),
+
+            # Asynchronous #2 - URL
             (URL_MODULE_DIRECTORY_PATH, "url_homograph"),
             (URL_MODULE_DIRECTORY_PATH, "url_http"),
             (URL_MODULE_DIRECTORY_PATH, "url_ssl"),
             (URL_MODULE_DIRECTORY_PATH, "url_sub_domain"),
             (URL_MODULE_DIRECTORY_PATH, "url_whois"),
 
+            # Asynchronous #3 - HTML
             (HTML_MODULE_DIRECTORY_PATH, "html_form"),
             (HTML_MODULE_DIRECTORY_PATH, "html_iframe"),
             (HTML_MODULE_DIRECTORY_PATH, "html_js_url"),
@@ -50,12 +57,14 @@ class BaseScanEngine :
             (HTML_MODULE_DIRECTORY_PATH, "html_resource_url"),
             (HTML_MODULE_DIRECTORY_PATH, "html_style"),
 
+            # Asynchronous #4 - JS Static
             (JS_MODULE_DIRECTORY_PATH, "js_static_external"),
             (JS_MODULE_DIRECTORY_PATH, "js_static_hook"),
             (JS_MODULE_DIRECTORY_PATH, "js_static_obfuscate"),
             (JS_MODULE_DIRECTORY_PATH, "js_static_redirect"),
             (JS_MODULE_DIRECTORY_PATH, "js_static_script"),
 
+            # Asynchronous #5 - JS Dynamic
             (JS_MODULE_DIRECTORY_PATH, "js_dynamic_dom"),
             (JS_MODULE_DIRECTORY_PATH, "js_dynamic_external"),
             (JS_MODULE_DIRECTORY_PATH, "js_dynamic_hook"),
@@ -72,6 +81,8 @@ class BaseScanEngine :
 
         # [ Default ] Module Order List - Asynchronous
         self.module_order_list_asynchronous = [
+            "AiUrl",
+
             "UrlHttp",
             "UrlSsl",
             "UrlHomograph",
@@ -104,6 +115,8 @@ class BaseScanEngine :
         # [ Default ] Module Weight List
         self.module_weight_dictionary = {
             "UrlShort" : 10,
+
+            "AiUrl": 0, # Special ( Dynamic )
 
             "UrlHomograph" : 28,
             "UrlHttp" : 12,
@@ -447,26 +460,47 @@ class BaseScanEngine :
         high_suspicious_flag = False
 
         engine_result_rate_score_weight = 0.0
+
+        ai_run_true_flag = False
+        ai_scan_true_flag = False
+
+        ai_run_true_score = 0
+        ai_run_true_weight = 0
         
         for module_result_dictionary in self.module_result_dictionary_list :
 
             module_weight = 0
 
+            module_class_name = module_result_dictionary.get("module_class_name")
+
             try :
+                # AI
+                if module_class_name == "AiUrl" :
 
-                if module_result_dictionary.get("module_run") :
+                    if module_result_dictionary.get("module_run") :
 
-                    module_weight = module_result_dictionary.get("module_weight", 0)
-
+                        ai_run_true_flag = True
+                    
                     if module_result_dictionary.get("module_result_flag") :
 
-                        run_true_score += module_weight
+                        ai_scan_true_flag = True
+                
+                # ETC ( Not AI )
+                else : 
 
-                        if module_weight >= HIGH_SUSPICIOUS_WEIGHT :
-    
-                            high_suspicious_flag = True
-                    
-                    run_true_weight += module_weight
+                    if module_result_dictionary.get("module_run") :
+
+                        module_weight = module_result_dictionary.get("module_weight", 0)
+
+                        if module_result_dictionary.get("module_result_flag") :
+
+                            run_true_score += module_weight
+
+                            if module_weight >= HIGH_SUSPICIOUS_WEIGHT :
+        
+                                high_suspicious_flag = True
+                        
+                        run_true_weight += module_weight
 
             except Exception as e :
                 print(f"[ ERROR ] Fail to Get Result from Module : \"{module_result_dictionary.get('module_class_name')}\"")
@@ -483,8 +517,29 @@ class BaseScanEngine :
             except Exception as e :
                 print(f"[ ERROR ] Fail to Set Result Dictionary from Module : \"{module_result_dictionary.get('module_class_name')}\"")
                 print(f"{e}")
-    
-        engine_result_rate_score_weight = run_true_score / run_true_weight
+
+        # AI - Run - True
+        if ai_run_true_flag :
+
+            # AI : Run - True + Scan - True
+            if ai_scan_true_flag :
+
+                ai_run_true_score = run_true_weight
+                ai_run_true_weight = run_true_weight
+            
+            # AI : Run - True + Scan - False
+            else :
+
+                ai_run_true_score = 0
+                ai_run_true_weight = run_true_weight
+
+        # AI - Run - False
+        else :
+
+            ai_run_true_score = 0
+            ai_run_true_weight = 0
+        
+        engine_result_rate_score_weight = ( run_true_score + ai_run_true_score ) / ( run_true_weight + ai_run_true_weight )
 
         self.engine_result_score = round(engine_result_rate_score_weight * 100)
         

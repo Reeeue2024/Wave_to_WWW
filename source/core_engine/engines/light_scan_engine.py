@@ -1,9 +1,9 @@
 # [ Kernel ] Kernel Service - Engine : light_scan_engine.py
 
-from core_engine.engines._base_scan_engine import BaseScanEngine, URL_MODULE_DIRECTORY_PATH, HTML_MODULE_DIRECTORY_PATH, JS_MODULE_DIRECTORY_PATH
+from core_engine.engines._base_scan_engine import BaseScanEngine, URL_MODULE_DIRECTORY_PATH, HTML_MODULE_DIRECTORY_PATH, JS_MODULE_DIRECTORY_PATH, AI_MODULE_DIRECTORY_PATH
 
 # [ Light ]
-ENGINE_RESULT_SCORE = 60
+ENGINE_RESULT_SCORE = 70
 
 class LightScanEngine(BaseScanEngine) :
     def __init__(self, input_url) :
@@ -12,6 +12,8 @@ class LightScanEngine(BaseScanEngine) :
         # [ Light ] Module List
         self.module_path_list = [
             (URL_MODULE_DIRECTORY_PATH, "url_short"),
+
+            (AI_MODULE_DIRECTORY_PATH, "ai_url"),
 
             # (URL_MODULE_DIRECTORY_PATH, "url_homograph"),
             (URL_MODULE_DIRECTORY_PATH, "url_http"),
@@ -47,6 +49,8 @@ class LightScanEngine(BaseScanEngine) :
 
         # [ Light ] Module Order List - Asynchronous
         self.module_order_list_asynchronous = [
+            "AiUrl",
+
             # "UrlHomograph",
             "UrlHttp",
             # "UrlSsl",
@@ -77,6 +81,8 @@ class LightScanEngine(BaseScanEngine) :
         # [ Light ] Module Weight List
         self.module_weight_dictionary = {
             "UrlShort" : 10,
+
+            "AiUrl": 0, # Special ( Dynamic )
 
             # "UrlHomograph" : 10,
             "UrlHttp" : 10,

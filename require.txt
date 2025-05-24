@@ -21,3 +21,5 @@ python-whois
 beautifulsoup4
 tinycss2
 urllib3
+pandas
+scikit-learn
