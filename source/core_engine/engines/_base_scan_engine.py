@@ -25,13 +25,23 @@ HIGH_SUSPICIOUS_WEIGHT = 20
 ENGINE_RESULT_SCORE = 70
 
 class BaseScanEngine :
-    def __init__(self, input_url, time_out_module = 20) :
+    def __init__(self, input_url) :
         self.input_url = input_url
         self.redirect_url = None
 
-        self.time_out_module = time_out_module
+        self.request_headers = {
+            "User-Agent" : (
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+            ),
+            "Accept-Language" : "en-US, en;q=0.9",
+            "Accept" : "text/html, application/xhtml+xml, application/xml;q=0.9, image/webp, */*;q=0.8",
+            "Connection" : "keep-alive",
+        }
 
         self.engine_resource = {}
+
+        # Time Out
+        self.time_out_module = 20
 
         # [ Default ] Module List
         self.module_path_list = [
@@ -154,66 +164,101 @@ class BaseScanEngine :
     IN : 
     OUT : 
     """
+    def get_js_file(self, js_file_url) :
+        start_time = time.time()
+
+        try :
+            response = requests.get(js_file_url, headers = self.request_headers, timeout = 5)
+            
+            response.raise_for_status()
+
+            js_file = response.text
+
+            print(f"  [ + ]  {"Get JS File - Success":<25} ( {round(time.time() - start_time, 2)}s : {js_file_url} )")
+
+            return js_file_url, js_file
+        
+        except Exception as e :
+
+            print(f"  [ ! ]  {"Get JS File - Fail":<25} ( {round(time.time() - start_time, 2)}s : {js_file_url} )")
+            print(f"{e}")
+
+            return js_file_url, None
+    
+    """
+    IN : 
+    OUT : 
+    """
     def set_engine_resource(self) :
         print("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
         print(" [ Kernel Service - Engine ] Set Engine Resource ...")
         print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
 
-        try :
-            headers = {
-                "User-Agent" : (
-                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
-                ),
-                "Accept-Language" : "en-US, en;q=0.9",
-                "Accept" : "text/html, application/xhtml+xml, application/xml;q=0.9, image/webp, */*;q=0.8",
-                "Connection" : "keep-alive",
-            }
+        start_time = time.time()
 
-            response = requests.get(self.input_url, headers = headers, timeout = 5)
+        try :
+            response = requests.get(self.input_url, headers = self.request_headers, timeout = 5)
 
             response.raise_for_status()
 
             bs = BeautifulSoup(response.text, "html.parser")
 
+            print(f"  [ + ]  {"Get HTML File - Success":<25} ( {round(time.time() - start_time, 2)}s : {self.input_url} )")
+
             html_file_script_tag_list = []
             js_file_dictionary = {}
 
-            for script_tag in bs.find_all("script") :
+            script_tag_list = bs.find_all("script")
+
+            js_file_url_list = []
+
+            for script_tag in script_tag_list :
 
                 if script_tag.get("src") :
 
                     js_file_url = urljoin(self.input_url, script_tag["src"])
-
-                    try :
-                        js_file = requests.get(js_file_url, timeout = 5).text
-
-                        js_file_dictionary[js_file_url] = js_file
-                    
-                    except :
-                        continue
+                    js_file_url_list.append(js_file_url)
                 
                 else :
 
                     if script_tag.string :
 
                         html_file_script_tag_list.append(script_tag.string.strip())
+
+            # Asynchronous : Get JS File
+            with ThreadPoolExecutor() as executor :
+
+                work_list = []
+
+                for js_file_url in js_file_url_list :
+
+                    work_list.append(executor.submit(self.get_js_file, js_file_url))
+
+                for work in as_completed(work_list) :
+
+                    js_file_url, js_file = work.result()
+
+                    if js_file :
+            
+                        js_file_dictionary[js_file_url] = js_file    
                 
             self.engine_resource["html_file_bs_object"] = bs
             self.engine_resource["html_file_script_tag_list"] = html_file_script_tag_list
             self.engine_resource["js_file_dictionary_list"] = js_file_dictionary
 
-        except requests.exceptions.HTTPError as e :
-            print(f"[ ERROR ] Fail to Set Engine Resource ( Get HTML ) - HTTP ERROR : {self.input_url}")
-            print(f"{e}")
+        # except requests.exceptions.HTTPError as e :
+        #     print(f"[ ERROR ] Fail to Set Engine Resource ( Get HTML ) - HTTP ERROR : {self.input_url}")
+        #     print(f"{e}")
         
-        except requests.exceptions.RequestException as e :
-            print(f"[ ERROR ] Fail to Set Engine Resource ( Get HTML ) - Request ERROR : {self.input_url}")
-            print(f"{e}")
+        # except requests.exceptions.RequestException as e :
+        #     print(f"[ ERROR ] Fail to Set Engine Resource ( Get HTML ) - Request ERROR : {self.input_url}")
+        #     print(f"{e}")
         
         except Exception as e :
-            print(f"[ ERROR ] Fail to Set Engine Resource : {self.input_url}")
+            print(f"  [ ! ]  {"Get HTML File - Fail":<25} ( {round(time.time() - start_time, 2)}s : {self.input_url} )")
             print(f"{e}")
         
+        # Not Key - Set Default
         finally :
             self.engine_resource.setdefault("html_file_bs_object", None)
             self.engine_resource.setdefault("html_file_script_tag_list", None)

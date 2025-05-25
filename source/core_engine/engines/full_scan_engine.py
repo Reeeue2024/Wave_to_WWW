@@ -9,6 +9,9 @@ class FullScanEngine(BaseScanEngine) :
     def __init__(self, input_url) :
         super().__init__(input_url)
 
+        # Time Out
+        self.time_out_module = 20
+
         # [ Full ] Module List
         self.module_path_list = [
             (URL_MODULE_DIRECTORY_PATH, "url_short"),

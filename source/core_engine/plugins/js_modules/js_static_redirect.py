@@ -5,6 +5,7 @@ from core_engine.plugins._base_module import BaseModule
 import sys
 import tldextract
 import re
+from concurrent.futures import ThreadPoolExecutor, wait, TimeoutError as FutureTimeoutError
 
 class JsStaticRedirect(BaseModule) :
     def __init__(self, input_url) :
@@ -29,6 +30,13 @@ class JsStaticRedirect(BaseModule) :
 
         return one_domain_suffix != two_domain_suffix
 
+    """
+    IN : 
+    OUT : 
+    """
+    def run_pattern(self, pattern, code) :
+        return re.search(pattern, code, re.IGNORECASE | re.DOTALL)
+    
     """
     IN : 
     OUT : 
@@ -83,38 +91,53 @@ class JsStaticRedirect(BaseModule) :
             },
         ]
 
-        for pattern_element in pattern_list :
+        reason_list = []
+        reason_data_list = []
 
-            pattern_result = re.search(pattern_element["pattern"], all_js_code, re.IGNORECASE | re.DOTALL)
+        with ThreadPoolExecutor() as executor :
 
-            if pattern_result :
+            future_to_reason = {}
 
-                redirect_url = pattern_result.group("url").strip()
-                redirect_domain_suffix = self.get_domain_suffix(redirect_url)
+            for pattern_element in pattern_list :
 
-                different_domain_suffix_flag = self.scan_different_domain_suffix(input_domain_suffix, redirect_domain_suffix)
+                future = executor.submit(self.run_pattern, pattern_element["pattern"], all_js_code)
 
-                if different_domain_suffix_flag :
+                future_to_reason[future] = pattern_element
+            
+            end_work, not_end_work = wait(future_to_reason, timeout = 2)
 
-                    reason_data = pattern_result.group(0).strip()
+            for future in end_work :
 
-                    self.module_run = True
-                    self.module_error = None
-                    self.module_result_flag = True
-                    self.module_result_data["reason"] = pattern_element["pattern_reason"]
-                    self.module_result_data["reason_data"] = reason_data
+                pattern_information = future_to_reason[future]
+                
+                try:
+                    result = future.result()
 
-                    self.create_module_result()
+                    if result :
 
-                    # print(f"[ DEBUG ] Module Result Dictionary : {self.module_result_dictionary}")
+                        reason_list.append(pattern_information["pattern_reason"])
+                        reason_data_list.append(result.group(0).strip())
+                
+                except Exception :
+                    continue
+        
+        # ( Run : True ) + ( Scan : True )
+        if reason_list or reason_data_list :
 
-                    return self.module_result_dictionary
+            self.module_run = True
+            self.module_error = None
+            self.module_result_flag = True
+            self.module_result_data["reason"] = reason_list
+            self.module_result_data["reason_data"] = reason_data_list
 
-        self.module_run = True
-        self.module_error = None
-        self.module_result_flag = False
-        self.module_result_data["reason"] = "Not Exist Redirect Pattern in JS."
-        self.module_result_data["reason_data"] = None
+        # ( Run : True ) + ( Scan : False )
+        else :
+
+            self.module_run = True
+            self.module_error = None
+            self.module_result_flag = False
+            self.module_result_data["reason"] = "Not Exist Redirect Pattern in JS."
+            self.module_result_data["reason_data"] = None
 
         self.create_module_result()
 

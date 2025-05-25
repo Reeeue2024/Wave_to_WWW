@@ -4,11 +4,19 @@ from core_engine.plugins._base_module import BaseModule
 
 import sys
 import re
+from concurrent.futures import ThreadPoolExecutor, wait, TimeoutError as FutureTimeoutError
 
 class JsStaticObfuscate(BaseModule) :
     def __init__(self, input_url) :
         super().__init__(input_url)
 
+    """
+    IN : 
+    OUT : 
+    """
+    def run_pattern(self, pattern, code) :
+        return re.search(pattern, code, re.IGNORECASE | re.DOTALL)
+    
     """
     IN : 
     OUT : 
@@ -76,31 +84,53 @@ class JsStaticObfuscate(BaseModule) :
             },
         ]
 
-        for pattern_element in pattern_list :
+        reason_list = []
+        reason_data_list = []
 
-            pattern_result = re.search(pattern_element["pattern"], all_js_code, re.IGNORECASE | re.DOTALL)
+        with ThreadPoolExecutor() as executor :
 
-            if pattern_result :
+            future_to_reason = {}
 
-                reason_data = pattern_result.group(0).strip()
+            for pattern_element in pattern_list :
 
-                self.module_run = True
-                self.module_error = None
-                self.module_result_flag = True
-                self.module_result_data["reason"] = pattern_element["pattern_reason"]
-                self.module_result_data["reason_data"] = reason_data
+                future = executor.submit(self.run_pattern, pattern_element["pattern"], all_js_code)
 
-                self.create_module_result()
+                future_to_reason[future] = pattern_element
+            
+            end_work, not_end_work = wait(future_to_reason, timeout = 2)
 
-                # print(f"[ DEBUG ] Module Result Dictionary : {self.module_result_dictionary}")
+            for future in end_work :
 
-                return self.module_result_dictionary
+                pattern_information = future_to_reason[future]
+                
+                try:
+                    result = future.result()
 
-        self.module_run = True
-        self.module_error = None
-        self.module_result_flag = False
-        self.module_result_data["reason"] = "Not Exist Obfuscate Pattern in JS."
-        self.module_result_data["reason_data"] = None
+                    if result :
+
+                        reason_list.append(pattern_information["pattern_reason"])
+                        reason_data_list.append(result.group(0).strip())
+                
+                except Exception :
+                    continue
+        
+        # ( Run : True ) + ( Scan : True )
+        if reason_list or reason_data_list :
+
+            self.module_run = True
+            self.module_error = None
+            self.module_result_flag = True
+            self.module_result_data["reason"] = reason_list
+            self.module_result_data["reason_data"] = reason_data_list
+
+        # ( Run : True ) + ( Scan : False )
+        else :
+
+            self.module_run = True
+            self.module_error = None
+            self.module_result_flag = False
+            self.module_result_data["reason"] = "Not Exist Obfuscate Pattern in JS."
+            self.module_result_data["reason_data"] = None
 
         self.create_module_result()
 

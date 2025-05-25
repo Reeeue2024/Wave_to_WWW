@@ -9,6 +9,9 @@ class LightScanEngine(BaseScanEngine) :
     def __init__(self, input_url) :
         super().__init__(input_url)
 
+        # Time Out
+        self.time_out_module = 10
+
         # [ Light ] Module List
         self.module_path_list = [
             (URL_MODULE_DIRECTORY_PATH, "url_short"),
@@ -29,11 +32,11 @@ class LightScanEngine(BaseScanEngine) :
             (HTML_MODULE_DIRECTORY_PATH, "html_resource_url"),
             (HTML_MODULE_DIRECTORY_PATH, "html_style"),
 
-            # (JS_MODULE_DIRECTORY_PATH, "js_static_external"),
-            # (JS_MODULE_DIRECTORY_PATH, "js_static_hook"),
-            # (JS_MODULE_DIRECTORY_PATH, "js_static_obfuscate"),
-            # (JS_MODULE_DIRECTORY_PATH, "js_static_redirect"),
-            # (JS_MODULE_DIRECTORY_PATH, "js_static_script"),
+            (JS_MODULE_DIRECTORY_PATH, "js_static_external"),
+            (JS_MODULE_DIRECTORY_PATH, "js_static_hook"),
+            (JS_MODULE_DIRECTORY_PATH, "js_static_obfuscate"),
+            (JS_MODULE_DIRECTORY_PATH, "js_static_redirect"),
+            (JS_MODULE_DIRECTORY_PATH, "js_static_script"),
 
             # (JS_MODULE_DIRECTORY_PATH, "js_dynamic_dom"),
             # (JS_MODULE_DIRECTORY_PATH, "js_dynamic_external"),
@@ -65,11 +68,11 @@ class LightScanEngine(BaseScanEngine) :
             "HtmlResourceUrl",
             "HtmlStyle",
 
-            # "JsStaticExternal",
-            # "JsStaticHook",
-            # "JsStaticObfuscate",
-            # "JsStaticRedirect",
-            # "JsStaticScript",
+            "JsStaticExternal",
+            "JsStaticHook",
+            "JsStaticObfuscate",
+            "JsStaticRedirect",
+            "JsStaticScript",
 
             # "JsDynamicDom",
             # "JsDynamicExternal",
@@ -98,11 +101,11 @@ class LightScanEngine(BaseScanEngine) :
             "HtmlResourceUrl" : 10,
             "HtmlStyle" : 10,
 
-            # "JsStaticExternal" : 10,
-            # "JsStaticHook" : 10,
-            # "JsStaticObfuscate" : 10,
-            # "JsStaticRedirect" : 10,
-            # "JsStaticScript" : 10,
+            "JsStaticExternal" : 10,
+            "JsStaticHook" : 10,
+            "JsStaticObfuscate" : 10,
+            "JsStaticRedirect" : 10,
+            "JsStaticScript" : 10,
 
             # "JsDynamicDom" : 10,
             # "JsDynamicExternal" : 10,
