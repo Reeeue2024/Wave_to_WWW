@@ -8,7 +8,7 @@ import json
 import os
 
 # 환경변수 로드
-load_dotenv()
+load_dotenv(dotenv_path="server/app/.env")
 
 # 로깅 설정
 logger = logging.getLogger(__name__)
