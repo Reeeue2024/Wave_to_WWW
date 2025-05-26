@@ -99,3 +99,73 @@
 [2025-05-27 01:36:42,073] INFO     [ Exist in DB! ] https://google.co.kr/
 [2025-05-27 01:36:50,263] INFO     [ Client Type ] WEB → Engine Type: full
 [2025-05-27 01:36:50,274] INFO     [ Exist in DB! ] https://naver.com/
+[2025-05-27 01:48:34,768] INFO     [ Client Type ] WEB → Engine Type: full
+[2025-05-27 01:48:34,884] INFO     [ Exist in DB! ] https://google.co.kr/
+[2025-05-27 01:48:53,272] INFO     [ Client Type ] WEB → Engine Type: full
+[2025-05-27 01:48:53,285] INFO     [ New URL ] https://search.naver.com/search.naver?where=nexearch&sm=top_hty&fbm=0&ie=utf8&query=%EB%8B%A8%EA%B5%AD%EB%8C%80%ED%95%99%EA%B5%90&ackey=jx35fok4
+[2025-05-27 01:50:52,410] INFO     [ Client Type ] WEB → Engine Type: full
+[2025-05-27 01:50:52,426] INFO     [ New URL ] https://search.naver.com/search.naver?where=nexearch&sm=top_hty&fbm=0&ie=utf8&query=%EB%8B%A8%EA%B5%AD%EB%8C%80%ED%95%99%EA%B5%90&ackey=jx35fok4
+[2025-05-27 01:52:51,050] INFO     [ Client Type ] WEB → Engine Type: full
+[2025-05-27 01:52:51,067] INFO     [ New URL ] https://www.bing.com/
+[2025-05-27 01:52:51,869] INFO     [ Time ] Detection completed in 819ms
+[2025-05-27 01:58:07,147] INFO     [ Client Type ] EXTENSION → Engine Type: light
+[2025-05-27 01:58:07,164] INFO     [ New URL ] https://map.naver.com/
+[2025-05-27 01:58:08,494] INFO     [ Time ] Detection completed in 1346ms
+[2025-05-27 01:58:08,496] INFO     [ Client Type ] EXTENSION → Engine Type: light
+[2025-05-27 01:58:08,503] INFO     [ New URL ] https://land.naver.com/
+[2025-05-27 01:59:40,716] INFO     [ Client Type ] EXTENSION → Engine Type: light
+[2025-05-27 01:59:40,732] INFO     [ New URL ] https://www.naver.com/#
+[2025-05-27 02:04:28,140] INFO     [ Time ] Detection completed in 287424ms
+[2025-05-27 02:04:28,144] INFO     [ Client Type ] EXTENSION → Engine Type: light
+[2025-05-27 02:04:28,162] INFO     [ New URL ] https://newsstand.naver.com/?list&pcode=422
+[2025-05-27 02:04:30,773] INFO     [ Time ] Detection completed in 2627ms
+[2025-05-27 02:05:28,696] INFO     [ Client Type ] EXTENSION → Engine Type: light
+[2025-05-27 02:05:28,706] INFO     [ New URL ] https://news.naver.com/
+[2025-05-27 02:05:35,358] INFO     [ Time ] Detection completed in 6660ms
+[2025-05-27 02:05:37,666] INFO     [ Client Type ] EXTENSION → Engine Type: light
+[2025-05-27 02:05:37,673] INFO     [ New URL ] https://news.naver.com/
+[2025-05-27 02:05:44,612] INFO     [ Time ] Detection completed in 6946ms
+[2025-05-27 02:05:47,510] INFO     [ Client Type ] EXTENSION → Engine Type: light
+[2025-05-27 02:05:47,519] INFO     [ New URL ] https://n.news.naver.com/article/293/0000067831
+[2025-05-27 02:05:49,797] INFO     [ Time ] Detection completed in 2285ms
+[2025-05-27 02:05:51,929] INFO     [ Client Type ] EXTENSION → Engine Type: light
+[2025-05-27 02:05:51,936] INFO     [ New URL ] https://n.news.naver.com/article/293/0000067831
+[2025-05-27 02:05:58,657] INFO     [ Time ] Detection completed in 6728ms
+[2025-05-27 02:05:58,659] INFO     [ Client Type ] EXTENSION → Engine Type: light
+[2025-05-27 02:05:58,668] INFO     [ New URL ] https://n.news.naver.com/article/293/0000067831
+[2025-05-27 02:06:00,854] INFO     [ Time ] Detection completed in 2194ms
+[2025-05-27 02:06:00,856] INFO     [ Client Type ] EXTENSION → Engine Type: light
+[2025-05-27 02:06:00,864] INFO     [ New URL ] https://n.news.naver.com/article/293/0000067831
+[2025-05-27 02:06:08,189] INFO     [ Time ] Detection completed in 7332ms
+[2025-05-27 02:06:08,190] INFO     [ Client Type ] EXTENSION → Engine Type: light
+[2025-05-27 02:06:08,197] INFO     [ New URL ] https://n.news.naver.com/article/293/0000067831
+[2025-05-27 02:06:10,416] INFO     [ Time ] Detection completed in 2225ms
+[2025-05-27 02:06:10,417] INFO     [ Client Type ] EXTENSION → Engine Type: light
+[2025-05-27 02:06:10,425] INFO     [ New URL ] https://n.news.naver.com/article/293/0000067831
+[2025-05-27 02:06:17,734] INFO     [ Time ] Detection completed in 7316ms
+[2025-05-27 02:06:17,736] INFO     [ Client Type ] EXTENSION → Engine Type: light
+[2025-05-27 02:06:17,745] INFO     [ New URL ] https://media.naver.com/press/293
+[2025-05-27 02:06:24,967] INFO     [ Time ] Detection completed in 7230ms
+[2025-05-27 02:06:24,968] INFO     [ Client Type ] EXTENSION → Engine Type: light
+[2025-05-27 02:06:24,976] INFO     [ New URL ] https://n.news.naver.com/article/293/0000067831
+[2025-05-27 02:06:27,204] INFO     [ Time ] Detection completed in 2236ms
+[2025-05-27 02:06:27,204] INFO     [ Client Type ] EXTENSION → Engine Type: light
+[2025-05-27 02:06:27,211] INFO     [ New URL ] https://media.naver.com/press/417
+[2025-05-27 02:06:34,650] INFO     [ Time ] Detection completed in 7445ms
+[2025-05-27 02:06:34,651] INFO     [ Client Type ] EXTENSION → Engine Type: light
+[2025-05-27 02:06:34,658] INFO     [ New URL ] https://n.news.naver.com/article/417/0001079059
+[2025-05-27 02:06:42,780] INFO     [ Time ] Detection completed in 8128ms
+[2025-05-27 02:07:02,184] INFO     [ Client Type ] EXTENSION → Engine Type: light
+[2025-05-27 02:07:02,191] INFO     [ New URL ] https://labs.google.com/search?source=hp&authuser=0
+[2025-05-27 02:07:04,563] INFO     [ Time ] Detection completed in 2379ms
+[2025-05-27 02:07:16,380] INFO     [ Client Type ] EXTENSION → Engine Type: light
+[2025-05-27 02:07:16,393] INFO     [ New URL ] https://gaksu.tistory.com/entry/XX-%EC%9B%B9-%EC%84%9C%EB%B2%84%EC%99%80-%EC%9B%B9-%EC%96%B4%ED%94%8C%EB%A6%AC%EC%BC%80%EC%9D%B4%EC%85%98%EA%B3%BC-DB-%EC%84%9C%EB%B2%84-%EC%97%B0%EB%8F%99
+[2025-05-27 02:07:27,512] INFO     [ Time ] Detection completed in 11131ms
+[2025-05-27 02:07:33,532] INFO     [ Client Type ] EXTENSION → Engine Type: light
+[2025-05-27 02:07:33,544] INFO     [ New URL ] https://velog.io/@cis07385/%ED%81%B4%EB%9D%BC%EC%9A%B0%EB%93%9C-%EC%9B%B9-%EC%95%B1-db-%EC%97%B0%EB%8F%99
+[2025-05-27 02:07:42,783] INFO     [ Time ] Detection completed in 9250ms
+[2025-05-27 02:07:45,994] INFO     [ Client Type ] EXTENSION → Engine Type: light
+[2025-05-27 02:07:46,001] INFO     [ New URL ] https://terianp.tistory.com/62
+[2025-05-27 02:07:55,889] INFO     [ Time ] Detection completed in 9895ms
+[2025-05-27 02:08:07,220] INFO     [ Client Type ] EXTENSION → Engine Type: light
+[2025-05-27 02:08:07,237] INFO     [ New URL ] https://hyunndyblog.tistory.com/147
