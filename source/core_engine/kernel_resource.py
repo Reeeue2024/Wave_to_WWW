@@ -88,12 +88,12 @@ class KernelResource :
 
             self.resource_dictionary["ai_model_bundle"] = bundle
 
-            print(f"  [ + ]  {"ai_model_bundle":<25} ( Load Resource - Success )")
+            print(f"  [ + ]  {'ai_model_bundle':<25} ( Load Resource - Success )")
 
         except Exception as e :
             self.resource_dictionary["ai_model_bundle"] = None
             
-            print(f"  [ ! ]  {"ai_model_bundle":<25} ( Load Resource - Fail )")
+            print(f"  [ ! ]  {'ai_model_bundle':<25} ( Load Resource - Fail )")
             print(f"{e}")
 
         print()

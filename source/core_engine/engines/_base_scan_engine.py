@@ -174,13 +174,13 @@ class BaseScanEngine :
 
             js_file = response.text
 
-            print(f"  [ + ]  {"Get JS File - Success":<25} ( {round(time.time() - start_time, 2)}s : {js_file_url} )")
+            print(f"  [ + ]  {'Get JS File - Success':<25} ( {round(time.time() - start_time, 2)}s : {js_file_url} )")
 
             return js_file_url, js_file
         
         except Exception as e :
 
-            print(f"  [ ! ]  {"Get JS File - Fail":<25} ( {round(time.time() - start_time, 2)}s : {js_file_url} )")
+            print(f"  [ ! ]  {'Get JS File - Fail':<25} ( {round(time.time() - start_time, 2)}s : {js_file_url} )")
             print(f"{e}")
 
             return js_file_url, None
@@ -203,7 +203,7 @@ class BaseScanEngine :
 
             bs = BeautifulSoup(response.text, "html.parser")
 
-            print(f"  [ + ]  {"Get HTML File - Success":<25} ( {round(time.time() - start_time, 2)}s : {self.input_url} )")
+            print(f"  [ + ]  {'Get HTML File - Success':<25} ( {round(time.time() - start_time, 2)}s : {self.input_url} )")
 
             html_file_script_tag_list = []
             js_file_dictionary = {}
@@ -255,7 +255,7 @@ class BaseScanEngine :
         #     print(f"{e}")
         
         except Exception as e :
-            print(f"  [ ! ]  {"Get HTML File - Fail":<25} ( {round(time.time() - start_time, 2)}s : {self.input_url} )")
+            print(f"  [ ! ]  {'Get HTML File - Fail':<25} ( {round(time.time() - start_time, 2)}s : {self.input_url} )")
             print(f"{e}")
         
         # Not Key - Set Default

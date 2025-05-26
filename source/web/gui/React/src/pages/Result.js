@@ -1,129 +1,140 @@
 import React, { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import '../styles/Result.css';
-import UrlInputBox from '../components/UrlInputBox';
 import GaugeScore from '../components/GaugeScore';
 import logoImage from '../components/logo_header.png';
 import GitImage from '../components/github.png';
 
 function Result() {
-    // 현재 활성화된 탭 상태를 저장 ('detection' 또는 'details')
-    const [activeTab, setActiveTab] = useState('detection');
+  const location = useLocation();
+  const resultData = location.state;
 
-    // 모듈 카드 목록을 렌더링하는 함수
-    // type: 모듈 종류 (예: URL, HTML, JS_Static 등)
-    // count: 렌더링할 모듈 수
-    const renderModules = (type, count) => {
-        const modules = [];
-        for (let i = 1; i <= count; i++) {
-            const isDetected = Math.random() < 0.3;
-            // 모듈 하나의 카드 JSX 생성
-            modules.push(
-                <div key={`${type}-${i}`} className={`module-card ${isDetected ? 'detected' : 'safe'}`}>
-                    {/* 모듈 이름 */}
-                    <div className="module-title">{`${type} Module ${i}`}</div>
-                    {/* 탐지 여부에 따라 출력 */}
-                    <div className="module-status">
-                        {isDetected ? <><span className="detected-text">Detected</span></> : <><span className="safe-text">Safe</span></>}
-                    </div>
-                </div>
-            );
-        }
-        return modules;
-    };
+  const [activeTab, setActiveTab] = useState('detection');
 
-    return (
-        <div className="result-background">
-            {/* 전체 상단 헤더 */}
-            <header className="result-header">
-                <img src={logoImage} alt="Logo" className="logo-image" />
-                <div className="nav-buttons">
-                    <button className="btn white">Search</button>
-                    <button className="btn white">About</button>
-                    <a
-                        className="github-link"
-                        href="https://github.com"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                    >
-                        <img src={GitImage} alt="GitHub" className="github-icon" />
-                    </a>
-                </div>
-            </header>
+  if (!resultData) {
+    return <div>결과 데이터가 없습니다. 홈에서 다시 시도해주세요.</div>;
+  }
 
-            {/* 메인 콘텐츠 컨테이너 */}
-            <main className="result-container">
-                <div className="result-box">
-                    {/* 입력된 URL 표시 */}
-                    <div className="url-section">
-                        <span className="url-text">https://github.com/reeeue/PROJECT</span>
-                    </div>
+  const { summary, modules } = resultData;
 
-                    {/* 게이지 점수 컴포넌트 */}
-                    <GaugeScore score={78} />
-
-                    {/* 모듈 감지 요약 */}
-                    <p className="detection-text">
-                        <span className="red">5</span> out of the 23 modules reported suspected phishing detection.
-                    </p>
-
-                    {/* 탭 헤더 */}
-                    <div className="tabs-header">
-                        <button
-                            className={`tab-button ${activeTab === 'detection' ? 'active' : ''}`}
-                            onClick={() => setActiveTab('detection')}
-                        >
-                            DETECTION
-                        </button>
-                        <button
-                            className={`tab-button ${activeTab === 'details' ? 'active' : ''}`}
-                            onClick={() => setActiveTab('details')}
-                        >
-                            DETAILS
-                        </button>
-                    </div>
-
-                    {/* 탭 본문 내용 */}
-                    <div className="tab-content">
-                        {activeTab === 'detection' && (
-                            <div>
-                                {/* 각 카테고리별 모듈 리스트 */}
-                                <h4>URL</h4>
-                                <div className="module-grid">
-                                    {renderModules('URL', 6)}
-                                </div>
-
-                                <h4>HTML</h4>
-                                <div className="module-grid">
-                                    {renderModules('HTML', 7)}
-                                </div>
-
-                                <h4>JS_Static</h4>
-                                <div className="module-grid">
-                                    {renderModules('JS_Static', 5)}
-                                </div>
-
-                                <h4>JS_Dynamic</h4>
-                                <div className="module-grid">
-                                    {renderModules('JS_Dynamic', 5)}
-                                </div>
-                            </div>
-                        )}
-                        {activeTab === 'details' && (
-                            <div>
-                                <h4>Feature Details</h4>
-                                <p>...여기에 상세 정보가 들어갑니다.</p>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            </main>
-
-            {/* 하단 푸터 */}
-            <footer className="result-footer">
-                © 2025 wave to www. All rights reserved.
-            </footer>
+  const renderModules = (mods) => {
+    return mods.map((mod, index) => (
+      <div key={index} className={`module-card ${mod.moduleResultFlag ? 'detected' : 'safe'}`}>
+        <div className="module-title">{mod.moduleName}</div>
+        <div className="module-status">
+          {mod.moduleResultFlag ? (
+            <span className="detected-text">Detected</span>
+          ) : (
+            <span className="safe-text">Safe</span>
+          )}
         </div>
-    );
+      </div>
+    ));
+  };
+
+  return (
+    <div className="result-background">
+      <header className="result-header">
+        <img src={logoImage} alt="Logo" className="logo-image" />
+        <div className="nav-buttons">
+          <button className="btn white">Search</button>
+          <button className="btn white">About</button>
+          <a
+            className="github-link"
+            href="https://github.com"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <img src={GitImage} alt="GitHub" className="github-icon" />
+          </a>
+        </div>
+      </header>
+
+      <main className="result-container">
+        <div className="result-box">
+          <div className="url-section">
+            <span className="url-text">{summary.inputUrl}</span>
+          </div>
+
+          <GaugeScore score={summary.resultScore} />
+
+          <div className="final-flag">
+            <p className="final-flag-text">
+              <strong>최종 피싱 여부:</strong>{' '}
+              {summary.resultFlag ? (
+                <span className="detected-text">피싱 사이트 ❌</span>
+              ) : (
+                <span className="safe-text">정상 ✅</span>
+              )}
+            </p>
+          </div>
+
+          <p className="detection-text">
+            {modules.filter(mod => mod.moduleResultFlag).length} out of the {modules.length} modules reported suspected phishing detection.
+          </p>
+
+          <div className="tabs-header">
+            <button
+              className={`tab-button ${activeTab === 'detection' ? 'active' : ''}`}
+              onClick={() => setActiveTab('detection')}
+            >
+              DETECTION
+            </button>
+            <button
+              className={`tab-button ${activeTab === 'details' ? 'active' : ''}`}
+              onClick={() => setActiveTab('details')}
+            >
+              DETAILS
+            </button>
+          </div>
+
+          <div className="tab-content">
+            {activeTab === 'detection' && (
+              <div className="module-grid">{renderModules(modules)}</div>
+            )}
+            {activeTab === 'details' && (
+  <div className="details-section">
+    {modules.map((mod, index) => (
+      <div key={index} className="module-detail-card">
+        <h4>{mod.moduleName}</h4>
+        <p><strong>✅ 실행 여부:</strong> {mod.moduleRun ? '성공' : '실패'}</p>
+        <p><strong>🎯 점수:</strong> {mod.moduleScore} / {mod.moduleWeight}</p>
+        <p><strong>🚨 탐지 여부:</strong> {mod.moduleResultFlag ? '탐지됨 ❌' : '안전 ✅'}</p>
+
+        <p><strong>📝 탐지 이유:</strong> {mod.reason || '정보 없음'}</p>
+
+        {mod.reasonData && mod.reasonData.length > 0 ? (
+          <div>
+            <strong>🔗 관련 데이터:</strong>
+            <ul>
+              {mod.reasonData.map((item, i) => (
+                <li key={i}>
+                  <a href={item} target="_blank" rel="noopener noreferrer">
+                    {item}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : (
+          <p>관련 데이터 없음</p>
+        )}
+
+        <hr />
+      </div>
+    ))}
+  </div>
+)}
+
+          </div>
+        </div>
+      </main>
+
+      <footer className="result-footer">
+        © 2025 wave to www. All rights reserved.
+      </footer>
+    </div>
+  );
 }
 
 export default Result;
