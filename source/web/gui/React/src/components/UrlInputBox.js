@@ -19,63 +19,84 @@ function UrlInputBox() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (!isValidUrl(url)) {
-      setError('올바른 URL 형식이 아닙니다.');
-      setServerError('');
-      return;
-    }
-
-    setError('');
+  if (!isValidUrl(url)) {
+    setError('올바른 URL 형식이 아닙니다.');
     setServerError('');
+    return;
+  }
 
-    try {
-      const response = await axios.post("http://localhost:8000/detect/url", { url });
+  setError('');
+  setServerError('');
 
-      if (response.data.success) {
-        const data = response.data.data;
+  try {
+    const response = await axios.post(
+      "http://localhost:8000/detect/url",
+      { url },
+      { headers: { "client-type": "web" },
+        timeout: 3000
+     }
+    );
 
-        const scanResult = {
-          inputUrl: data.input_url,
-          resultFlag: data.engine_result_flag,
-          resultScore: data.engine_result_score,
-        };
+    console.log("✅ 서버 응답:", response);
 
-        const scanModuleResultMap = Array.isArray(data.module_result_dictionary_list)
-          ? data.module_result_dictionary_list.map(module => ({
-              moduleName: module.module_class_name,
-              moduleRun: module.module_run,
-              moduleScore: module.module_score,
-              moduleWeight: module.module_weight,
-              moduleResultFlag: module.module_result_flag,
-              moduleError: module.module_error || null,
-              reason: module.module_result_data?.reason || null,
-              reasonData: Array.isArray(module.module_result_data?.reason_data)
-                ? module.module_result_data.reason_data.map(d => d.slice(0, 10))
-                : module.module_result_data?.reason_data
-                  ? [module.module_result_data.reason_data.slice(0, 10)]
-                  : null
-            }))
-          : [];
+    // success 래퍼 유무에 관계없이 처리
+    const payload = response.data.data || response.data;
 
-        navigate('/result', {
-          state: {
-            summary: scanResult,
-            modules: scanModuleResultMap,
-          },
-        });
-      } else {
-        setServerError(response.data.message || '분석에 실패했습니다.');
-      }
-    } catch (err) {
-      if (err.response) {
-        setServerError(err.response.data.message || '서버 오류가 발생했습니다.');
-      } else {
-        setServerError('서버에 연결할 수 없습니다.');
-      }
-    }
-  };
+    const scanResult = {
+      inputUrl: payload.input_url,
+      resultFlag: payload.engine_result_flag,
+      resultScore: payload.engine_result_score,
+    };
+
+    const scanModuleResultMap = Array.isArray(payload.module_result_dictionary_list)
+  ? payload.module_result_dictionary_list.map(module => ({
+      moduleName: module.module_class_name,
+      moduleRun: module.module_run,
+      moduleScore: module.module_score,
+      moduleWeight: module.module_weight,
+      moduleResultFlag: module.module_result_flag,
+      moduleError: module.module_error || null,
+      reason: module.module_result_data?.reason || null,
+      reasonData: (() => {
+        const data = module.module_result_data?.reason_data;
+        if (Array.isArray(data)) {
+          return data.map(d => typeof d === 'string' ? d.slice(0, 10) : String(d).slice(0, 10));
+        } else if (typeof data === 'string') {
+          return [data.slice(0, 10)];
+        } else if (data !== null && data !== undefined) {
+          return [String(data).slice(0, 10)];
+        } else {
+          return null;
+        }
+      })()
+    }))
+  : [];
+
+
+    navigate('/result', {
+      state: {
+        summary: scanResult,
+        modules: scanModuleResultMap,
+      },
+    });
+  } catch (err) {
+  console.error("❌ Axios error:", err);
+  if (err.response) {
+    console.error("❌ Server responded with error:", err.response);
+    setServerError(err.response.data.message || '서버 오류가 발생했습니다.');
+  } else if (err.request) {
+    console.error("❌ No response received:", err.request);
+    setServerError('서버에 연결할 수 없습니다.');
+  } else {
+    console.error("❌ Request setup error:", err.message);
+    setServerError(`요청 설정 중 오류가 발생했습니다. (${err.message})`);
+  }
+}
+
+};
+
 
   return (
     <div className="url-input-wrapper">

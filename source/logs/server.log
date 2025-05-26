@@ -30,3 +30,72 @@
 [2025-05-26 23:04:11,377] INFO     [ Exist in DB! ] https://dankook.ac.kr/
 [2025-05-26 23:07:37,326] INFO     [ Client Type ] WEB → Engine Type: full
 [2025-05-26 23:07:37,375] INFO     [ Exist in DB! ] https://dankook.ac.kr/
+[2025-05-26 23:50:49,611] INFO     [ Client Type ] WEB → Engine Type: full
+[2025-05-26 23:50:49,751] INFO     [ Exist in DB! ] https://dankook.ac.kr/
+[2025-05-26 23:50:59,156] INFO     [ Client Type ] WEB → Engine Type: full
+[2025-05-26 23:50:59,190] INFO     [ Exist in DB! ] https://google.co.kr/
+[2025-05-26 23:51:25,711] INFO     [ Client Type ] WEB → Engine Type: full
+[2025-05-26 23:51:25,725] INFO     [ Exist in DB! ] https://naver.com/
+[2025-05-26 23:51:38,365] INFO     [ Client Type ] WEB → Engine Type: full
+[2025-05-26 23:51:38,374] INFO     [ Exist in DB! ] https://portal.dankook.ac.kr/
+[2025-05-26 23:52:29,521] INFO     [ Client Type ] WEB → Engine Type: full
+[2025-05-26 23:52:29,530] INFO     [ New URL ] https://chatgpt.com/
+[2025-05-26 23:52:30,707] INFO     [ Time ] Detection completed in 1185ms
+[2025-05-26 23:54:04,526] INFO     [ Client Type ] WEB → Engine Type: full
+[2025-05-26 23:54:04,537] INFO     [ New URL ] https://www.notion.com/
+[2025-05-26 23:54:10,854] INFO     [ Time ] Detection completed in 6329ms
+[2025-05-26 23:54:23,761] INFO     [ Client Type ] WEB → Engine Type: full
+[2025-05-26 23:54:23,809] INFO     [ Exist in DB! ] https://www.notion.com/
+[2025-05-26 23:54:25,547] INFO     [ Client Type ] WEB → Engine Type: full
+[2025-05-26 23:54:25,595] INFO     [ Exist in DB! ] https://www.notion.com/
+[2025-05-26 23:56:43,766] INFO     [ Client Type ] WEB → Engine Type: full
+[2025-05-26 23:56:43,781] INFO     [ New URL ] https://github.com/
+[2025-05-26 23:58:30,227] INFO     [ Client Type ] WEB → Engine Type: full
+[2025-05-26 23:58:30,246] INFO     [ New URL ] https://github.com/
+[2025-05-26 23:59:36,148] INFO     [ Client Type ] WEB → Engine Type: full
+[2025-05-26 23:59:36,167] INFO     [ New URL ] https://www.daum.net/
+[2025-05-27 00:00:53,843] INFO     [ Client Type ] WEB → Engine Type: full
+[2025-05-27 00:00:53,863] INFO     [ Exist in DB! ] https://naver.com/
+[2025-05-27 00:01:07,859] INFO     [ Client Type ] WEB → Engine Type: full
+[2025-05-27 00:01:07,872] INFO     [ Exist in DB! ] https://dankook.ac.kr/
+[2025-05-27 00:01:40,543] INFO     [ Client Type ] WEB → Engine Type: full
+[2025-05-27 00:01:40,552] INFO     [ Exist in DB! ] https://dankook.ac.kr/
+[2025-05-27 00:29:58,612] INFO     [ Client Type ] WEB → Engine Type: full
+[2025-05-27 00:29:58,627] INFO     [ Exist in DB! ] https://daum.net/
+[2025-05-27 00:30:13,671] INFO     [ Client Type ] WEB → Engine Type: full
+[2025-05-27 00:30:13,711] INFO     [ Exist in DB! ] https://google.co.kr/
+[2025-05-27 00:30:53,336] INFO     [ Client Type ] WEB → Engine Type: full
+[2025-05-27 00:30:53,344] INFO     [ New URL ] https://github.com/
+[2025-05-27 00:35:34,069] INFO     [ Client Type ] WEB → Engine Type: full
+[2025-05-27 00:35:34,096] INFO     [ New URL ] https://m.blog.naver.com/graypunch/20002767571
+[2025-05-27 00:43:18,954] INFO     [ Client Type ] WEB → Engine Type: full
+[2025-05-27 00:43:18,983] INFO     [ Exist in DB! ] https://naver.com/
+[2025-05-27 00:44:44,212] INFO     [ Client Type ] WEB → Engine Type: full
+[2025-05-27 00:44:44,281] INFO     [ New URL ] https://search.naver.com/search.naver?where=nexearch&sm=top_hty&fbm=0&ie=utf8&query=%EB%8B%A8%EA%B5%AD%EB%8C%80%ED%95%99%EA%B5%90&ackey=x7jx1pss
+[2025-05-27 01:08:13,587] INFO     [ Client Type ] WEB → Engine Type: full
+[2025-05-27 01:08:13,694] INFO     [ Exist in DB! ] https://naver.com/
+[2025-05-27 01:08:26,837] INFO     [ Client Type ] WEB → Engine Type: full
+[2025-05-27 01:08:26,876] INFO     [ Exist in DB! ] https://google.co.kr/
+[2025-05-27 01:08:47,972] INFO     [ Client Type ] WEB → Engine Type: full
+[2025-05-27 01:08:47,993] INFO     [ Exist in DB! ] https://portal.dankook.ac.kr/
+[2025-05-27 01:08:56,555] INFO     [ Client Type ] WEB → Engine Type: full
+[2025-05-27 01:08:56,565] INFO     [ Exist in DB! ] https://daum.net/
+[2025-05-27 01:09:03,021] INFO     [ Client Type ] WEB → Engine Type: full
+[2025-05-27 01:09:03,030] INFO     [ Exist in DB! ] https://github.com/
+[2025-05-27 01:09:13,328] INFO     [ Client Type ] WEB → Engine Type: full
+[2025-05-27 01:09:13,344] INFO     [ New URL ] https://notion.com/
+[2025-05-27 01:09:23,786] INFO     [ Time ] Detection completed in 10458ms
+[2025-05-27 01:15:44,569] INFO     [ Client Type ] WEB → Engine Type: full
+[2025-05-27 01:15:44,616] INFO     [ Exist in DB! ] https://notion.com/
+[2025-05-27 01:23:48,406] INFO     [ Client Type ] WEB → Engine Type: full
+[2025-05-27 01:23:48,488] INFO     [ Exist in DB! ] https://notion.com/
+[2025-05-27 01:29:47,773] INFO     [ Client Type ] WEB → Engine Type: full
+[2025-05-27 01:29:47,904] INFO     [ Exist in DB! ] https://notion.com/
+[2025-05-27 01:32:26,688] INFO     [ Client Type ] WEB → Engine Type: full
+[2025-05-27 01:32:26,721] INFO     [ Exist in DB! ] https://notion.com/
+[2025-05-27 01:34:11,952] INFO     [ Client Type ] WEB → Engine Type: full
+[2025-05-27 01:34:11,986] INFO     [ Exist in DB! ] https://notion.com/
+[2025-05-27 01:36:42,012] INFO     [ Client Type ] WEB → Engine Type: full
+[2025-05-27 01:36:42,073] INFO     [ Exist in DB! ] https://google.co.kr/
+[2025-05-27 01:36:50,263] INFO     [ Client Type ] WEB → Engine Type: full
+[2025-05-27 01:36:50,274] INFO     [ Exist in DB! ] https://naver.com/
