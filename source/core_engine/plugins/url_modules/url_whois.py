@@ -24,7 +24,11 @@ class UrlWhois(BaseModule) :
     IN : 
     OUT : 
     """
-    async def get_whois_data(self) :
+    def get_whois_data(self) :
+        # import time
+
+        # time.sleep(15)
+
         try :
             self.whois_data = whois.whois(self.hostname)
 
@@ -32,39 +36,6 @@ class UrlWhois(BaseModule) :
         
         except Exception as e :
             return False
-        
-        # try :
-        #     # [ 1. ] Create Asynchronous Process - "WHOIS"
-        #     process = await asyncio.create_subprocess_exec(
-        #         "python3", "tools/whois/whois_get.py", self.hostname,
-        #         stdout = asyncio.subprocess.PIPE,
-        #         stderr = asyncio.subprocess.PIPE
-        #     )
-
-        #     # [ 2. ] Get "Time-Out" From Engine
-        #     time_out = getattr(self, "time_out_module", 30)
-
-        #     # [ 3. ] Set "Time-Out"
-        #     try :
-        #         stdout, stderr = await asyncio.wait_for(process.communicate(), timeout = time_out)
-
-        #     except asyncio.TimeoutError :
-        #         process.kill()
-
-        #         await process.communicate()
-
-        #         return False
-
-        #     if process.returncode != 0 :
-
-        #         return False
-
-        #     self.whois_data = json.loads(stdout.decode())
-
-        #     return True
-        
-        # except Exception as e :
-        #     return False
 
     """
     IN : 
@@ -156,8 +127,27 @@ class UrlWhois(BaseModule) :
 
             return self.module_result_dictionary
         
-        whois_flag = await self.get_whois_data()
+        loop = asyncio.get_running_loop()
 
+        try :
+            whois_flag = await asyncio.wait_for(loop.run_in_executor(None, self.get_whois_data), timeout = self.module_time_out)
+
+            # print("[ DEBUG ] \"Not\" Time Out.")
+
+        except asyncio.TimeoutError :
+            # print("[ DEBUG ] Time Out.")
+
+            self.module_run = False
+            self.module_error = "[ ERROR : Time Out ] Fail to Get WHOIS Data."
+            self.module_result_flag = False
+            self.module_result_data = None
+
+            self.create_module_result()
+            
+            # print(f"[ DEBUG ] Module Result Dictionary : {self.module_result_dictionary}")
+
+            return self.module_result_dictionary
+        
         # Run Fail Case #2
         if not whois_flag :
 

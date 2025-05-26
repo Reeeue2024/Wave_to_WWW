@@ -9,6 +9,7 @@ from urllib.parse import urlparse
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 import certifi
+import asyncio
 
 class UrlSsl(BaseModule) :
     def __init__(self, input_url) :
@@ -24,6 +25,10 @@ class UrlSsl(BaseModule) :
     OUT : 
     """
     def get_certificate(self) :
+        # import time
+
+        # time.sleep(15)
+
         try :
             urlparse_result = urlparse(self.input_url)
             hostname = urlparse_result.hostname
@@ -83,8 +88,29 @@ class UrlSsl(BaseModule) :
     IN : 
     OUT : 
     """
-    async def scan(self) :
-        self.certificate = self.get_certificate()
+    async def scan(self) :        
+        loop = asyncio.get_running_loop()
+
+        try :
+            self.certificate = await asyncio.wait_for(loop.run_in_executor(None, self.get_certificate), timeout = self.module_time_out)
+
+            # print("[ DEBUG ] \"Not\" Time Out.")
+
+        except asyncio.TimeoutError :
+            # print("[ DEBUG ] Time Out.")
+
+            self.module_run = False
+            self.module_error = "[ ERROR : Time Out ] Fail to Get SSL Certificate."
+            self.module_result_flag = False
+            self.module_result_data = None
+
+            self.create_module_result()
+            
+            # print(f"[ DEBUG ] Module Result Dictionary : {self.module_result_dictionary}")
+
+            return self.module_result_dictionary
+
+        # self.certificate = self.get_certificate()
 
         # Run Fail Case #1
         if not self.certificate :

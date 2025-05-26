@@ -18,6 +18,10 @@ class UrlSubDomain(BaseModule) :
     OUT : 
     """
     async def scan(self) :
+        # import time
+
+        # time.sleep(15)
+
         urlparse_result = urlparse(self.input_url)
 
         hostname = urlparse_result.hostname

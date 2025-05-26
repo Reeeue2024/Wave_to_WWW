@@ -5,6 +5,7 @@ from core_engine.plugins._base_module import BaseModule
 import sys
 import requests
 from urllib.parse import urlparse, urlunparse
+import asyncio
 
 class UrlHttp(BaseModule) :
     def __init__(self, input_url) :
@@ -15,6 +16,10 @@ class UrlHttp(BaseModule) :
     OUT : 
     """
     def get_url_protocol(self) :
+        # import time
+
+        # time.sleep(15)
+
         if "://" not in self.input_url :
 
             self.input_url = "http://" + self.input_url
@@ -57,8 +62,27 @@ class UrlHttp(BaseModule) :
     OUT : 
     """
     async def scan(self) :
-        url_with_protocol = self.get_url_protocol()
+        loop = asyncio.get_running_loop()
 
+        try :
+            url_with_protocol = await asyncio.wait_for(loop.run_in_executor(None, self.get_url_protocol), timeout = self.module_time_out)
+        
+            # print("[ DEBUG ] \"Not\"Time Out.")
+
+        except asyncio.TimeoutError :
+            # print("[ DEBUG ] Time Out.")
+
+            self.module_run = False
+            self.module_error = "[ ERROR : Time Out ] Fail to Get HTTP / HTTPS Protocol."
+            self.module_result_flag = False
+            self.module_result_data = None
+
+            self.create_module_result()
+            
+            # print(f"[ DEBUG ] Module Result Dictionary : {self.module_result_dictionary}")
+
+            return self.module_result_dictionary
+    
         # Run Fail Case #1
         if url_with_protocol is None :
 

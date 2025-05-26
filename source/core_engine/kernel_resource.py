@@ -41,15 +41,15 @@ class KernelResource :
             return
 
         function_dictionary = {
-            # # Black List
-            # "black_list_url" : lambda : list(db["black_list_url"].find({}, {"_id" : 0})), # ( Example ) "https://google.com"
-            # "black_list_domain_suffix" : lambda : list(db["black_list_domain_suffix"].find({}, {"_id" : 0})),  # ( Example ) "google.com"
-            # "black_list_brand" : lambda : list(db["black_list_brand"].find({}, {"_id" : 0})),  # ( Example ) "google"
+            # Black List
+            "black_list_url" : lambda : list(db["black_list_url"].find({}, {"_id" : 0})), # ( Example ) "https://google.com"
+            "black_list_domain_suffix" : lambda : list(db["black_list_domain_suffix"].find({}, {"_id" : 0})),  # ( Example ) "google.com"
+            "black_list_brand" : lambda : list(db["black_list_brand"].find({}, {"_id" : 0})),  # ( Example ) "google"
 
-            # # White List
-            # "white_list_url" : lambda : list(db["white_list_url"].find({}, {"_id" : 0})),
-            # "white_list_domain_suffix" : lambda : list(db["white_list_domain_suffix"].find({}, {"_id" : 0})),
-            # "white_list_brand" : lambda : list(db["white_list_brand"].find({}, {"_id" : 0})),
+            # White List
+            "white_list_url" : lambda : list(db["white_list_url"].find({}, {"_id" : 0})),
+            "white_list_domain_suffix" : lambda : list(db["white_list_domain_suffix"].find({}, {"_id" : 0})),
+            "white_list_brand" : lambda : list(db["white_list_brand"].find({}, {"_id" : 0})),
 
             # ETC
             "short_domain_list" : lambda : list(db["short_domain_list"].find({}, {"_id" : 0})),

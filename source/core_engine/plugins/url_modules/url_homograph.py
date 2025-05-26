@@ -64,12 +64,9 @@ class UrlHomograph(BaseModule) :
                 stderr = asyncio.subprocess.PIPE
             )
 
-            # [ 2. ] Get "Time-Out" From Engine
-            time_out = getattr(self, "time_out_module", 30)
-
-            # [ 3. ] Set "Time-Out"
+            # [ 2. ] Set "Time-Out"
             try :
-                stdout, stderr = await asyncio.wait_for(process.communicate(), timeout = time_out)
+                stdout, stderr = await asyncio.wait_for(process.communicate(), timeout = self.module_time_out)
 
             except asyncio.TimeoutError :
                 process.kill()
@@ -77,7 +74,7 @@ class UrlHomograph(BaseModule) :
                 await process.communicate()
 
                 self.module_run = False
-                self.module_error = f"[ ERROR ] TIME OUT : {time_out}"
+                self.module_error = f"[ ERROR ] TIME OUT : {self.module_time_out}"
                 self.module_result_flag = False
                 self.module_result_data = None
 

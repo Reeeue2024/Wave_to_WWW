@@ -72,7 +72,7 @@ class UrlShort(BaseModule) :
     IN : 
     OUT : 
     """
-    async def scan(self) :
+    def scan(self) :
         self.get_redirect_url()
 
         # print(f"[ DEBUG ] Redirect URL : {self.redirect_url}")

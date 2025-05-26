@@ -9,6 +9,8 @@ class BaseModule :
         self.input_url = input_url
         self.redirect_url = None
 
+        self.module_time_out = 10
+
         # ( Engine ) Resource
         self.engine_resource = {}
 
@@ -39,6 +41,36 @@ class BaseModule :
     OUT : 
     """
     def create_module_result(self) :
+        if isinstance(self.module_result_data, dict) :
+
+            for key in ["reason", "reason_data"] :
+
+                value = self.module_result_data.get(key)
+
+                if isinstance(value, list) :
+
+                    new_list = []
+
+                    all_element_count = len(value)
+                    max_element_count = 10
+                    max_element_length = 100
+
+                    for item in value[:max_element_count] :
+
+                        if isinstance(item, str) and len(item) > max_element_length :
+
+                            new_list.append(item[:max_element_length] + " ( ... )")
+
+                        else :
+
+                            new_list.append(item)
+                    
+                    if all_element_count > max_element_count :
+
+                        new_list.append(f"[ More ] {all_element_count - max_element_count} \"Reason + Reason Data\" Exist.")
+
+                    self.module_result_data[key] = new_list
+
         self.module_result_dictionary = {
             "module_run" : self.module_run,
             "module_error" : self.module_error,

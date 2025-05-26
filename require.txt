@@ -23,3 +23,6 @@ tinycss2
 urllib3
 pandas
 scikit-learn
+
+# Tools
+"dnstwist" : https://github.com/elceef/dnstwist

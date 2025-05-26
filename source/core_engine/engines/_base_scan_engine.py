@@ -22,7 +22,7 @@ SUSPICIOUS_WEIGHT = 10
 HIGH_SUSPICIOUS_WEIGHT = 20
 
 # [ Default ]
-ENGINE_RESULT_SCORE = 70
+ENGINE_RESULT_SCORE = 60
 
 class BaseScanEngine :
     def __init__(self, input_url) :
@@ -38,10 +38,9 @@ class BaseScanEngine :
             "Connection" : "keep-alive",
         }
 
-        self.engine_resource = {}
+        self.time_out_module = 10
 
-        # Time Out
-        self.time_out_module = 20
+        self.engine_resource = {}
 
         # [ Default ] Module List
         self.module_path_list = [
@@ -312,17 +311,32 @@ class BaseScanEngine :
     IN : 
     OUT : 
     """
-    def run_a_module_with_time_out(self, module_instance) :
-        event_loop = asyncio.new_event_loop()
-
-        asyncio.set_event_loop(event_loop)
-
+    async def run_a_module_asynchronous_with_time_out(self, module_instance) :
         start_time = time.time()
 
         try :
-            run_result = event_loop.run_until_complete(
-                asyncio.wait_for(module_instance.scan(), timeout = self.time_out_module)
-            )
+            run_result = await asyncio.wait_for(module_instance.scan(), timeout = self.time_out_module)
+
+            module_run_flag = run_result.get("module_run", False)
+
+            if not module_run_flag :
+
+                module_error_message = run_result.get("module_error", "")
+
+                # ERROR - Time Out "O" in Module Level
+                if "time out" in module_error_message.lower() :
+
+                    print("[ DEBUG - Module Level in Engine ] Time Out.")
+
+                    return {
+                        "run_status" : "Time Out",
+                        "run_time" : round(time.time() - start_time, 2),
+                        "run_result" : None,
+                        "run_error" : "[ ERROR ] Time Out",
+
+                    }
+
+            # print("[ DEBUG - Engine Level in Engine ] \"Not\" Time Out. ( Run Success )")
 
             return {
                 "run_status" : "Success",
@@ -330,8 +344,10 @@ class BaseScanEngine :
                 "run_result" : run_result,
             }
         
-        # ERROR - Time Out : O
+        # ERROR - Time Out "O" in Engine Level
         except asyncio.TimeoutError :
+            print("[ DEBUG - Engine Level in Engine ] Time Out.")
+
             return {
                 "run_status" : "Time Out",
                 "run_time" : round(time.time() - start_time, 2),
@@ -340,41 +356,26 @@ class BaseScanEngine :
 
             }
         
-        # ERROR - Time Out : X
+        # ERROR - Time Out "X" in Engine Level
         except Exception as e :
+            print("[ DEBUG - Engine Level in Engine ] \"Not\" Time Out. ( Run Fail )")
+
             return {
                 "run_status" : "Error",
                 "run_time" : round(time.time() - start_time, 2),
                 "run_result" : None,
                 "run_error" : f"[ ERROR ] {e}",
             }
-        
-        finally :
-            try:
-                task_list = asyncio.all_tasks(event_loop)
 
-                for task in task_list :
-
-                    task.cancel()
-
-                event_loop.run_until_complete(asyncio.gather(*task_list, return_exceptions = True))
-
-            except Exception as e :
-                print(f"[ ERROR ] Fail to Clean Task.")
-                print(f"{e}")
-
-            finally :
-                event_loop.close()
-    
     """
     IN : 
     OUT : 
     """
-    def run_a_module(self, module_instance) :
+    async def run_a_module_asynchronous(self, module_instance) :
         module_class_name = module_instance.__class__.__name__
 
         try :
-            run_a_module_with_time_out_result = self.run_a_module_with_time_out(module_instance)
+            run_a_module_with_time_out_result = await self.run_a_module_asynchronous_with_time_out(module_instance)
             
             module_run_status = run_a_module_with_time_out_result["run_status"]
             module_run_time = run_a_module_with_time_out_result["run_time"]
@@ -419,7 +420,148 @@ class BaseScanEngine :
             print(f"  [ ! ]  {module_class_name:<25} ( Run Module - Fail )")
 
             print(f"{e}")
+    
+    """
+    IN : 
+    OUT : 
+    """
+    async def run_module_asynchronous(self) :
+        print("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        print(" [ Kernel Service - Engine ] Run Module ( Asynchronous ) ...")
+        print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
+
+        task_list = []
+
+        for module_instance in self.module_instance_list :
+
+            module_class_name = module_instance.__class__.__name__
+
+            if module_class_name in self.module_order_list_asynchronous :
+
+                task_list.append(self.run_a_module_asynchronous(module_instance))
+
+        await asyncio.gather(*task_list, return_exceptions = True)
+    
+    """
+    IN : 
+    OUT : 
+    """
+    def run_a_module_synchronous_with_time_out(self, module_instance) :
+        start_time = time.time()
+
+        try :
+            with ThreadPoolExecutor() as executor :
+
+                work = executor.submit(module_instance.scan)
+
+                run_result = work.result(timeout = self.time_out_module)
+
+            run_result = module_instance.scan()
+
+            module_run_flag = run_result.get("module_run", False)
+
+            if not module_run_flag :
+
+                module_error_message = run_result.get("module_error", "")
+
+                # ERROR - Time Out "O" in Module Level
+                if "time out" in module_error_message.lower() :
+
+                    print("[ DEBUG - Module Level in Engine ] Time Out.")
+
+                    return {
+                        "run_status" : "Time Out",
+                        "run_time" : round(time.time() - start_time, 2),
+                        "run_result" : None,
+                        "run_error" : "[ ERROR ] Time Out",
+
+                    }
+
+            # print("[ DEBUG - Engine Level in Engine ] \"Not\" Time Out. ( Run Success )")
+
+            return {
+                "run_status" : "Success",
+                "run_time" : round(time.time() - start_time, 2),
+                "run_result" : run_result,
+            }
+        
+        # ERROR - Time Out "O" in Engine Level
+        except asyncio.TimeoutError :
+            print("[ DEBUG - Engine Level in Engine ] Time Out.")
+
+            return {
+                "run_status" : "Time Out",
+                "run_time" : round(time.time() - start_time, 2),
+                "run_result" : None,
+                "run_error" : "[ ERROR ] Time Out",
+
+            }
+        
+        # ERROR - Time Out "X" in Engine Level
+        except Exception as e :
+            print("[ DEBUG - Engine Level in Engine ] \"Not\" Time Out. ( Run Fail )")
+
+            return {
+                "run_status" : "Error",
+                "run_time" : round(time.time() - start_time, 2),
+                "run_result" : None,
+                "run_error" : f"[ ERROR ] {e}",
+            }
+
+    """
+    IN : 
+    OUT : 
+    """
+    def run_a_module_synchronous(self, module_instance) :
+        module_class_name = module_instance.__class__.__name__
+
+        try :
+            run_a_module_with_time_out_result = self.run_a_module_synchronous_with_time_out(module_instance)
             
+            module_run_status = run_a_module_with_time_out_result["run_status"]
+            module_run_time = run_a_module_with_time_out_result["run_time"]
+
+            if module_run_status == "Success" :
+
+                module_result_dictionary = run_a_module_with_time_out_result["run_result"]
+
+                self.module_result_dictionary_list.append({
+                    "module_class_name" : module_class_name,
+                    "module_weight" : self.module_weight_dictionary.get(module_class_name),
+                    "module_run" : True,
+                    "module_result_flag" : module_result_dictionary.get("module_result_flag"),
+                    "module_result_data" : module_result_dictionary.get("module_result_data"),
+                })
+
+                print(f"  [ + ]  {module_class_name:<25} ( Run Module - {module_run_status} : {module_run_time}s )")
+
+            else :
+
+                self.module_result_dictionary_list.append({
+                    "module_class_name" : module_class_name,
+                    "module_weight" : self.module_weight_dictionary.get(module_class_name),
+                    "module_run" : False,
+                    "module_error" : run_a_module_with_time_out_result.get("run_error"),
+                    "module_result_flag" : False,
+                    "module_result_data" : None,
+                })
+
+                print(f"  [ ! ]  {module_class_name:<25} ( Run Module - {module_run_status} : {module_run_time}s )")
+
+        except Exception as e :
+            self.module_result_dictionary_list.append({
+                "module_class_name" : module_class_name,
+                "module_weight" : self.module_weight_dictionary.get(module_class_name),
+                "module_run" : False,
+                "module_error" : f"{e}",
+                "module_result_flag" : False,
+                "module_result_data" : None,
+            })
+
+            print(f"  [ ! ]  {module_class_name:<25} ( Run Module - Fail )")
+
+            print(f"{e}")
+    
     """
     IN : 
     OUT : 
@@ -435,7 +577,7 @@ class BaseScanEngine :
 
             if module_class_name in self.module_order_list_synchronous :
                 
-                self.run_a_module(module_instance)
+                self.run_a_module_synchronous(module_instance)
 
                 if module_class_name == "UrlShort" :
 
@@ -453,41 +595,16 @@ class BaseScanEngine :
     IN : 
     OUT : 
     """
-    def run_module_asynchronous(self) :
-        print("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-        print(" [ Kernel Service - Engine ] Run Module ( Asynchronous ) ...")
-        print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
-
-        with ThreadPoolExecutor() as executor :
-
-            work_list = []
-
-            for module_instance in self.module_instance_list :
-
-                module_class_name = module_instance.__class__.__name__
-
-                if module_class_name in self.module_order_list_asynchronous :
-
-                    work_list.append(executor.submit(self.run_a_module, module_instance))
-
-            for work in as_completed(work_list) :
-                
-                work.result()
-    
-    """
-    IN : 
-    OUT : 
-    """
     def run_module(self) :
         # print("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
         # print(" [ Kernel Service - Engine ] Run Module ...")
         # print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
 
         self.run_module_synchronous()
-        self.run_module_asynchronous()
+        asyncio.run(self.run_module_asynchronous())
 
         # print(f"[ DEBUG ] Engine Result Dictionary : {self.engine_result_dictionary}")
-    
+
     """
     IN : 
     OUT : 

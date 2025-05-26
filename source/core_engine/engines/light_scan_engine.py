@@ -3,7 +3,7 @@
 from core_engine.engines._base_scan_engine import BaseScanEngine, URL_MODULE_DIRECTORY_PATH, HTML_MODULE_DIRECTORY_PATH, JS_MODULE_DIRECTORY_PATH, AI_MODULE_DIRECTORY_PATH
 
 # [ Light ]
-ENGINE_RESULT_SCORE = 70
+ENGINE_RESULT_SCORE = 60
 
 class LightScanEngine(BaseScanEngine) :
     def __init__(self, input_url) :
@@ -36,7 +36,7 @@ class LightScanEngine(BaseScanEngine) :
             (JS_MODULE_DIRECTORY_PATH, "js_static_hook"),
             (JS_MODULE_DIRECTORY_PATH, "js_static_obfuscate"),
             (JS_MODULE_DIRECTORY_PATH, "js_static_redirect"),
-            (JS_MODULE_DIRECTORY_PATH, "js_static_script"),
+            # (JS_MODULE_DIRECTORY_PATH, "js_static_script"),
 
             # (JS_MODULE_DIRECTORY_PATH, "js_dynamic_dom"),
             # (JS_MODULE_DIRECTORY_PATH, "js_dynamic_external"),
@@ -83,33 +83,33 @@ class LightScanEngine(BaseScanEngine) :
 
         # [ Light ] Module Weight List
         self.module_weight_dictionary = {
-            "UrlShort" : 10,
+            "UrlShort" : 5, # LOW
 
             "AiUrl": 0, # Special ( Dynamic )
 
-            # "UrlHomograph" : 10,
-            "UrlHttp" : 10,
-            # "UrlSsl" : 10,
+            # "UrlHomograph" : 20, # HIGH
+            "UrlHttp" : 5, # LOW
+            "UrlSsl" : 15, # NOT LOW + NOT HIGH #2
             "UrlSubDomain" : 10,
             # "UrlWhois" : 10,
 
-            "HtmlForm" : 10,
-            "HtmlIframe" : 10,
-            "HtmlJsUrl" : 10,
-            "HtmlLink" : 10,
-            "HtmlMetaRefresh" : 10,
-            "HtmlResourceUrl" : 10,
-            "HtmlStyle" : 10,
+            "HtmlForm" : 15, # NOT LOW + NOT HIGH #2
+            "HtmlIframe" : 15, # NOT LOW + NOT HIGH #2
+            "HtmlJsUrl" : 10, # NOT LOW + NOT HIGH #1
+            "HtmlLink" : 10, # NOT LOW + NOT HIGH #1
+            "HtmlMetaRefresh" : 15, # NOT LOW + NOT HIGH #2
+            "HtmlResourceUrl" : 10, # NOT LOW + NOT HIGH #1
+            "HtmlStyle" : 20, # HIGH ( ? )
+            
+            "JsStaticExternal" : 10, # NOT LOW + NOT HIGH #1
+            "JsStaticHook" : 15, # NOT LOW + NOT HIGH #2
+            "JsStaticObfuscate" : 10, # NOT LOW + NOT HIGH #1
+            "JsStaticRedirect" : 15, # NOT LOW + NOT HIGH #2
+            # "JsStaticScript" : 10, # NOT LOW + NOT HIGH #1
 
-            "JsStaticExternal" : 10,
-            "JsStaticHook" : 10,
-            "JsStaticObfuscate" : 10,
-            "JsStaticRedirect" : 10,
-            "JsStaticScript" : 10,
-
-            # "JsDynamicDom" : 10,
-            # "JsDynamicExternal" : 10,
-            # "JsDynamicHook" : 10,
-            # "JsDynamicObfuscate" : 10,
-            # "JsDynamicRedirect" : 10,
+            # "JsDynamicDom" : 20, # HIGH
+            # "JsDynamicExternal" : 15, # NOT LOW + NOT HIGH #2
+            # "JsDynamicHook" : 15, # NOT LOW + NOT HIGH #2
+            # "JsDynamicObfuscate" : 20, # HIGH
+            # "JsDynamicRedirect" : 15, # NOT LOW + NOT HIGH #2
         }

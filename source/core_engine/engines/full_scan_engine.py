@@ -3,7 +3,7 @@
 from core_engine.engines._base_scan_engine import BaseScanEngine, URL_MODULE_DIRECTORY_PATH, HTML_MODULE_DIRECTORY_PATH, JS_MODULE_DIRECTORY_PATH, AI_MODULE_DIRECTORY_PATH
 
 # [ Full ]
-ENGINE_RESULT_SCORE = 70
+ENGINE_RESULT_SCORE = 60
 
 class FullScanEngine(BaseScanEngine) :
     def __init__(self, input_url) :
