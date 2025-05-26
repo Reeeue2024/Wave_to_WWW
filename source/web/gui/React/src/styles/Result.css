@@ -1,0 +1,236 @@
+/* 전체 배경 */
+.result-background {
+    background: linear-gradient(to bottom right, #0d0d0d, #1a1a1a);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 0;
+}
+
+/* 헤더 (로고, 버튼들 위치) */
+.result-header {
+    width: 98%;
+    margin-top: -10px;
+    margin-bottom: -30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+}
+
+/* 페이지 중앙 메인 박스 (탐지 결과 담는 부분) */
+.result-container {
+    background: linear-gradient(to bottom right, #171717, #171717);
+    width: 95%;
+    border-radius: 30px;
+    padding: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    margin: 40px 0;
+}
+
+/* 안쪽 실제 콘텐츠 박스 */
+.result-box {
+    width: 70%;
+    margin: auto;
+    padding: 40px;
+    border-radius: 20px;
+    background-color: #111;
+    border: 1px solid white;
+    box-shadow: 0 0 20px #B95250;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* URL 표시 영역 */
+
+.url-section {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.url-text {
+    background: #000;
+    color: white;
+    font-weight: bold;
+    font-size: 20px;
+    border: 1px solid white;
+    box-shadow: 0 0 20px #B95250;
+    border-radius: 20px;
+    padding: 10px 24px;
+}
+
+/* 감지 모듈 요약 텍스트 */
+.detection-text {
+    color: #ccc;
+    font-size: 16px;
+    margin-top: 15px;
+    margin-bottom: 24px;
+}
+
+.detection-text .red {
+    color: #B95250;
+    font-weight: bold;
+}
+
+/* 점수 게이지 박스 */
+.gauge-wrapper {
+  width: 60%;
+  max-width: 250px;
+  margin: 0 auto;
+  text-align: center;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* 게이지 아래 점수 텍스트 */
+.gauge-score-text {
+  margin-top: -10px;
+  text-align: center;
+}
+
+.score-big {
+  font-size: 36px;
+  font-weight: bold;
+  color: #B95250;
+  margin: 0;
+}
+
+.score-label {
+  font-size: 14px;
+  color: #ccc;
+  margin-top: 4px;
+}
+
+/* 탭 헤더 버튼 영역 */
+.tabs-header {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin: 24px 0 12px;
+}
+
+.tab-button {
+    background: transparent;
+    color: #A1A1A1;
+    border: none;
+    border-bottom: 2px solid transparent;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 8px 16px;
+    transition: all 0.2s ease;
+}
+
+.tab-button.active {
+    color: #2185B7;
+    border-bottom: 2px solid #2185B7;
+}
+
+/* 탭 내용 영역 */
+.tab-content {
+    padding: 20px;
+    border-radius: 10px;
+    color: #eee;
+    text-align: left;
+}
+
+/* 모듈 카드 그리드 */
+.module-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+}
+
+/* 모듈 카드 개별 요소 */
+.module-card {
+    background-color: #1b1b1b;
+    border-radius: 10px;
+    padding: 16px;
+    color: white;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.module-title {
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.module-status {
+    font-size: 14px;
+}
+
+/* 감지 여부 스타일 */
+.safe {
+    border: 1px solid white;
+    box-shadow: 0 0 10px #2185B7;
+}
+
+.detected {
+    border: 1px solid white;
+    box-shadow: 0 0 10px #B95250;
+}
+
+.safe-text {
+    color: #2185B7;
+    font-weight: bold;
+}
+
+.detected-text {
+    color: #B95250;
+    font-weight: bold;
+}
+
+/* 푸터 */
+.result-footer {
+    width: 100%;
+    text-align: center;
+    margin-top: -30px;
+    font-size: 12px;
+    color: #aaa;
+}
+
+/* 헤더 로고 이미지 */
+.logo-image {
+    width: 70px;
+}
+
+/* 헤더 네비 버튼 그룹 */
+.nav-buttons {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* 버튼 공통 스타일 */
+.btn.white {
+    width: 90px;
+    background: transparent;
+    color: white;
+    border: 1px solid white;
+    box-shadow: 0 0 10px #66CCFF;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+/* GitHub 아이콘 */
+.github-icon {
+    width: 35px;
+    height: 35px;
+    object-fit: contain; /* 필요 시 추가 */
+}
