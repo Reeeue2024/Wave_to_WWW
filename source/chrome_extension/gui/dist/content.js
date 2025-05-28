@@ -56,7 +56,7 @@ document.addEventListener('mouseover', async (e) => {  // ← async 추가
   if (!link) return;
 
   try {
-    const res = await fetch('http://localhost:8000/detect/url', {
+    const res = await fetch('http://localhost:3000/detect/url', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
