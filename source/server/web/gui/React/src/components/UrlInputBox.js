@@ -32,10 +32,10 @@ function UrlInputBox() {
 
   try {
     const response = await axios.post(
-      "http://localhost:3000/detect/url",
+      "http://localhost:8000/detect/url",
       { url },
       { headers: { "client-type": "web" },
-        timeout: 30000
+        timeout: 3000
      }
     );
 
@@ -62,11 +62,11 @@ function UrlInputBox() {
       reasonData: (() => {
         const data = module.module_result_data?.reason_data;
         if (Array.isArray(data)) {
-          return data.map(d => typeof d === 'string' ? d : String(d));
+          return data.map(d => typeof d === 'string' ? d.slice(0, 10) : String(d).slice(0, 10));
         } else if (typeof data === 'string') {
-          return [data];
+          return [data.slice(0, 10)];
         } else if (data !== null && data !== undefined) {
-          return [String(data)];
+          return [String(data).slice(0, 10)];
         } else {
           return null;
         }

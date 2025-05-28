@@ -1,0 +1,45 @@
+services:
+  web:
+    build:
+      context: ./web/gui/react
+    ports:
+      - "1000:1000"
+    stdin_open: true
+    tty: true
+
+  # chrome_extension:
+  #   build: ./chrome_extension
+  #   ports:
+  #     - "2000:2000"
+
+  server:
+    build: ./server
+    ports:
+      - "3000:3000"
+    depends_on:
+      - kernel
+      - db
+    env_file:
+      - ./server/app/.env
+
+  kernel:
+    build: ./kernel
+    ports:
+      - "4000:4000"
+
+  db:
+    image: mysql:8.0
+    restart: always
+    container_name: mysql_container
+    environment:
+      MYSQL_DATABASE: wave_to_www_result
+      MYSQL_USER: wave_to_www
+      MYSQL_PASSWORD: wave_to_www_pw
+      MYSQL_ROOT_PASSWORD: wawave_to_www_root_pw
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+
+volumes:
+  db_data:

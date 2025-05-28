@@ -1,3 +1,5 @@
+########## ########## Kernel - Start ########## ##########
+
 # Kernel Server
 fastapi
 pydantic
@@ -26,3 +28,13 @@ scikit-learn
 
 # Tools
 # "dnstwist" : https://github.com/elceef/dnstwist
+
+########## ########## Kernel - End ########## ##########
+
+########## ########## Server - Start ########## ##########
+
+# Server Resource
+mysql-connector-python
+httpx
+
+########## ########## Server - End ########## ##########

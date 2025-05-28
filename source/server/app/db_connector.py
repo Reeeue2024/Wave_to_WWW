@@ -30,6 +30,35 @@ def get_db_connection():
         logger.error(f"Error: {err}")
         raise Exception("Database connection failed")
 
+# DB 초기화 (생성)
+def initialize_url_table():
+    create_table_query = """
+        CREATE TABLE IF NOT EXISTS url_table (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            input_url VARCHAR(2083) NOT NULL,
+            engine_result_flag BOOLEAN NOT NULL,
+            engine_result_score INT,
+            module_result_dictionary_list JSON,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            INDEX idx_input_url (input_url(768))
+        )
+    """
+    connection = None
+    cursor = None
+    try:
+        connection = get_db_connection()
+        cursor = connection.cursor()
+        cursor.execute(create_table_query)
+        connection.commit()
+        logger.info("url_table created or already exists.")
+    except mysql.connector.Error as err:
+        logger.error(f"Failed to create url_table: {err}")
+    finally:
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
+
 # DB에 URL 존재 여부 및 결과 조회
 def check_url_in_db(url):
     query = """

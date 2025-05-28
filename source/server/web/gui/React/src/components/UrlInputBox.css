@@ -1,0 +1,47 @@
+.url-input-box {
+    display: flex;
+    align-items: center;
+    background-color: black;
+    padding: 18px 18px;
+    border-radius: 30px;
+    width: 600px;
+    max-width: 90%;
+    margin-top: 50px;
+
+    border: 1px solid #ffffff;
+    box-shadow:
+      0 0 8px #66CCFF
+      0 0 16px #3399CC;
+
+    animation: blueNeonGlow 2.0s ease-in-out infinite alternate;
+  }
+  
+  .search-icon {
+    width: 20px;
+    height: 20px;
+    padding: 3px 5px;
+    margin-right: 10px;
+    object-fit: contain;
+  }
+  
+  .url-input {
+    border: none;
+    outline: none;
+    width: 100%;
+    font-size: 17px;
+  }
+  
+  @keyframes blueNeonGlow {
+  0% {
+    box-shadow:
+      0 0 8px #66CCFF,
+      0 0 16px #3399CC,
+      0 0 24px #1A3A55;
+  }
+  100% {
+    box-shadow:
+      0 0 10px #66CCFF,
+      0 0 20px #3399CC,
+      0 0 30px #1A3A55;
+  }
+}

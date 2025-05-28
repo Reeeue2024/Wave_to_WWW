@@ -9,19 +9,36 @@ from server.sessions.sessions import store_result, get_result
 from server.app.utils.response import success_response, error_response
 from server.app.utils.logger import logger
 from server.app.schemas.request_schema import UrlDetectRequest
-from configs.config import ALLOWED_ORIGINS
-from core_engine.kernel_service import KernelService
-from core_engine.kernel_resource import kernel_resource_instance
-from server.app.db_connector import check_url_in_db, insert_url_result
+from server.server_config.config import ALLOWED_ORIGINS
+# from server.kernel.kernel_service import KernelService
+# from server.kernel.kernel_resource import kernel_resource_instance
+from server.app.db_connector import initialize_url_table, check_url_in_db, insert_url_result
 import uuid
 import time
 import json
+import httpx
+
+async def call_kernel_api(input_url: str, engine_type: str) -> dict:
+    async with httpx.AsyncClient(timeout=30) as client:
+        try:
+            response = await client.post(
+                "http://kernel:4000/detect/url",  # kernel 컨테이너의 엔드포인트
+                json={"input_url": input_url, "engine_type": engine_type} 
+            )
+            response.raise_for_status()
+            return response.json()
+        except httpx.RequestError as e:
+            logger.error(f"[ Kernel API Error ] Request failed: {e}")
+            raise
+        except httpx.HTTPStatusError as e:
+            logger.error(f"[ Kernel API Error ] HTTP status error: {e}")
+            raise
 
 app = FastAPI()
 
 @app.on_event("startup")
-def load_kernel_resources():
-    kernel_resource_instance.load_resource()
+def startup_event():
+    initialize_url_table() # DB 테이블 초기화 (생성)
 
 # CORS 설정
 app.add_middleware(
@@ -83,11 +100,10 @@ async def detect_url(
 
     logger.info(f"[ New URL ] {url}")
     try:
-        kernel_service = KernelService()
-        result = kernel_service.run_kernel(input_url=url, engine_type=engine_type)
+        result = await call_kernel_api(input_url=url, engine_type=engine_type)
     except Exception as e:
-        logger.exception("[ ERROR ] Kernel execution failed.")
-        return error_response(message="Kernel execution failed", status_code=500)
+        logger.exception("[ ERROR ] Kernel HTTP call failed.")
+        return error_response(message="Kernel communication failed", status_code=500)
 
     duration = round((time.time() - start_time) * 1000)
     logger.info(f"[ Time ] Detection completed in {duration}ms")
