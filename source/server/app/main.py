@@ -13,10 +13,15 @@ from server.server_config.config import ALLOWED_ORIGINS
 # from server.kernel.kernel_service import KernelService
 # from server.kernel.kernel_resource import kernel_resource_instance
 from server.app.db_connector import initialize_url_table, check_url_in_db, insert_url_result
+from server.app.utils.kisa_report import report_to_kisa
+from dotenv import load_dotenv
+from urllib.parse import urlparse
 import uuid
 import time
 import json
 import httpx
+
+load_dotenv(dotenv_path="server/app/.env")
 
 async def call_kernel_api(input_url: str, engine_type: str) -> dict:
     async with httpx.AsyncClient(timeout=30) as client:
@@ -73,6 +78,12 @@ async def detect_url(
 ):
     url = str(data.url)
 
+    # URL 유효성 검사
+    parsed = urlparse(url)
+    if not parsed.scheme or not parsed.netloc:
+        logger.warning(f"[ Invalid URL Format ] {url}")
+        return error_response(message="Invalid URL format", status_code=400)
+
     # 클라이언트 타입 판별 (기본: web)
     client_type = request.headers.get("client-type", "web").lower()
     if client_type not in ("web", "extension"):
@@ -105,6 +116,11 @@ async def detect_url(
         logger.exception("[ ERROR ] Kernel HTTP call failed.")
         return error_response(message="Kernel communication failed", status_code=500)
 
+    # 커널 응답 JSON 구조 검사
+    if not all(k in result for k in ("input_url", "engine_result_flag", "engine_result_score", "module_result_dictionary_list")):
+        logger.error(f"[ Invalid Kernel Response ] Missing fields in kernel result: {result}")
+        return error_response(message="Invalid kernel response structure", status_code=500)
+    
     duration = round((time.time() - start_time) * 1000)
     logger.info(f"[ Time ] Detection completed in {duration}ms")
 
@@ -116,16 +132,29 @@ async def detect_url(
     else:
         clean_result = {
             "input_url": result.get("input_url"),
-            "engine_result_flag": result.get("engine_result_flag"),
+            "engine_result_flag": True, # result.get("engine_result_flag")
             "engine_result_score": result.get("engine_result_score"),
             "module_result_dictionary_list": result.get("module_result_dictionary_list")
         }
         response_payload = clean_result
-        insert_url_result(
-            input_url = clean_result.get("input_url"),
-            engine_result_flag = clean_result.get("engine_result_flag"),
-            engine_result_score = clean_result.get("engine_result_score"),
-            module_result_dictionary_list = clean_result.get("module_result_dictionary_list")
+
+        # DB insert
+        try:
+            insert_url_result(
+                input_url = clean_result.get("input_url"),
+                engine_result_flag = clean_result.get("engine_result_flag"),
+                engine_result_score = clean_result.get("engine_result_score"),
+                module_result_dictionary_list = clean_result.get("module_result_dictionary_list")
+            )
+        except Exception as e:
+            logger.error(f"[ DB Insert Error ] Failed to insert result into DB: {e}")
+
+    # KISA 리포트
+    if engine_type != "light" and clean_result.get("engine_result_flag") == True:
+        report_to_kisa(
+            url=clean_result.get("input_url"),
+            score=clean_result.get("engine_result_score"),
+            modules=clean_result.get("module_result_dictionary_list")
         )
     
     store_result(session_id, response_payload)
