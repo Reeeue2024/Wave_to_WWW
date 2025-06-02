@@ -1,47 +1,195 @@
+/* src/components/UrlInputBox.css */
+
+/* 검색창 컨테이너 */
 .url-input-box {
-    display: flex;
-    align-items: center;
-    background-color: black;
-    padding: 18px 18px;
-    border-radius: 30px;
-    width: 600px;
-    max-width: 90%;
-    margin-top: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-    border: 1px solid #ffffff;
-    box-shadow:
-      0 0 8px #66CCFF
-      0 0 16px #3399CC;
+  background-color: #171717;
+  padding: 18px 18px;
+  border-radius: 30px;
 
-    animation: blueNeonGlow 2.0s ease-in-out infinite alternate;
-  }
-  
-  .search-icon {
-    width: 20px;
-    height: 20px;
-    padding: 3px 5px;
-    margin-right: 10px;
-    object-fit: contain;
-  }
-  
-  .url-input {
-    border: none;
-    outline: none;
-    width: 100%;
-    font-size: 17px;
-  }
-  
-  @keyframes blueNeonGlow {
+  width: 700px;              
+  max-width: 90%;          
+  min-width: 90%;          
+  height: 50px;              
+
+  margin: 50px auto 0;
+  box-sizing: border-box;    
+
+  border: 1px solid #ffffff;
+  box-shadow:
+    0 0 8px #2185B7,
+    0 0 16px #66CCFF;
+
+  animation: blueNeonGlow 2s ease-in-out infinite alternate;
+}
+
+/* 기존 url-input-wrapper에 모드 분리 */
+.url-input-wrapper.result-mode {
+  pointer-events: none;
+}
+
+/* 파란색 glow 효과 (정상) */
+.safe-glow .url-input-box {
+  border: 1px solid white;
+  box-shadow: 0 0 10px #66CCFF;
+}
+
+/* 빨간색 glow 효과 (피싱) */
+.danger-glow .url-input-box {
+  border: 1px solid white;
+  box-shadow: 0 0 10px #B95250;
+}
+
+/* 검색 아이콘 */
+.search-icon {
+  width: 20px;
+  height: 20px;
+  margin-right: 10px;
+  object-fit: contain;
+}
+
+/* 입력 필드 */
+.url-input {
+  flex: 1;                         
+  border: none;
+  outline: none;
+  font-size: 17px;
+  color: #fff;
+  background-color: #171717;
+  font-family: 'PoppinsLight', sans-serif;
+}
+
+/* 네온 애니메이션 */
+@keyframes blueNeonGlow {
   0% {
     box-shadow:
-      0 0 8px #66CCFF,
-      0 0 16px #3399CC,
-      0 0 24px #1A3A55;
+      0 0 8px #2185B7,
+      0 0 16px #66CCFF,
+      0 0 24px #171717;
   }
   100% {
     box-shadow:
-      0 0 10px #66CCFF,
-      0 0 20px #3399CC,
-      0 0 30px #1A3A55;
+      0 0 10px #2185B7,
+      0 0 20px #66CCFF,
+      0 0 30px #171717;
   }
+}
+
+/* 폰트 설정 */
+@font-face {
+  font-family: 'PoppinsLight';
+  src: url('../assets/fonts/Poppins-Light.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* 모바일 최적화 */
+@media (max-width: 480px) {
+  .url-input-box {
+    padding: 14px 14px;
+    height: 50px;
+  }
+
+  .url-input {
+    font-size: 15px;
+  }
+
+  .search-icon {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+/* Toast용 애니메이션 제거 클래스 */
+.no-enter {
+  opacity: 1 !important;
+  transform: none !important;
+}
+.no-exit {
+  opacity: 0 !important;
+}
+
+/* Toast 자체 스타일 (중앙 고정) */
+.custom-toast {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  z-index: 9999 !important;
+  background-color: white !important;
+  border-radius: 8px !important;
+  text-align: center !important;
+  padding: 12px 18px !important;
+  min-width: 250px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+}
+
+/* dim 처리 배경 오버레이 */
+.toast-dim-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 9998;
+}
+
+/* 중앙에 위치한 사용자 정의 Toast 스타일 */
+.center-toast {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  z-index: 9999 !important;
+
+  background-color: rgba(23, 23, 23, 0.90) !important; /* ✅ 반투명 다크 배경 */
+  color: rgba(255, 255, 255, 0.92) !important;
+
+  border-radius: 10px !important;
+  text-align: center !important;
+  padding: 16px 24px !important;
+  min-width: 250px;
+  box-shadow: 0 0 16px rgba(0, 0, 0, 0.3);
+
+  font-family: 'PoppinsLight', sans-serif !important;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+/* Toast 내부 텍스트의 추가 스타일 */
+.center-toast-body {
+  text-align: center !important;
+  padding: 0;
+  margin: 0;
+
+}
+
+/* Toast 진행바 스타일 */
+.custom-toast-progress {
+  background: #B95250 !important; 
+  height: 4px !important;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+
+/* Toast 표시 중 화면에 덧씌워지는 반투명 오버레이 */
+.toast-dim-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 9998;
+}
+
+@font-face {
+  font-family: 'PoppinsLight';
+  src: url('../assets/fonts/Poppins-Light.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
 }
