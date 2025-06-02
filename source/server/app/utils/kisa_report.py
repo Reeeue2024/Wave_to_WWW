@@ -6,7 +6,7 @@ from email.mime.text import MIMEText
 from email.header import Header
 # from dotenv import load_dotenv
 from datetime import datetime
-from logger import logger
+from .logger import logger
 import os
 
 # load_dotenv(dotenv_path="../.env")
@@ -29,18 +29,22 @@ if not SMTP_USER or not SMTP_PASSWORD:
 def format_module_results_to_html(modules: list[dict]) -> str:
     rows = ""
     for module in modules:
-        name = module.get("module_name")
-        result = "탐지됨" if module.get("result_flag") else "정상"
-        score = module.get("module_score")
+        name = module.get("module_class_name")
+        result = "위험" if module.get("module_result_flag") else "정상"
+        evidence_data = module.get("module_result_data")
+        if isinstance(evidence_data, dict):
+            evidence = evidence_data.get("evidence", str(evidence_data))
+        else:
+            evidence = str(evidence_data) if evidence_data is not None else "x"
 
-        if name is None or result is None or score is None:
+        if name is None or result is None:
             continue
 
         rows += f"""
         <tr>
-            <td style="padding: 8px; border: 1px solid #ccc;">{name}</td>
-            <td style="padding: 8px; border: 1px solid #ccc;">{result}</td>
-            <td style="padding: 8px; border: 1px solid #ccc;">{score}</td>
+            <td style="padding: 8px; border: 1px solid #ccc; white-space: nowrap;">{name}</td>
+            <td style="padding: 8px; border: 1px solid #ccc; white-space: nowrap; ">{result}</td>
+            <td style="padding: 8px; border: 1px solid #ccc;">{evidence}</td>
         </tr>"""
     table = f"""
     <table style="border-collapse: collapse; width: 100%; font-family: sans-serif;">
@@ -48,7 +52,7 @@ def format_module_results_to_html(modules: list[dict]) -> str:
             <tr>
                 <th style="padding: 8px; border: 1px solid #ccc; background-color: #f2f2f2;">모듈 이름</th>
                 <th style="padding: 8px; border: 1px solid #ccc; background-color: #f2f2f2;">탐지 결과</th>
-                <th style="padding: 8px; border: 1px solid #ccc; background-color: #f2f2f2;">점수</th>
+                <th style="padding: 8px; border: 1px solid #ccc; background-color: #f2f2f2;">근거</th>
             </tr>
         </thead>
         <tbody>
@@ -74,7 +78,7 @@ def report_to_kisa(url: str, score: float = 0.0, modules: list[dict] = []) -> bo
             <li><strong>탐지 일시:</strong> {timestamp}</li>
         </ul>
 
-        <p><strong>모듈별 탐지 결과:</strong></p>
+        <p><strong>근거 자료: 탐지 시스템의 모듈별 탐지 결과</strong></p>
         {module_table}
 
         <p style="margin-top: 20px;">본 메일은 비영리 프로젝트의 자동화된 시스템에 의해 발송되었습니다.<br>감사합니다.</p>
