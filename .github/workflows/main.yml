@@ -29,11 +29,11 @@ jobs:
 
       - name: Tag Docker image
         run: |
-          docker tag wavetowww:latest <AWS_ACCOUNT_ID>.dkr.ecr.ap-northeast-2.amazonaws.com/wavetowww:latest
+          docker tag wavetowww:latest 589744711132.dkr.ecr.ap-northeast-2.amazonaws.com/wavetowww:latest
 
       - name: Push Docker image to Amazon ECR
         run: |
-          docker push <AWS_ACCOUNT_ID>.dkr.ecr.ap-northeast-2.amazonaws.com/wavetowww:latest
+          docker push 589744711132.dkr.ecr.ap-northeast-2.amazonaws.com/wavetowww:latest
 
       - name: Package application
         run: |
