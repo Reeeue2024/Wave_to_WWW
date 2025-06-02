@@ -22,7 +22,7 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t wavetowww .
+          docker build -t wavetowww -f ./server/Dockerfile ./server
 
       - name: Package application
         run: |
