@@ -6,6 +6,8 @@ services:
       - "1000:1000"
     stdin_open: true
     tty: true
+    volumes:
+      - ./web/gui/react:/web
 
   # chrome_extension:
   #   build: ./chrome_extension
@@ -21,6 +23,8 @@ services:
       - db
     env_file:
       - ./server/app/.env
+    volumes:
+      - ./server/app:/server/app
 
   kernel:
     build: ./kernel
@@ -37,7 +41,7 @@ services:
       MYSQL_PASSWORD: wave_to_www_pw
       MYSQL_ROOT_PASSWORD: wawave_to_www_root_pw
     ports:
-      - "3306:3306"
+      - "3366:3306"
     volumes:
       - db_data:/var/lib/mysql
 

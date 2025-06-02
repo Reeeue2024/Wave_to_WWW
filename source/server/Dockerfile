@@ -20,4 +20,4 @@ RUN chmod +x /server/wait-for-it.sh
 ENV PYTHONPATH=/
 
 # Run Server in Docker
-CMD ["/server/wait-for-it.sh", "db:3306", "--", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "3000"]
+CMD ["/server/wait-for-it.sh", "db:3366", "--", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "3000", "--reload"]
