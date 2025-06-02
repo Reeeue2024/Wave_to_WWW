@@ -24,6 +24,17 @@ jobs:
         run: |
           docker build -t wavetowww -f ./source/server/Dockerfile ./source/server
 
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Tag Docker image
+        run: |
+          docker tag wavetowww:latest <AWS_ACCOUNT_ID>.dkr.ecr.ap-northeast-2.amazonaws.com/wavetowww:latest
+
+      - name: Push Docker image to Amazon ECR
+        run: |
+          docker push <AWS_ACCOUNT_ID>.dkr.ecr.ap-northeast-2.amazonaws.com/wavetowww:latest
+
       - name: Package application
         run: |
           zip -r deploy-package.zip appspec.yml scripts/
