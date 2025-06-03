@@ -9,20 +9,20 @@
   align-items: center;
   padding: 20px 0;
   z-index: 0;
+  margin-top: -20px;
 }
 
-/* 헤더 */
-.result-header {
+/* 상단 헤더 */
+.home-header {
   width: 98%;
-  margin-top: -10px;
-  margin-bottom: -30px;
+  padding: 15px 15px;
+  margin-top: -5px;
+  margin-bottom: -5px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  color: white;
-  position: relative;
-  z-index: 1;
   background: #171717;
+  color: white;
 }
 
 /* 메인 결과 박스 */
@@ -30,7 +30,7 @@
   background: linear-gradient(to bottom right, #171717, #171717);
   width: 95%;
   border-radius: 30px;
-  padding: 40px;
+  padding: 40px 40px 40px 40px;  /* 위쪽 여백 줄이기 */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -39,6 +39,7 @@
   position: relative; /* 블롭 위치용 */
   overflow: hidden;
   background: #171717;
+  margin-top: 0px;
 }
 
 /* 콘텐츠 박스 */

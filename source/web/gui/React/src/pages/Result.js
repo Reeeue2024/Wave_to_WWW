@@ -9,10 +9,8 @@ import GaugeScore from '../components/GaugeScore';
 import WaveLoader from '../components/WaveLoader';
 import ResultUrlBox from '../components/ResultUrlBox';
 
-import logoHeader from '../assets/img/logo_header.png';
-import GitImage from '../assets/img/github.png';
-import GmailImage from '../assets/img/gmail.png';
-import ChromeExtensitonImage from '../assets/img/chrome_extension.png';
+import Header from '../components/Header'; 
+
 
 // 카테고리 및 모듈 설명 맵
 import { categoryMap, categoryDescriptions, moduleDescriptions } from '../components/descriptions';
@@ -182,60 +180,9 @@ function Result() {
 
   // 결과 페이지 전체 렌더링
   return (
+
     <div className="result-background">
-      {/* 상단 헤더 */}
-      <header className="home-header">
-        {/* 좌측 로고 클릭 시 홈으로 이동 */}
-        <img
-          src={logoHeader}
-          alt="Logo"
-          className="logo-image"
-          style={{ cursor: 'pointer' }}
-          onClick={() => navigate('/')}
-        />
-        {/* 우측 버튼들: Search, About, GitHub 링크 */}
-        <div className="nav-buttons">
-          <button className="btn white">Search</button>
-          <button className="btn white">About</button>
-
-          {/* Chrome Extension 아이콘 */}
-          <a
-            href="https://chrome.google.com/webstore/detail/your-extension-id"
-            className="chrome-icon-link"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <img src={ChromeExtensitonImage} alt="Chrome Extension" className="chrome-icon" />
-          </a>
-
-          {/* Gmail 아이콘 (툴팁 표시용) */}
-          <div className="tooltip-wrapper">
-            <div
-              className="gmail-icon-link"
-              onClick={handleGmailClick}
-              style={{ cursor: 'pointer' }}
-            >
-              <img src={GmailImage} alt="Gmail" className="gmail-icon" />
-              {showTooltip && (
-                <span className="tooltip-text">
-                  wavetowww@gmail.com<br />
-                  <span className="tooltip-sub">Reach out to wave to www</span>
-                </span>
-              )}
-            </div>
-          </div>
-          {/* Gitbub 아이콘 */}
-          <a
-            className="github-link"
-            href="https://github.com/Reeeue2024/PROJECT"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <img src={GitImage} alt="GitHub" className="github-icon" />
-          </a>
-        </div>
-      </header>
-
+      <Header />
       {/* 본문 결과 영역 */}
       <main className="result-container">
         {/* 배경 블롭 */}

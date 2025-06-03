@@ -309,7 +309,6 @@
   cursor: pointer;
 }
 
-
 /* Chrome Extension 아이콘 스타일 */
 .chrome-icon {
   width: 30px;
@@ -349,7 +348,7 @@
   top: 110%; 
   left: -195%;
   transform: translateX(-50%);
-  background: rgba(255, 255, 255, 0.55); 
+  background: rgba(255, 255, 255, 0.45); 
   color: #171717;
   padding: 20px 24px;
   border-radius: 10px;
