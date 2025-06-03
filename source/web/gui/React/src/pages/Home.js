@@ -15,13 +15,13 @@ import sparkle from '../assets/img/sparkle.png';
 
 function Home() {
   const navigate = useNavigate(); // 페이지 이동을 위한 hook
-  const [isLoading, setIsLoading] = useState(true); // 로딩 상태 관리
+  const [initialLoading, setInitialLoading] = useState(true);
 
   const [showTooltip, setShowTooltip] = useState(false)
 
   // 로딩 애니메이션 3초 후 종료
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 3000);
+    const timer = setTimeout(() => setInitialLoading(false), 3000);
     return () => clearTimeout(timer);
   }, []);
 
@@ -33,16 +33,13 @@ function Home() {
 
   return (
     <>
-      {/* 로딩 중일 때 보여줄 화면 (파도 + 로고 애니메이션) */}
-      {isLoading && (
+      {/* 초기 로딩 애니메이션 (3초) */}
+      {initialLoading ? (
         <div className="wave-loader">
           <div className="full-screen-wave" />
           <img src={logoHeader} alt="logo" className="loader-logo" />
         </div>
-      )}
-
-      {/* 로딩이 끝난 후 실제 페이지 렌더링 */}
-      {!isLoading && (
+      ) : (
         <div className="home-wrapper fade-in">
           <Header />
           {/* 본문 배경 영역 */}

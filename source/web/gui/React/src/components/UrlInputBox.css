@@ -23,7 +23,7 @@
     0 0 8px #2185B7,
     0 0 16px #66CCFF;
 
-  animation: blueNeonGlow 2s ease-in-out infinite alternate;
+  animation: none
 }
 
 /* 기존 url-input-wrapper에 모드 분리 */
@@ -40,7 +40,7 @@
 /* 빨간색 glow 효과 (피싱) */
 .danger-glow .url-input-box {
   border: 1px solid white;
-  box-shadow: 0 0 10px #B95250;
+  box-shadow: 0 0 12px #B95250;
 }
 
 /* 검색 아이콘 */

@@ -2,6 +2,7 @@
 // URL 분석 중 파도 애니메이션 로딩 화면을 표시하는 컴포넌트
 
 import React, { useEffect, useState } from 'react';
+import Header from './Header';
 import './WaveLoader.css';
 
 // 파도 애니메이션 로딩 화면을 출력하는 컴포넌트
@@ -24,7 +25,10 @@ function WaveLoader({ url }) {
   }, []);
 
   return (
-    <div className="wave-loader-wrapper">
+    <div className="wave-loader-wrapper wave-loader-active">
+      <div className="wave-loader-header">
+        <Header />
+      </div>
       {/* 원형 테두리 안에 파도 표시 */}
       <div className="circle-wrapper">
         <div className="circle">

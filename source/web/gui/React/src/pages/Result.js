@@ -9,7 +9,7 @@ import GaugeScore from '../components/GaugeScore';
 import WaveLoader from '../components/WaveLoader';
 import ResultUrlBox from '../components/ResultUrlBox';
 
-import Header from '../components/Header'; 
+import Header from '../components/Header';
 
 
 // 카테고리 및 모듈 설명 맵
@@ -99,14 +99,30 @@ function Result() {
 
   // reason 및 관련 링크 렌더링
   const renderReasonsWithData = (reason, data) => {
+    // case 1: reason, data 모두 배열
     if (Array.isArray(reason) && Array.isArray(data)) {
+      const filtered = reason
+        .map((r, i) => {
+          const text = typeof r === 'string' ? r.trim() : '';
+          const href = typeof data[i] === 'string' ? data[i].trim() : '';
+          if (!text && !href) return null;
+          return { text, href };
+        })
+        .filter(item => item !== null);
+
+      if (filtered.length === 0) return null;
+
       return (
         <ul className="reason-list">
-          {reason.map((r, i) => (
+          {filtered.map((item, i) => (
             <li key={i}>
-              <strong>{r}</strong>
-              {data[i] && typeof data[i] === 'string' && (
-                <div><a href={data[i]} target="_blank" rel="noopener noreferrer">{data[i]}</a></div>
+              {item.text && <strong>{item.text}</strong>}
+              {item.href && (
+                <div>
+                  <a href={item.href} target="_blank" rel="noopener noreferrer">
+                    {item.href}
+                  </a>
+                </div>
               )}
             </li>
           ))}
@@ -114,15 +130,31 @@ function Result() {
       );
     }
 
+    // case 2: reason이 문자열일 때
     if (typeof reason === 'string') {
-      const reasons = reason.split('.').filter(r => r.trim() !== '');
+      const reasons = reason
+        .split('.')
+        .map(r => r.trim())
+        .filter(r => r !== '');
+
+      const filtered = reasons.map((r, i) => {
+        const href = typeof data?.[i] === 'string' ? data[i].trim() : '';
+        return { text: r, href };
+      });
+
+      if (filtered.length === 0) return null;
+
       return (
         <ul className="reason-list">
-          {reasons.map((r, i) => (
+          {filtered.map((item, i) => (
             <li key={i}>
-              <strong>{r.trim()}</strong>
-              {data?.[i] && typeof data[i] === 'string' && (
-                <div><a href={data[i]} target="_blank" rel="noopener noreferrer">{data[i]}</a></div>
+              {item.text && <strong>{item.text}</strong>}
+              {item.href && (
+                <div>
+                  <a href={item.href} target="_blank" rel="noopener noreferrer">
+                    {item.href}
+                  </a>
+                </div>
               )}
             </li>
           ))}
@@ -130,14 +162,20 @@ function Result() {
       );
     }
 
+    // case 3: data만 배열일 때
     if (Array.isArray(data)) {
+      const validLinks = data
+        .filter(d => typeof d === 'string' && d.trim() !== '');
+
+      if (validLinks.length === 0) return null;
+
       return (
         <ul className="reason-list">
-          {data.map((d, i) => (
+          {validLinks.map((d, i) => (
             <li key={i}>
-              {typeof d === 'string'
-                ? <a href={d} target="_blank" rel="noopener noreferrer">{d}</a>
-                : '[Unsupported Format]'}
+              <a href={d} target="_blank" rel="noopener noreferrer">
+                {d}
+              </a>
             </li>
           ))}
         </ul>
@@ -146,6 +184,8 @@ function Result() {
 
     return <p>No reason provided.</p>;
   };
+
+
 
   // DETAILS 탭용 상세 모듈 설명 렌더링
   const renderDetails = (mods) => mods.map((mod, index) => {

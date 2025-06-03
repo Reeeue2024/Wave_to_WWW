@@ -6,6 +6,15 @@ body,
   background-color: #171717;
 }
 
+/* 상단 고정 헤더 전용 */
+.wave-loader-header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1001;
+}
+
 /* 원형 로딩 컨테이너: 중앙에 배치된 원형 테두리 */
 .circle {
   position: absolute;
@@ -62,6 +71,7 @@ body,
   0% {
     transform: translate(-50%, -75%) rotate(0deg);
   }
+
   100% {
     transform: translate(-50%, -75%) rotate(360deg);
   }
@@ -79,7 +89,15 @@ body,
 
 /* 로딩 원과 텍스트 사이 간격 조정 */
 .circle-wrapper {
-  margin-bottom: 120px;
+  margin-bottom: 150px;
+}
+
+.wave-loader-active {
+  position: fixed;
+  inset: 0;
+  background-color: #171717;
+  /* 검정 배경으로 구분 */
+  z-index: 9999;
 }
 
 /* 로딩 텍스트 스타일 */
@@ -95,12 +113,13 @@ body,
 .loading-url {
   color: #aaa;
   font-size: 14px;
-  margin-top: 6px;
+  margin-top: 16px;
   max-width: 90%;
   text-align: center;
   word-break: break-word;
   font-style: italic;
-    font-family: 'PoppinsLight', sans-serif;
+  font-family: 'PoppinsLight', sans-serif;
+  line-height: 1.6;
 }
 
 @font-face {
