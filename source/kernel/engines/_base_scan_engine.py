@@ -21,7 +21,7 @@ SUSPICIOUS_WEIGHT = 10
 HIGH_SUSPICIOUS_WEIGHT = 20
 
 # [ Default ]
-ENGINE_RESULT_SCORE = 60
+ENGINE_RESULT_SCORE = 10
 
 class BaseScanEngine :
     def __init__(self, input_url) :
@@ -47,7 +47,7 @@ class BaseScanEngine :
             (URL_MODULE_DIRECTORY_PATH, "url_short"),
 
             # Asynchronous #1 - AI
-            (AI_MODULE_DIRECTORY_PATH, "ai_url"),
+            (AI_MODULE_DIRECTORY_PATH, "ai"),
 
             # Asynchronous #2 - URL
             (URL_MODULE_DIRECTORY_PATH, "url_homograph"),
@@ -630,6 +630,7 @@ class BaseScanEngine :
         
         for module_result_dictionary in self.module_result_dictionary_list :
 
+            module_score = 0
             module_weight = 0
 
             module_class_name = module_result_dictionary.get("module_class_name")
@@ -652,26 +653,27 @@ class BaseScanEngine :
                     if module_result_dictionary.get("module_run") :
 
                         module_weight = module_result_dictionary.get("module_weight", 0)
+                        run_true_weight += module_weight
 
                         if module_result_dictionary.get("module_result_flag") :
 
-                            run_true_score += module_weight
+                            module_score = module_weight
+                            run_true_score += module_score
 
                             if module_weight >= HIGH_SUSPICIOUS_WEIGHT :
         
                                 high_suspicious_flag = True
                         
-                        run_true_weight += module_weight
-
             except Exception as e :
                 print(f"[ ERROR ] Fail to Get Result from Module : \"{module_result_dictionary.get('module_class_name')}\"")
                 print(f"{e}")
 
+                module_score = 0
                 module_weight = 0
                     
             try :
                 module_result_dictionary_list.append({
-                    "module_score" : module_weight,
+                    "module_score" : module_score,
                     **module_result_dictionary,
                 })
 
@@ -700,7 +702,15 @@ class BaseScanEngine :
             ai_run_true_score = 0
             ai_run_true_weight = 0
         
-        engine_result_rate_score_weight = ( run_true_score + ai_run_true_score ) / ( run_true_weight + ai_run_true_weight )
+        if run_true_weight > 0 or ai_run_true_weight > 0 :
+
+            engine_result_rate_score_weight = ( run_true_score + ai_run_true_score ) / ( run_true_weight + ai_run_true_weight )
+        
+        else :
+
+            engine_result_rate_score_weight = 0
+
+        # engine_result_rate_score_weight = ( run_true_score + ai_run_true_score ) / ( run_true_weight + ai_run_true_weight )
 
         self.engine_result_score = round(engine_result_rate_score_weight * 100)
         

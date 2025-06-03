@@ -22,7 +22,7 @@ class LightScanEngine(BaseScanEngine) :
         self.module_path_list = [
             (URL_MODULE_DIRECTORY_PATH, "url_short"),
 
-            (AI_MODULE_DIRECTORY_PATH, "ai_url"),
+            (AI_MODULE_DIRECTORY_PATH, "ai"),
 
             # (URL_MODULE_DIRECTORY_PATH, "url_homograph"),
             # (URL_MODULE_DIRECTORY_PATH, "url_http"),
@@ -58,7 +58,7 @@ class LightScanEngine(BaseScanEngine) :
 
         # [ Light ] Module Order List - Asynchronous
         self.module_order_list_asynchronous = [
-            "AiUrl",
+            "Ai",
 
             # "UrlHomograph",
             # "UrlHttp",
@@ -91,7 +91,7 @@ class LightScanEngine(BaseScanEngine) :
         self.module_weight_dictionary = {
             "UrlShort" : 5, # LOW
 
-            "AiUrl": 0, # Special ( Dynamic )
+            "Ai": 0, # Special ( Dynamic )
 
             # "UrlHomograph" : 20, # HIGH
             # "UrlHttp" : 5, # LOW

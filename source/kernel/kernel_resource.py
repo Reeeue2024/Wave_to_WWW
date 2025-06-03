@@ -42,14 +42,14 @@ class KernelResource :
 
         function_dictionary = {
             # Black List
-            "black_list_url" : lambda : list(db["black_list_url"].find({}, {"_id" : 0})), # ( Example ) "https://google.com"
-            "black_list_domain_suffix" : lambda : list(db["black_list_domain_suffix"].find({}, {"_id" : 0})),  # ( Example ) "google.com"
-            "black_list_brand" : lambda : list(db["black_list_brand"].find({}, {"_id" : 0})),  # ( Example ) "google"
+            # "black_list_url" : lambda : list(db["black_list_url"].find({}, {"_id" : 0})), # ( Example ) "https://google.com"
+            # "black_list_domain_suffix" : lambda : list(db["black_list_domain_suffix"].find({}, {"_id" : 0})),  # ( Example ) "google.com"
+            # "black_list_brand" : lambda : list(db["black_list_brand"].find({}, {"_id" : 0})),  # ( Example ) "google"
 
             # White List
-            "white_list_url" : lambda : list(db["white_list_url"].find({}, {"_id" : 0})),
-            "white_list_domain_suffix" : lambda : list(db["white_list_domain_suffix"].find({}, {"_id" : 0})),
-            "white_list_brand" : lambda : list(db["white_list_brand"].find({}, {"_id" : 0})),
+            # "white_list_url" : lambda : list(db["white_list_url"].find({}, {"_id" : 0})),
+            # "white_list_domain_suffix" : lambda : list(db["white_list_domain_suffix"].find({}, {"_id" : 0})),
+            # "white_list_brand" : lambda : list(db["white_list_brand"].find({}, {"_id" : 0})),
 
             # ETC
             "short_domain_list" : lambda : list(db["short_domain_list"].find({}, {"_id" : 0})),
@@ -74,19 +74,35 @@ class KernelResource :
                 print(f"  [ ! ]  {resource_name:<25} ( Load Resource - Fail )")
                 print(f"{e}")
         
+        # ( AI ) Get PKL File - Model + Scalar
         try :
             base_directory = os.path.dirname(os.path.abspath(__file__))
-            pkl_file_path = os.path.join(base_directory, "plugins", "ai_modules", "ai_model", "sprint4_phase3.pkl")
+            model_pkl_file_path = os.path.join(base_directory, "plugins", "ai_modules", "ai_model", "rf_29features_0603.pkl")
+            scalar_pkl_file_path = os.path.join(base_directory, "plugins", "ai_modules", "ai_model", "rf_29features_scaler_0603.pkl") 
 
-            if not os.path.exists(pkl_file_path) :
+            if not os.path.exists(model_pkl_file_path) :
 
-                raise FileNotFoundError(f"[ ERROR ] Fail to Get AI Model File : {pkl_file_path}")
+                raise FileNotFoundError(f"[ ERROR ] Fail to Get AI Model File : {model_pkl_file_path}")
 
-            with open(pkl_file_path, "rb") as f :
+            if not os.path.exists(scalar_pkl_file_path) :
 
-                bundle = pickle.load(f)
+                raise FileNotFoundError(f"[ ERROR ] Fail to Get AI Scalar File : {scalar_pkl_file_path}")
 
-            self.resource_dictionary["ai_model_bundle"] = bundle
+        except Exception as e :
+            self.resource_dictionary["ai_model_bundle"] = None
+            self.resource_dictionary["ai_scalar_bundle"] = None
+            
+            print(f"  [ ! ]  {'ai_model_bundle':<25} ( Get Resource - Fail )")
+            print(f"  [ ! ]  {'ai_scalar_bundle':<25} ( Get Resource - Fail )")
+            print(f"{e}")
+        
+        # ( AI ) Load PKL File - Model
+        try :
+            with open(model_pkl_file_path, "rb") as f :
+
+                model_bundle = pickle.load(f)
+
+            self.resource_dictionary["ai_model_bundle"] = model_bundle
 
             print(f"  [ + ]  {'ai_model_bundle':<25} ( Load Resource - Success )")
 
@@ -95,7 +111,23 @@ class KernelResource :
             
             print(f"  [ ! ]  {'ai_model_bundle':<25} ( Load Resource - Fail )")
             print(f"{e}")
+        
+        # ( AI ) Load PKL File - Scalar
+        try :
+            with open(scalar_pkl_file_path, "rb") as f :
 
+                scalar_bundle = pickle.load(f)
+
+            self.resource_dictionary["ai_scalar_bundle"] = scalar_bundle
+
+            print(f"  [ + ]  {'ai_scalar_bundle':<25} ( Load Resource - Success )")
+        
+        except Exception as e :
+            self.resource_dictionary["ai_scalar_bundle"] = None
+            
+            print(f"  [ ! ]  {'ai_scalar_bundle':<25} ( Load Resource - Fail )")
+            print(f"{e}")
+        
         print()
 
     """

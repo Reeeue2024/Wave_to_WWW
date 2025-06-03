@@ -1,0 +1,327 @@
+{
+  "success": true,
+  "message": "The request was successfully processed.",
+  "data": {
+    "input_url": "https://google.com/",
+    "engine_result_flag": 0,
+    "engine_result_score": 14,
+    "module_result_dictionary_list": [
+      {
+        "module_run": true,
+        "module_score": 5,
+        "module_weight": 5,
+        "module_class_name": "UrlShort",
+        "module_result_data": {
+          "reason": "Not Exist Short URL.",
+          "reason_data": null
+        },
+        "module_result_flag": false
+      },
+      {
+        "module_run": true,
+        "module_score": 0,
+        "module_weight": 0,
+        "module_class_name": "AiUrl",
+        "module_result_data": {
+          "reason": "Probability of Result : 0.29",
+          "reason_data": {
+            "is_ip": 0,
+            "path_entropy": 0,
+            "is_ip_and_long": 0,
+            "len_sub_domain": 0,
+            "file_path_depth": 0,
+            "url_length_level": 0,
+            "domain_complexity": 12.65,
+            "value_entropy_url": 3.54,
+            "has_suspicious_word": 0,
+            "ratio_alpha_numeric": 1,
+            "avg_path_segment_len": 0,
+            "num_numeric_segments": 0,
+            "query_length_category": 0,
+            "count_special_characters": 5
+          }
+        },
+        "module_result_flag": false
+      },
+      {
+        "module_run": true,
+        "module_score": 10,
+        "module_weight": 10,
+        "module_class_name": "UrlSubDomain",
+        "module_result_data": {
+          "reason": "Not Exist White List Brand in Sub Domain and Path.",
+          "reason_data": null
+        },
+        "module_result_flag": false
+      },
+      {
+        "module_run": true,
+        "module_score": 15,
+        "module_weight": 15,
+        "module_class_name": "HtmlForm",
+        "module_result_data": {
+          "reason": [
+            "Exist External URL in \"form\" Tag."
+          ],
+          "reason_data": [
+            "/search"
+          ]
+        },
+        "module_result_flag": true
+      },
+      {
+        "module_run": true,
+        "module_score": 15,
+        "module_weight": 15,
+        "module_class_name": "HtmlIframe",
+        "module_result_data": null,
+        "module_result_flag": false
+      },
+      {
+        "module_run": true,
+        "module_score": 10,
+        "module_weight": 10,
+        "module_class_name": "HtmlJsUrl",
+        "module_result_data": {
+          "reason": [
+            "External URL in Script Tag.",
+            "External URL in Script Tag.",
+            "External URL in Script Tag.",
+            "External URL in Script Tag."
+          ],
+          "reason_data": [
+            "https://www.gstatic.com/og/_/js/k=og.asy.en_US.YxN910XyAuI.2019.O/rt=j/m=_ac,_awd,ada,lldp,qads,abld ( ... )",
+            "https://www.gstatic.com/og/_/ss/k=og.asy.RnePwmYX8Yk.L.W.O/m=ll_tdm,adcgm3,ll_fw,abld/excm=/d=1/ed=1 ( ... )",
+            "https://www.google.co.kr/intl/ko/about/products",
+            "https://www.google.com\\"
+          ]
+        },
+        "module_result_flag": true
+      },
+      {
+        "module_run": true,
+        "module_score": 10,
+        "module_weight": 10,
+        "module_class_name": "HtmlLink",
+        "module_result_data": {
+          "reason": "Not Exist Hide Style / Different URL / Open Vulnerability in \"a\" Tag.",
+          "reason_data": null
+        },
+        "module_result_flag": false
+      },
+      {
+        "module_run": true,
+        "module_score": 15,
+        "module_weight": 15,
+        "module_class_name": "HtmlMetaRefresh",
+        "module_result_data": null,
+        "module_result_flag": false
+      },
+      {
+        "module_run": true,
+        "module_score": 10,
+        "module_weight": 10,
+        "module_class_name": "HtmlResourceUrl",
+        "module_result_data": {
+          "reason": [
+            "Exist External URL in Resource.",
+            "Exist External URL in Resource.",
+            "Exist External URL in Resource.",
+            "Exist External URL in Resource.",
+            "Exist External URL in Resource.",
+            "Exist External URL in Resource."
+          ],
+          "reason_data": [
+            "//www.gstatic.com/images/branding/searchlogo/ico/favicon.ico",
+            "/xjs/_/ss/k=xjs.hd.RbTVFINy51A.L.B1.O/am=gFAqEAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAQAAAAAAAAAAAa ( ... )",
+            "https://www.gstatic.com/og/_/ss/k=og.asy.RnePwmYX8Yk.L.W.O/m=ll_tdm,adcgm3,ll_fw,abld/excm=/d=1/ed=1 ( ... )",
+            "/xjs/_/js/k=xjs.hd.ko.t_DBm_srwAc.es5.O/am=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAA ( ... )",
+            "https://www.gstatic.com/og/_/js/k=og.asy.en_US.YxN910XyAuI.2019.O/rt=j/m=_ac,_awd,ada,lldp,qads,abld ( ... )",
+            "/tia/tia.png"
+          ]
+        },
+        "module_result_flag": true
+      },
+      {
+        "module_run": true,
+        "module_score": 20,
+        "module_weight": 20,
+        "module_class_name": "HtmlStyle",
+        "module_result_data": null,
+        "module_result_flag": false
+      },
+      {
+        "module_run": true,
+        "module_score": 10,
+        "module_weight": 10,
+        "module_class_name": "JsStaticExternal",
+        "module_result_data": {
+          "reason": [
+            "Exist External Image Request in JS.",
+            "Exist External IFrame Source in JS."
+          ],
+          "reason_data": [
+            "img.src=\"https://fonts.gstatic.com/s/i/short-term/release/googlesymbols/hide_image/default/24px.svg\"",
+            "createElement(\"iframe\");this.ma=b;Vm(b,a);this.A=new Promise((c,d)=>{let e=!1;const f=g=>{g.stopProp ( ... )"
+          ]
+        },
+        "module_result_flag": true
+      },
+      {
+        "module_run": true,
+        "module_score": 15,
+        "module_weight": 15,
+        "module_class_name": "JsStaticHook",
+        "module_result_data": {
+          "reason": [
+            "Hook Mouse Event in JS.",
+            "Exist Set Time in JS.",
+            "Hook ( Form ) Submit Event in JS.",
+            "Exist DOM Mutate Observe in JS.",
+            "Exist \"preventDefault()\" in JS."
+          ],
+          "reason_data": [
+            "addEventListener(\"click\",function(b){var a;a:{for(a=b.target;a&&a!==document.documentElement;a=a.par ( ... )",
+            "setTimeout(function(){document.body.appendChild(a)},50*Math.pow(2,d)+Math.random()*50))};}).call(thi ( ... )",
+            "addEventListener(\"submit\",function(b){var a;if(a=b.target){var c=a.getAttribute(\"data-submitfalse\"); ( ... )",
+            "new MutationObserver(function(){var g=a.Eb(c).el();g&&(d(g),f.disconnect())})",
+            ".preventDefault()"
+          ]
+        },
+        "module_result_flag": true
+      },
+      {
+        "module_run": true,
+        "module_score": 10,
+        "module_weight": 10,
+        "module_class_name": "JsStaticObfuscate",
+        "module_result_data": {
+          "reason": [
+            "Exist Hex Obfuscate in JS.",
+            "Exist Character Code Obfuscate in JS.",
+            "Exist Replace Function Obfuscate in JS.",
+            "Exist Base64 Obfuscate in JS."
+          ],
+          "reason_data": [
+            "\\x3d",
+            "String.fromCharCode(60)",
+            ".replace(/\\-([a-z])/g,function(b,c){return c.toUpperCase()})};_.De=function(a){return a.replace(RegE ( ... )",
+            "btoa(c)"
+          ]
+        },
+        "module_result_flag": true
+      },
+      {
+        "module_run": true,
+        "module_score": 15,
+        "module_weight": 15,
+        "module_class_name": "JsStaticRedirect",
+        "module_result_data": {
+          "reason": "Not Exist Redirect Pattern in JS.",
+          "reason_data": null
+        },
+        "module_result_flag": false
+      },
+      {
+        "module_run": true,
+        "module_score": 10,
+        "module_weight": 10,
+        "module_class_name": "JsStaticScript",
+        "module_result_data": {
+          "reason": [
+            "Exist Element Append to DOM Script in JS.",
+            "Exist Source Assign Script in JS.",
+            "Exist \"document.createElement()\" Inject Script in JS."
+          ],
+          "reason_data": [
+            "appendChild(a)},50*Math.pow(2,d)+Math.random()*50))};}).call(this);\n(function(){google.kEXPI='0,1816 ( ... )",
+            ".src=\"https://fonts.gstatic.com/s/i/short-term/release/googlesymbols/hide_image/default/24px.svg\"",
+            "document.createElement(\"script\")"
+          ]
+        },
+        "module_result_flag": true
+      },
+      {
+        "module_run": true,
+        "module_score": 20,
+        "module_weight": 20,
+        "module_class_name": "JsDynamicDom",
+        "module_result_data": null,
+        "module_result_flag": false
+      },
+      {
+        "module_run": true,
+        "module_score": 15,
+        "module_weight": 15,
+        "module_class_name": "JsDynamicExternal",
+        "module_result_data": null,
+        "module_result_flag": false
+      },
+      {
+        "module_run": true,
+        "module_score": 15,
+        "module_weight": 15,
+        "module_class_name": "JsDynamicHook",
+        "module_result_data": null,
+        "module_result_flag": false
+      },
+      {
+        "module_run": true,
+        "module_score": 20,
+        "module_weight": 20,
+        "module_class_name": "JsDynamicObfuscate",
+        "module_result_data": null,
+        "module_result_flag": false
+      },
+      {
+        "module_run": true,
+        "module_score": 15,
+        "module_weight": 15,
+        "module_class_name": "JsDynamicRedirect",
+        "module_result_data": null,
+        "module_result_flag": false
+      },
+      {
+        "module_run": true,
+        "module_score": 20,
+        "module_weight": 20,
+        "module_class_name": "UrlHomograph",
+        "module_result_data": null,
+        "module_result_flag": false
+      },
+      {
+        "module_run": true,
+        "module_score": 15,
+        "module_weight": 15,
+        "module_class_name": "UrlSsl",
+        "module_result_data": {
+          "reason": "Not Use Free CA / Not Trust CA in SSL Certificate.",
+          "reason_data": null
+        },
+        "module_result_flag": false
+      },
+      {
+        "module_run": true,
+        "module_score": 5,
+        "module_weight": 5,
+        "module_class_name": "UrlHttp",
+        "module_result_data": {
+          "reason": "Use HTTP.",
+          "reason_data": "http://google.com/"
+        },
+        "module_result_flag": true
+      },
+      {
+        "module_run": true,
+        "module_score": 10,
+        "module_weight": 10,
+        "module_class_name": "UrlWhois",
+        "module_result_data": {
+          "reason": "Not Exist \"Recent Create / Private Information / Free TLD / Diffeernt Country\" in \"WHOIS\" Data.",
+          "reason_data": null
+        },
+        "module_result_flag": false
+      }
+    ]
+  }
+}

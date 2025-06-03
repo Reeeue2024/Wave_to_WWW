@@ -1,28 +1,9 @@
-# [ Kernel ] Module - AI : ai_url.py - extract_features_0603.py
+# [ Kernel ] Module - AI : ai_url.py - extract_features.py
 
 import re
-import socket
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse
-import pandas as pd
-import pickle
-from datetime import datetime, timezone
-import whois
-import time
-
-# 안전한 출력 함수
-def safe_print(msg):
-    try:
-        print(msg.encode("utf-8", "replace").decode("utf-8"))
-    except Exception as e:
-        print(f"[출력 오류 발생: {e}]")
-
-# 모델 및 스케일러 로드
-with open("features(rf500).pkl", "rb") as f:
-    model = pickle.load(f)
-with open("scaler(rf500).pkl", "rb") as f:
-    scaler = pickle.load(f)
 
 # feature 목록
 updated_feature_names = [
@@ -41,7 +22,6 @@ def extract_features(url, threshold=0.7):
     features = {}
     suspicious_reasons = []
 
-    # URL
     features['length_url'] = len(url)
     if features['length_url'] > 100:
         suspicious_reasons.append("length_url (long URL)")
@@ -106,7 +86,7 @@ def extract_features(url, threshold=0.7):
     if features['phish_hints'] == 1:
         suspicious_reasons.append("phish_hints (Contains phishing keywords)")
 
-    # HTML
+    # HTML 분석
     try:
         response = requests.get(url, timeout=1)
         soup = BeautifulSoup(response.content, 'html.parser')
@@ -157,7 +137,7 @@ def extract_features(url, threshold=0.7):
                   'Request_URL', 'URL_of_Anchor', 'Links_in_tags', 'SFH', 'Iframe']:
             features[k] = 0
 
-    # 생략 feature
+    # WHOIS (생략 또는 고정)
     features['domain_age'] = 0
     features['page_rank'] = 0
     features['google_index'] = 0
@@ -171,46 +151,5 @@ def extract_features(url, threshold=0.7):
     for col in updated_feature_names:
         if col not in features:
             features[col] = 0
-
-    features_df = pd.DataFrame([features])[updated_feature_names]
-
-    # 모델 추론
-    scaled_array = scaler.transform(features_df)
-    scaled_features = pd.DataFrame(scaled_array, columns=features_df.columns)
-    raw_prob = model.predict_proba(scaled_features)[0][1]
-
-    # 점수 보정
-    row = features_df.iloc[0]
-    boost = 0
-
-    # 피싱 보정
-    if row['phish_hints'] == 1: boost += 0.10
-    if row['prefix_suffix'] == 1: boost += 0.06
-    if row['Favicon'] == 1: boost += 0.05
-    if row['shortest_word_host'] <= 2: boost += 0.04
-    if row['longest_words_raw'] > 20: boost += 0.03
-    if row['ratio_digits_url'] > 0.3: boost += 0.03
-    if row['nb_hyperlinks'] < 5: boost += 0.03
-    if row['ratio_intHyperlinks'] < 0.3: boost += 0.02
-    if row['longest_words_raw'] > 30: boost += 0.03
-    if row['longest_word_path'] > 20: boost += 0.03
-    if row['Favicon'] == 1 and row['ratio_intHyperlinks'] < 0.3: boost += 0.04
-    if row['prefix_suffix'] == 1 and row['shortest_word_host'] <= 2: boost += 0.04
-
-    # 정상 보정
-    if row['ratio_intHyperlinks'] > 0.6: boost -= 0.04
-    if row['domain_in_title'] == 1: boost -= 0.02
-    if row.get('Iframe', 1) == 0: boost -= 0.01
-    if row['nb_hyperlinks'] > 20: boost -= 0.03
-    trusted_domains = ['google', 'netflix', 'naver', 'amazon', 'microsoft', 'akamai', 'apple']
-    if any(t in domain for t in trusted_domains):
-        boost -= 0.04
-    if row['ratio_intHyperlinks'] > 0.5 and row['nb_hyperlinks'] > 5:
-        boost -= 0.03
-    if row['length_hostname'] > 30 and any(x in domain for x in ['elb.amazonaws.com', 'akadns.net']):
-        boost -= 0.03
-
-    # 제한 조정
-    boost = min(max(boost, -0.08), 0.25)
-    prob = min(max(raw_prob + boost, 0.0), 1.0)
-    pred_label = int(prob >= threshold)
+    
+    return features, updated_feature_names, domain
