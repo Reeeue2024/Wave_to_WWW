@@ -132,7 +132,7 @@ async def detect_url(
     else:
         clean_result = {
             "input_url": result.get("input_url"),
-            "engine_result_flag": True, # result.get("engine_result_flag")
+            "engine_result_flag": result.get("engine_result_flag"),
             "engine_result_score": result.get("engine_result_score"),
             "module_result_dictionary_list": result.get("module_result_dictionary_list")
         }
