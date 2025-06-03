@@ -9,8 +9,10 @@ import GaugeScore from '../components/GaugeScore';
 import WaveLoader from '../components/WaveLoader';
 import ResultUrlBox from '../components/ResultUrlBox';
 
-import logoImage from '../assets/img/logo_header.png';
+import logoHeader from '../assets/img/logo_header.png';
 import GitImage from '../assets/img/github.png';
+import GmailImage from '../assets/img/gmail.png';
+import ChromeExtensitonImage from '../assets/img/chrome_extension.png';
 
 // 카테고리 및 모듈 설명 맵
 import { categoryMap, categoryDescriptions, moduleDescriptions } from '../components/descriptions';
@@ -22,12 +24,19 @@ function Result() {
   const [activeTab, setActiveTab] = useState('detection'); // 탭 상태
   const [loading, setLoading] = useState(true); // 로딩 상태
   const userInputUrl = resultData?.inputUrl;
+  const [showTooltip, setShowTooltip] = useState(false)
 
   // 로딩 화면 2초 후 제거
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 2000);
     return () => clearTimeout(timer);
   }, []);
+
+  const handleGmailClick = (e) => {
+    e.preventDefault();
+    setShowTooltip(true);
+    setTimeout(() => setShowTooltip(false), 6000);
+  };
 
   // resultData가 없을 경우 에러 처리
   if (!resultData) {
@@ -37,6 +46,7 @@ function Result() {
   const { summary, modules } = resultData;
   const phishingCount = modules.filter(mod => mod.moduleResultFlag).length;
   const totalCount = modules.length;
+
 
   // 모듈 이름 접두사 기준으로 카테고리 분류
   const inferCategory = (name) => {
@@ -73,7 +83,7 @@ function Result() {
           setTimeout(() => {
             const target = document.getElementById(`detail-${mod.moduleName}`);
             if (target) {
-              target.scrollIntoView({ behavior: 'smooth', block: 'start' }); 
+              target.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
           }, 100);
         }}
@@ -174,17 +184,47 @@ function Result() {
   return (
     <div className="result-background">
       {/* 상단 헤더 */}
-      <header className="result-header">
+      <header className="home-header">
+        {/* 좌측 로고 클릭 시 홈으로 이동 */}
         <img
-          src={logoImage}
+          src={logoHeader}
           alt="Logo"
           className="logo-image"
           style={{ cursor: 'pointer' }}
           onClick={() => navigate('/')}
         />
+        {/* 우측 버튼들: Search, About, GitHub 링크 */}
         <div className="nav-buttons">
           <button className="btn white">Search</button>
           <button className="btn white">About</button>
+
+          {/* Chrome Extension 아이콘 */}
+          <a
+            href="https://chrome.google.com/webstore/detail/your-extension-id"
+            className="chrome-icon-link"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <img src={ChromeExtensitonImage} alt="Chrome Extension" className="chrome-icon" />
+          </a>
+
+          {/* Gmail 아이콘 (툴팁 표시용) */}
+          <div className="tooltip-wrapper">
+            <div
+              className="gmail-icon-link"
+              onClick={handleGmailClick}
+              style={{ cursor: 'pointer' }}
+            >
+              <img src={GmailImage} alt="Gmail" className="gmail-icon" />
+              {showTooltip && (
+                <span className="tooltip-text">
+                  wavetowww@gmail.com<br />
+                  <span className="tooltip-sub">Reach out to wave to www</span>
+                </span>
+              )}
+            </div>
+          </div>
+          {/* Gitbub 아이콘 */}
           <a
             className="github-link"
             href="https://github.com/Reeeue2024/PROJECT"
