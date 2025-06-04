@@ -37,7 +37,7 @@ jobs:
 
       - name: Package application
         run: |
-          zip -r deploy-package.zip appspec.yml scripts/
+          zip -r deploy-package.zip appspec.yml scripts/ source/
 
       - name: Upload to S3
         run: |
