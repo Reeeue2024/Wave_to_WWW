@@ -6,7 +6,7 @@ import Header from './Header';
 import './WaveLoader.css';
 
 // 파도 애니메이션 로딩 화면을 출력하는 컴포넌트
-function WaveLoader({ url }) {
+function WaveLoader({ url, onCancelHome }) {
   const [waveTop, setWaveTop] = useState(50); // 파도 위치 상태값 (% 단위)
 
   // 파도 위치를 주기적으로 위로 올리다가 다시 초기화하는 애니메이션 효과
@@ -27,7 +27,7 @@ function WaveLoader({ url }) {
   return (
     <div className="wave-loader-wrapper wave-loader-active">
       <div className="wave-loader-header">
-        <Header />
+        <Header onLogoClick={onCancelHome} />
       </div>
       {/* 원형 테두리 안에 파도 표시 */}
       <div className="circle-wrapper">

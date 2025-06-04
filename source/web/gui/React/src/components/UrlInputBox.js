@@ -1,26 +1,31 @@
 // src/components/UrlInputBox.js
-import React, { useState } from 'react';
+
+import React, { useState, useRef } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { toast, cssTransition } from 'react-toastify';
-import WaveLoader from './WaveLoader'; // ⬅️ 추가
+import WaveLoader from './WaveLoader';
 import 'react-toastify/dist/ReactToastify.css';
 import './UrlInputBox.css';
 import searchIcon from '../assets/img/search_icon.png';
 
+// 커스텀 토스트 애니메이션 제거 설정 (입장/퇴장 효과 없음)
 const NoAnimation = cssTransition({
   enter: 'no-enter',
   exit: 'no-exit',
   duration: [1, 1],
 });
 
+
 function UrlInputBox() {
   const [url, setUrl] = useState('');
   const [error, setError] = useState('');
   const [serverError, setServerError] = useState('');
-  const [loading, setLoading] = useState(false); // ⬅️ WaveLoader 제어용
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const canceled = useRef(false);
 
+  // URL 유효성 검사 정규표현식
   const isValidUrl = (value) => {
     const pattern = new RegExp('^(https?:\\/\\/)?' +
       '(([\\da-z.-]+)\\.([a-z.]{2,6})|' +
@@ -30,6 +35,7 @@ function UrlInputBox() {
     return pattern.test(value);
   };
 
+  // 중앙에 커스텀 토스트 메시지를 표시하는 함수
   const showCenteredToast = (msg) => {
     toast.error(msg, {
       transition: NoAnimation,
@@ -49,6 +55,7 @@ function UrlInputBox() {
     });
   };
 
+  // 폼 제출 이벤트 처리
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -62,9 +69,10 @@ function UrlInputBox() {
 
     setError('');
     setServerError('');
-    setLoading(true); // ✅ WaveLoader 표시
+    setLoading(true);
 
     try {
+      // 백엔드 서버로 URL 분석 요청
       const response = await axios.post(
         'http://localhost:3000/detect/url',
         { url },
@@ -76,12 +84,14 @@ function UrlInputBox() {
 
       const payload = response.data.data || response.data;
 
+      // 요약 결과 저장
       const scanResult = {
         inputUrl: payload.input_url,
         resultFlag: payload.engine_result_flag,
         resultScore: payload.engine_result_score,
       };
 
+      // 모듈별 분석 결과 정리
       const scanModuleResultMap = Array.isArray(payload.module_result_dictionary_list)
         ? payload.module_result_dictionary_list.map((module) => ({
           moduleName: module.module_class_name,
@@ -101,13 +111,17 @@ function UrlInputBox() {
         }))
         : [];
 
-      navigate('/result', {
-        state: {
-          summary: scanResult,
-          modules: scanModuleResultMap,
-          inputUrl: url,
-        },
-      });
+      // 페이지 이동 (결과 페이지로)
+      if (!canceled.current) {
+        navigate('/result', {
+          state: {
+            summary: scanResult,
+            modules: scanModuleResultMap,
+            inputUrl: url,
+          },
+        });
+      }
+
     } catch (err) {
       console.error('Axios error:', err);
       let msg = '';
@@ -117,11 +131,22 @@ function UrlInputBox() {
 
       setServerError(msg);
       showCenteredToast(msg);
-      setLoading(false); // ❗ 실패 시만 로딩 해제
+
+      // 취소 상태일 경우 홈으로 이동, 아니면 로딩 해제
+      if (canceled.current) {
+        navigate('/');
+      } else {
+        setLoading(false);
+      }
     }
   };
 
-  if (loading) return <WaveLoader url={url} />; // ✅ 검사 중이면 WaveLoader만 렌더
+  // 로딩 중이면 WaveLoader 로딩 화면 출력
+  if (loading) return <WaveLoader url={url} onCancelHome={() => {
+    canceled.current = true;
+    setLoading(false); // 로딩 종료
+    navigate('/');     // 홈으로 이동
+  }} />;
 
   return (
     <div className="url-input-wrapper">

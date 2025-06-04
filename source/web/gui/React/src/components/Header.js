@@ -7,10 +7,10 @@ import GitImage from '../assets/img/github.png';
 import GmailImage from '../assets/img/gmail.png';
 import ChromeExtensitonImage from '../assets/img/chrome_extension.png';
 
-function Header() {
+function Header({ onLogoClick }) {
   const navigate = useNavigate();
-  const [showTooltip, setShowTooltip] = useState(false);
 
+  const [showTooltip, setShowTooltip] = useState(false);
   const handleGmailClick = (e) => {
     e.preventDefault();
     setShowTooltip(true);
@@ -24,7 +24,7 @@ function Header() {
         alt="Logo"
         className="logo-image"
         style={{ cursor: 'pointer' }}
-        onClick={() => navigate('/')}
+        onClick={onLogoClick || (() => navigate('/'))}
       />
       <div className="nav-buttons">
         <button className="btn white">Search</button>

@@ -21,6 +21,13 @@ export const categoryDescriptions = {
 
 // 각 탐지 모듈별 이름, 간단 설명, 상세 설명 정의
 export const moduleDescriptions = {
+  // AI
+  Ai: {
+    name: 'AI',
+    description: 'Detects phishing using 29 features from URL, HTML, and domain data.',
+    longDescription: 'Our AI model analyzes 29 carefully selected features extracted from the URL structure, HTML content, and domain-related information to detect phishing websites. With a detection accuracy of over 96%, it provides reliable and real-time threat assessment based on data-driven insights.'
+  },
+
   // URL 모듈
   UrlShort: {
     name: 'Shortened URL Usage',
