@@ -6,9 +6,6 @@ services:
       - "1000:1000"
     stdin_open: true
     tty: true
-    volumes:
-      - ./web/gui/react:/web
-      - /web/node_modules
 
   # chrome_extension:
   #   build: ./chrome_extension
@@ -48,3 +45,4 @@ services:
 
 volumes:
   db_data:
+  node_modules:
