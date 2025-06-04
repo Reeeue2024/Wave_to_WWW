@@ -94,23 +94,37 @@ function UrlInputBox() {
 
       // 모듈별 분석 결과 정리
       const scanModuleResultMap = Array.isArray(payload.module_result_dictionary_list)
-        ? payload.module_result_dictionary_list.map((module) => ({
-          moduleName: module.module_class_name,
-          moduleRun: module.module_run,
-          moduleScore: module.module_score,
-          moduleWeight: module.module_weight,
-          moduleResultFlag: module.module_result_flag,
-          moduleError: module.module_error || null,
-          reason: module.module_result_data?.reason || null,
-          reasonData: (() => {
-            const data = module.module_result_data?.reason_data;
-            if (Array.isArray(data)) return data.map((d) => String(d));
-            else if (typeof data === 'string') return [data];
-            else if (data != null) return [String(data)];
-            return null;
-          })(),
-        }))
-        : [];
+  ? payload.module_result_dictionary_list.map((module) => ({
+      moduleName: module.module_class_name,
+      moduleRun: module.module_run,
+      moduleScore: module.module_score,
+      moduleWeight: module.module_weight,
+      moduleResultFlag: module.module_result_flag,
+      moduleError: module.module_error || null,
+      reason: module.module_result_data?.reason || null,
+      reasonData: (() => {
+        const data = module.module_result_data?.reason_data;
+
+        // ✅ AI 모듈일 때: 객체로 올 경우 처리
+        if (
+          module.module_class_name === 'Ai' &&
+          typeof data === 'object' &&
+          data !== null &&
+          !Array.isArray(data)
+        ) {
+          return Object.entries(data).map(([key, value]) => `${key}: ${value}`);
+        }
+
+        // ✅ 일반적인 배열/string 처리
+        if (Array.isArray(data)) return data.map((d) => String(d));
+        if (typeof data === 'string') return [data];
+        if (data != null) return [String(data)];
+
+        return null;
+      })(),
+    }))
+  : [];
+
 
       // 페이지 이동 (결과 페이지로)
       if (!canceled.current) {
