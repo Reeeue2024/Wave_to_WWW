@@ -5,6 +5,7 @@ from kernel.plugins._base_module import BaseModule
 import sys
 from urllib.parse import urlparse
 import tldextract
+import time
 
 class UrlSubDomain(BaseModule) :
     def __init__(self, input_url) :
@@ -18,9 +19,7 @@ class UrlSubDomain(BaseModule) :
     OUT : 
     """
     async def scan(self) :
-        # import time
-
-        # time.sleep(15)
+        start_time = time.time()
 
         urlparse_result = urlparse(self.input_url)
 
@@ -31,6 +30,7 @@ class UrlSubDomain(BaseModule) :
         if hostname is None :
 
             self.module_run = False
+            self.module_run_time = round(time.time() - start_time, 2)
             self.module_error = "[ ERROR ] Fail to Get Host Name."
             self.module_result_flag = False
             self.module_result_data = None
@@ -69,6 +69,7 @@ class UrlSubDomain(BaseModule) :
                 if brand in subdomain :
 
                     self.module_run = True
+                    self.module_run_time = round(time.time() - start_time, 2)
                     self.module_error = None
                     self.module_result_flag = True
                     self.module_result_data["reason"] = "Exist White List Brand in Sub Domain."
@@ -87,6 +88,7 @@ class UrlSubDomain(BaseModule) :
                     if brand in path :
 
                         self.module_run = True
+                        self.module_run_time = round(time.time() - start_time, 2)
                         self.module_error = None
                         self.module_result_flag = True
                         self.module_result_data["reason"] = "Exist White List Brand in Path."
@@ -111,6 +113,7 @@ class UrlSubDomain(BaseModule) :
         else :
 
             self.module_run = True
+            self.module_run_time = round(time.time() - start_time, 2)
             self.module_error = None
             self.module_result_flag = False
             self.module_result_data["reason"] = "Exist \"Domain + Suffix\" in White List."

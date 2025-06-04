@@ -6,6 +6,7 @@ import sys
 from urllib.parse import urlparse
 import tldextract
 import re
+import time
 
 class HtmlJsUrl(BaseModule) :
     def __init__(self, input_url) :
@@ -44,12 +45,15 @@ class HtmlJsUrl(BaseModule) :
     OUT : 
     """
     async def scan(self) :
+        start_time = time.time()
+
         html_file_bs_object = self.engine_resource.get("html_file_bs_object")
 
         # Run Fail Case #1
         if not html_file_bs_object :
 
             self.module_run = False
+            self.module_run_time = round(time.time() - start_time, 2)
             self.module_error = "[ ERROR ] Fail to Get HTML File from Engine."
             self.module_result_flag = False
             self.module_result_data = None
@@ -98,6 +102,7 @@ class HtmlJsUrl(BaseModule) :
         if reason_list or reason_data_list :
 
             self.module_run = True
+            self.module_run_time = round(time.time() - start_time, 2)
             self.module_error = None
             self.module_result_flag = True
             self.module_result_data["reason"] = reason_list
@@ -107,6 +112,7 @@ class HtmlJsUrl(BaseModule) :
         else :
 
             self.module_run = True
+            self.module_run_time = round(time.time() - start_time, 2)
             self.module_error = None
             self.module_result_flag = False
             self.module_result_data["reason"] = "Not Exist External URL in Event Attribute and Script Tag."

@@ -9,7 +9,7 @@ from bs4 import BeautifulSoup
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # [ Light ]
-ENGINE_RESULT_SCORE = 60
+ENGINE_RESULT_SCORE = 70
 
 class LightScanEngine(BaseScanEngine) :
     def __init__(self, input_url) :

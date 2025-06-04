@@ -6,6 +6,7 @@ import sys
 from urllib.parse import urlparse
 import json
 import asyncio
+import time
 
 class UrlHomograph(BaseModule) :
     def __init__(self, input_url) :
@@ -152,6 +153,8 @@ class UrlHomograph(BaseModule) :
     OUT : 
     """
     async def scan(self) :
+        start_time = time.time()
+
         urlparse_result = urlparse(self.input_url)
         hostname = urlparse_result.hostname
 
@@ -159,6 +162,7 @@ class UrlHomograph(BaseModule) :
         if hostname is None :
 
             self.module_run = False
+            self.module_run_time = round(time.time() - start_time, 2)
             self.module_error = "[ ERROR ] Fail to Get Host Name."
             self.module_result_flag = False
             self.module_result_data = None
@@ -188,6 +192,7 @@ class UrlHomograph(BaseModule) :
             if punycode_flag :
                 
                 self.module_run = True
+                self.module_run_time = round(time.time() - start_time, 2)
                 self.module_error = None
                 self.module_result_flag = True
                 self.module_result_data["reason"] = "Exist Punycode in Host Name."
@@ -212,6 +217,7 @@ class UrlHomograph(BaseModule) :
         if dnstwist_flag :
 
             self.module_run = True
+            self.module_run_time = round(time.time() - start_time, 2)
             self.module_error = None
             self.module_result_flag = True
             self.module_result_data["reason"] = "Exist White List in \"dnstwist\" Result."
@@ -221,6 +227,7 @@ class UrlHomograph(BaseModule) :
         else :
 
             self.module_run = True
+            self.module_run_time = round(time.time() - start_time, 2)
             self.module_error = None
             self.module_result_flag = False
             self.module_result_data["reason"] = "Not Exist Punycode in Host Name. / Not Exist White List in \"dnstwist\" Result."

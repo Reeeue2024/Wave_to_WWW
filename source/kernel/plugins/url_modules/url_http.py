@@ -6,6 +6,7 @@ import sys
 import requests
 from urllib.parse import urlparse, urlunparse
 import asyncio
+import time
 
 class UrlHttp(BaseModule) :
     def __init__(self, input_url) :
@@ -62,6 +63,8 @@ class UrlHttp(BaseModule) :
     OUT : 
     """
     async def scan(self) :
+        start_time = time.time()
+
         loop = asyncio.get_running_loop()
 
         try :
@@ -73,6 +76,7 @@ class UrlHttp(BaseModule) :
             # print("[ DEBUG ] Time Out.")
 
             self.module_run = False
+            self.module_run_time = round(time.time() - start_time, 2)
             self.module_error = "[ ERROR : Time Out ] Fail to Get HTTP / HTTPS Protocol."
             self.module_result_flag = False
             self.module_result_data = None
@@ -87,6 +91,7 @@ class UrlHttp(BaseModule) :
         if url_with_protocol is None :
 
             self.module_run = False
+            self.module_run_time = round(time.time() - start_time, 2)
             self.module_error = "[ ERROR ] Fail to Get HTTP / HTTPS Protocol."
             self.module_result_flag = False
             self.module_result_data = None
@@ -95,6 +100,7 @@ class UrlHttp(BaseModule) :
         elif url_with_protocol.startswith("http://") :
 
             self.module_run = True
+            self.module_run_time = round(time.time() - start_time, 2)
             self.module_error = None
             self.module_result_flag = True
             self.module_result_data["reason"] = "Use HTTP."
@@ -104,6 +110,7 @@ class UrlHttp(BaseModule) :
         elif url_with_protocol.startswith("https://") :
 
             self.module_run = True
+            self.module_run_time = round(time.time() - start_time, 2)
             self.module_error = None
             self.module_result_flag = False
             self.module_result_data["reason"] = "Use HTTPS."

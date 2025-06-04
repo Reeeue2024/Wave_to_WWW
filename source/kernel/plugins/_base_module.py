@@ -16,6 +16,7 @@ class BaseModule :
 
         # ( Module ) Result
         self.module_run = False
+        self.module_run_time = 0
         self.module_error = None
         self.module_result_flag = False
         self.module_result_data = {}
@@ -73,6 +74,7 @@ class BaseModule :
 
         self.module_result_dictionary = {
             "module_run" : self.module_run,
+            "module_run_time" : self.module_run_time,
             "module_error" : self.module_error,
             "module_result_flag" : self.module_result_flag,
             "module_result_data" : self.module_result_data,

@@ -6,6 +6,7 @@ import sys
 from urllib.parse import urlparse
 import requests
 import tldextract
+import time
 
 class UrlShort(BaseModule) :
     def __init__(self, input_url) :
@@ -73,6 +74,8 @@ class UrlShort(BaseModule) :
     OUT : 
     """
     def scan(self) :
+        start_time = time.time()
+
         self.get_redirect_url()
 
         # print(f"[ DEBUG ] Redirect URL : {self.redirect_url}")
@@ -81,6 +84,7 @@ class UrlShort(BaseModule) :
         if self.redirect_url is None :
 
             self.module_run = False
+            self.module_run_time = round(time.time() - start_time, 2)
             self.module_error = "[ ERROR ] Fail to Get Response."
             self.module_result_flag = False
             self.module_result_data = None
@@ -99,6 +103,7 @@ class UrlShort(BaseModule) :
             if different_url_flag :
 
                 self.module_run = True
+                self.module_run_time = round(time.time() - start_time, 2)
                 self.module_error = None
                 self.module_result_flag = True
                 self.module_result_data["reason"] = "Exist Short URL."
@@ -115,6 +120,7 @@ class UrlShort(BaseModule) :
 
         # ( Run : True ) + ( Scan : False )
         self.module_run = True
+        self.module_run_time = round(time.time() - start_time, 2)
         self.module_error = None
         self.module_result_flag = False
         self.module_result_data["reason"] = "Not Exist Short URL."

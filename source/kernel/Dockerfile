@@ -5,6 +5,12 @@ FROM python:3.10-slim
 # Work Directory in Docker
 WORKDIR /kernel
 
+RUN apt-get update && \
+    apt-get install -y curl gnupg && \
+    curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
+    apt-get install -y nodejs && \
+    apt-get clean
+
 COPY require_kernel.txt .
 
 RUN pip install --upgrade pip

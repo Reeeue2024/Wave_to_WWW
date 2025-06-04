@@ -6,6 +6,7 @@ import sys
 import json
 import os
 import asyncio
+import time
 
 class JsDynamicDom(BaseModule) :
     def __init__(self, input_url) :
@@ -16,6 +17,8 @@ class JsDynamicDom(BaseModule) :
     OUT : 
     """
     async def scan(self) :
+        start_time = time.time()
+
         js_directory_path = os.path.dirname(os.path.abspath(__file__))
         js_file_path = os.path.abspath(os.path.join(js_directory_path, "js_dynamic_dom.js"))
 
@@ -40,6 +43,7 @@ class JsDynamicDom(BaseModule) :
                 await process.communicate()
 
                 self.module_run = False
+                self.module_run_time = round(time.time() - start_time, 2) # Add Execute Time in JS
                 self.module_error = f"[ ERROR ] TIME OUT : {time_out}"
                 self.module_result_flag = False
                 self.module_result_data = None
@@ -52,6 +56,7 @@ class JsDynamicDom(BaseModule) :
 
         except Exception as e :
             self.module_run = False
+            self.module_run_time = round(time.time() - start_time, 2) # Add Execute Time in JS
             self.module_error = f"[ ERROR ] {e}"
             self.module_result_flag = False
             self.module_result_data = None
@@ -97,16 +102,24 @@ class JsDynamicDom(BaseModule) :
                 self.module_result_data = None
         
         except json.JSONDecodeError as e :
+            print(f"[ DEBUG ] JSON : {result_js}")
+
             self.module_run = False
+            self.module_run_time = round(time.time() - start_time, 2) # Add Execute Time in JS
             self.module_error = f"[ ERROR ] {e}"
             self.module_result_flag = False
             self.module_result_data = None
 
         except Exception as e :
+            print(f"[ DEBUG ] JSON : {result_js}")
+            
             self.module_run = False
+            self.module_run_time = round(time.time() - start_time, 2) # Add Execute Time in JS
             self.module_error = f"[ ERROR ] {e}"
             self.module_result_flag = False
             self.module_result_data = None
+
+        self.module_run_time = round(time.time() - start_time, 2) # Add Execute Time in JS
 
         self.create_module_result()
 

@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 import whois
 import asyncio
 import json
+import time
 
 class UrlWhois(BaseModule) :
     def __init__(self, input_url) :
@@ -115,10 +116,13 @@ class UrlWhois(BaseModule) :
     OUT : 
     """
     async def scan(self) :
+        start_time = time.time()
+
         # Run Fail Case #1
         if self.hostname is None :
 
             self.module_run = False
+            self.module_run_time = round(time.time() - start_time, 2)
             self.module_error = "[ ERROR ] Fail to Get Host Name."
             self.module_result_flag = False
             self.module_result_data = None
@@ -138,6 +142,7 @@ class UrlWhois(BaseModule) :
             # print("[ DEBUG ] Time Out.")
 
             self.module_run = False
+            self.module_run_time = round(time.time() - start_time, 2)
             self.module_error = "[ ERROR : Time Out ] Fail to Get WHOIS Data."
             self.module_result_flag = False
             self.module_result_data = None
@@ -152,6 +157,7 @@ class UrlWhois(BaseModule) :
         if not whois_flag :
 
             self.module_run = False
+            self.module_run_time = round(time.time() - start_time, 2)
             self.module_error = "[ ERROR ] Fail to Get WHOIS Data."
             self.module_result_flag = False
             self.module_result_data = None
@@ -199,6 +205,7 @@ class UrlWhois(BaseModule) :
         if create_date_flag or private_information_flag or free_tld_flag or tld_whois_country_flag :
 
             self.module_run = True
+            self.module_run_time = round(time.time() - start_time, 2)
             self.module_error = None
             self.module_result_flag = True
             self.module_result_data["reason"] = reason_list
@@ -208,6 +215,7 @@ class UrlWhois(BaseModule) :
         else :
 
             self.module_run = True
+            self.module_run_time = round(time.time() - start_time, 2)
             self.module_error = None
             self.module_result_flag = False
             self.module_result_data["reason"] = "Not Exist \"Recent Create / Private Information / Free TLD / Diffeernt Country\" in \"WHOIS\" Data."

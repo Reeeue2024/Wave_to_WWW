@@ -6,6 +6,7 @@ import sys
 import tldextract
 import re
 from concurrent.futures import ThreadPoolExecutor, wait, TimeoutError as FutureTimeoutError
+import time
 
 class JsStaticRedirect(BaseModule) :
     def __init__(self, input_url) :
@@ -42,12 +43,15 @@ class JsStaticRedirect(BaseModule) :
     OUT : 
     """
     async def scan(self) :
+        start_time = time.time()
+
         html_file_script_tag_list = self.engine_resource.get("html_file_script_tag_list", [])
         js_file_dictionary_list = self.engine_resource.get("js_file_dictionary_list", {})
 
         if not html_file_script_tag_list or not js_file_dictionary_list :
 
             self.module_run = False
+            self.module_run_time = round(time.time() - start_time, 2)
             self.module_error = "[ ERROR ] Fail to Get HTML File / JS File from Engine."
             self.module_result_flag = False
             self.module_result_data = None
@@ -138,6 +142,8 @@ class JsStaticRedirect(BaseModule) :
             self.module_result_flag = False
             self.module_result_data["reason"] = "Not Exist Redirect Pattern in JS."
             self.module_result_data["reason_data"] = None
+
+        self.module_run_time = round(time.time() - start_time, 2)
 
         self.create_module_result()
 

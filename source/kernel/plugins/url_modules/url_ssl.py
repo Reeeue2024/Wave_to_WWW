@@ -10,6 +10,7 @@ from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 import certifi
 import asyncio
+import time
 
 class UrlSsl(BaseModule) :
     def __init__(self, input_url) :
@@ -88,7 +89,9 @@ class UrlSsl(BaseModule) :
     IN : 
     OUT : 
     """
-    async def scan(self) :        
+    async def scan(self) : 
+        start_time = time.time()
+
         loop = asyncio.get_running_loop()
 
         try :
@@ -100,6 +103,7 @@ class UrlSsl(BaseModule) :
             # print("[ DEBUG ] Time Out.")
 
             self.module_run = False
+            self.module_run_time = round(time.time() - start_time, 2)
             self.module_error = "[ ERROR : Time Out ] Fail to Get SSL Certificate."
             self.module_result_flag = False
             self.module_result_data = None
@@ -116,6 +120,7 @@ class UrlSsl(BaseModule) :
         if not self.certificate :
 
             self.module_run = False
+            self.module_run_time = round(time.time() - start_time, 2)
             self.module_error = "[ ERROR ] Fail to Get SSL Certificate."
             self.module_result_flag = False
             self.module_result_data = None
@@ -130,6 +135,7 @@ class UrlSsl(BaseModule) :
         if free_ca_flag :
 
             self.module_run = True
+            self.module_run_time = round(time.time() - start_time, 2)
             self.module_error = None
             self.module_result_flag = True
             self.module_result_data["reason"] = "Use Free CA in SSL Certificate."
@@ -145,6 +151,7 @@ class UrlSsl(BaseModule) :
         if not_trust_flag :
 
             self.module_run = True
+            self.module_run_time = round(time.time() - start_time, 2)
             self.module_error = None
             self.module_result_flag = True
             self.module_result_data["reason"] = "Use Not Trust CA in SSL Certificate."
@@ -156,6 +163,7 @@ class UrlSsl(BaseModule) :
 
         # ( Run : True ) + ( Scan : False )
         self.module_run = True
+        self.module_run_time = round(time.time() - start_time, 2)
         self.module_error = None
         self.module_result_flag = False
         self.module_result_data["reason"] = "Not Use Free CA / Not Trust CA in SSL Certificate."
