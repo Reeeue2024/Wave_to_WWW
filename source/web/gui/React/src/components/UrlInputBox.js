@@ -89,6 +89,7 @@ function UrlInputBox() {
         inputUrl: payload.input_url,
         resultFlag: payload.engine_result_flag,
         resultScore: payload.engine_result_score,
+        reportedToKisa: payload.reported_to_kisa ?? false  //  키사 플래그 파싱
       };
 
       // 모듈별 분석 결과 정리
@@ -117,7 +118,6 @@ function UrlInputBox() {
           state: {
             summary: scanResult,
             modules: scanModuleResultMap,
-            inputUrl: url,
           },
         });
       }

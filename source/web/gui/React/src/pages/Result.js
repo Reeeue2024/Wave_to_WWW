@@ -239,6 +239,9 @@ function Result() {
 
           {/* 최종 판단 표시 */}
           <div className="final-flag">
+            {summary.reportedToKisa && (                                                    //이 부분이 키사 보고 문장 추가한 부분입니다.
+            <p className="kisa-report-text">📤 해당 URL은 키사(KISA)에 보고되었습니다.</p>
+            )}
             <p className="final-flag-text">
               {summary.resultFlag
                 ? <span className="detected-text">Phishing</span>

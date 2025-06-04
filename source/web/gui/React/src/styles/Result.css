@@ -656,3 +656,10 @@
   font-weight: normal;
   font-style: normal;
 }
+
+/*이 부분이 kisa 결과 디자인 임시*/
+.kisa-report-text {               
+  color: #007bff;
+  font-weight: 500;
+  margin-top: 8px;
+}
