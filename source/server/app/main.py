@@ -102,11 +102,13 @@ async def detect_url(
         if engine_type == "light":
             return success_response({
                 "input_url": str(data.url),
-                "engine_result_flag": existing_result["engine_result_flag"]
+                "engine_result_flag": existing_result["engine_result_flag"],
+                "reported_to_kisa": False
             })
         else:
             return success_response({
-                **existing_result
+                **existing_result,
+                "reported_to_kisa": False
             })
 
     logger.info(f"[ New URL ] {url}")
@@ -124,10 +126,13 @@ async def detect_url(
     duration = round((time.time() - start_time) * 1000)
     logger.info(f"[ Time ] Detection completed in {duration}ms")
 
+    reported_to_kisa = False
+
     if engine_type == "light":
         response_payload = {
             "input_url": str(data.url),
-            "engine_result_flag": result.get("engine_result_flag")
+            "engine_result_flag": result.get("engine_result_flag"),
+            "reported_to_kisa": False
         }
     else:
         clean_result = {
@@ -136,7 +141,22 @@ async def detect_url(
             "engine_result_score": result.get("engine_result_score"),
             "module_result_dictionary_list": result.get("module_result_dictionary_list")
         }
-        response_payload = clean_result
+
+        if clean_result.get("engine_result_flag") == True:
+            try:
+                report_to_kisa(
+                    url=clean_result.get("input_url"),
+                    score=clean_result.get("engine_result_score"),
+                    modules=clean_result.get("module_result_dictionary_list")
+                )
+                reported_to_kisa = True
+            except Exception as e:
+                logger.error(f"[ KISA Report Error ] {e}")
+
+        response_payload = {
+            **clean_result,
+            "reported_to_kisa": reported_to_kisa
+        }
 
         # DB insert
         try:
@@ -148,14 +168,6 @@ async def detect_url(
             )
         except Exception as e:
             logger.error(f"[ DB Insert Error ] Failed to insert result into DB: {e}")
-
-    # KISA 리포트
-    if engine_type != "light" and clean_result.get("engine_result_flag") == True:
-        report_to_kisa(
-            url=clean_result.get("input_url"),
-            score=clean_result.get("engine_result_score"),
-            modules=clean_result.get("module_result_dictionary_list")
-        )
     
     store_result(session_id, response_payload)
     return success_response(response_payload)
