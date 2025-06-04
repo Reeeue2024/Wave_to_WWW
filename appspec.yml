@@ -7,17 +7,17 @@ files:
 hooks:
   BeforeInstall:
     - location: scripts/stop_docker.sh
-      timeout: 300
+      timeout: 180
       runas: ubuntu
   AfterInstall:
     - location: scripts/deploy.sh
-      timeout: 300
+      timeout: 600
       runas: ubuntu
   ApplicationStart:
     - location: scripts/start_docker.sh
-      timeout: 300
+      timeout: 180
       runas: ubuntu
   ValidateService:
     - location: scripts/validate.sh
-      timeout: 300
+      timeout: 600
       runas: ubuntu
