@@ -98,7 +98,15 @@ function Result() {
   });
 
   // reason 및 관련 링크 렌더링
-  const renderReasonsWithData = (reason, data) => {
+  const renderReasonsWithData = (reason, data, moduleName) => {
+    //moduleName을 추가하여 AI일 경우에는 reason만 하나의 문장으로 출력하도록 하였습니다.
+    if (moduleName === 'Ai') {
+    return (
+      <ul className="reason-list">
+        <li><strong>{reason}</strong></li>
+      </ul>
+    );
+  }
     // case 1: reason, data 모두 배열
     if (Array.isArray(reason) && Array.isArray(data)) {
       const filtered = reason
@@ -133,7 +141,7 @@ function Result() {
     // case 2: reason이 문자열일 때
     if (typeof reason === 'string') {
       const reasons = reason
-        .split('.')
+        .split('/(?<=[.!?])\s+/g') //.단위로 쪼개게 되어서 30.80%가 split 되었던 거라서 문장 단위로 쪼개도록 split 하였습니다.
         .map(r => r.trim())
         .filter(r => r !== '');
 
@@ -209,7 +217,7 @@ function Result() {
         <p><strong>Execution:</strong> {mod.moduleRun ? 'Success' : 'Fail'}</p>
         <p><strong>Score:</strong> {mod.moduleScore} / {mod.moduleWeight}</p>
         <div><strong>Reason:</strong></div>
-        {renderReasonsWithData(mod.reason, mod.reasonData)}
+        {renderReasonsWithData(mod.reason, mod.reasonData, mod.moduleName)}
         <hr />
       </div>
     );
