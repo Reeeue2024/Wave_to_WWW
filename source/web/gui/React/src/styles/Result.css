@@ -30,13 +30,15 @@
   background: linear-gradient(to bottom right, #171717, #171717);
   width: 95%;
   border-radius: 30px;
-  padding: 40px 40px 40px 40px;  /* 위쪽 여백 줄이기 */
+  padding: 40px 40px 40px 40px;
+  /* 위쪽 여백 줄이기 */
   display: flex;
   justify-content: center;
   align-items: center;
   color: white;
   margin: 40px 0;
-  position: relative; /* 블롭 위치용 */
+  position: relative;
+  /* 블롭 위치용 */
   overflow: hidden;
   background: #171717;
   margin-top: 0px;
@@ -164,14 +166,14 @@
   padding: 16px;
   border-radius: 14px;
   background: #171717;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   transition: all 0.3s ease;
   transform: translateY(0);
   border: 2px solid transparent;
-  justify-content: space-between; 
+  justify-content: space-between;
 }
 
 /* 피싱 아님일 경우 */
@@ -191,7 +193,7 @@
 /* 마우스 hover 시 카드가 살짝 떠오르는 효과 */
 .module-card:hover {
   transform: translateY(-6px);
-  box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
 }
 
 /* 모듈 카드 내 제목 */
@@ -224,10 +226,10 @@
 /* 카테고리 설명 텍스트 */
 .category-description {
   color: #ccc;
-  font-size: 16px;         
+  font-size: 16px;
   margin: 8px 0 20px;
   margin-bottom: -5px;
-  text-align: left;        
+  text-align: left;
   font-family: 'PoppinsLight', sans-serif;
   line-height: 1.6;
   max-width: 900px;
@@ -318,7 +320,7 @@
 /* hover 효과 */
 .module-detail-card:hover {
   transform: translateY(-6px);
-  box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
 }
 
 /* 세부 항목 스타일 */
@@ -462,10 +464,10 @@
 
 .tooltip-text {
   position: absolute;
-  top: 110%; 
+  top: 110%;
   left: -195%;
   transform: translateX(-50%);
-  background: rgba(255, 255, 255, 0.55); 
+  background: rgba(255, 255, 255, 0.55);
   color: #171717;
   padding: 20px 24px;
   border-radius: 10px;
@@ -483,7 +485,7 @@
 }
 
 .tooltip-sub {
-  color: #515151; 
+  color: #515151;
   display: block;
   margin-top: 2px;
   font-size: 14px;
@@ -493,7 +495,7 @@
 .tooltip-text::after {
   content: "";
   position: absolute;
-  bottom: 100%; 
+  bottom: 100%;
   left: 80%;
   transform: translateX(-50%);
   border-width: 10px;
@@ -530,10 +532,8 @@
   position: absolute;
   width: 500px;
   aspect-ratio: 1 / 1;
-  background: linear-gradient(
-    rgba(227, 246, 255, 0.8),
-    rgba(33, 133, 183, 0.8)
-  );
+  background: linear-gradient(rgba(227, 246, 255, 0.8),
+      rgba(33, 133, 183, 0.8));
   border-radius: 30% 70% 70% 30% / 30% 40% 70% 70%;
   filter: blur(130px);
   z-index: 0;
@@ -578,18 +578,24 @@
 
 
 @keyframes changeShape {
-  0%, 100% {
+
+  0%,
+  100% {
     border-radius: 30% 70% 70% 30% / 30% 40% 70% 70%;
   }
+
   20% {
     border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
   }
+
   40% {
     border-radius: 40% 60% 60% 40% / 50% 60% 40% 50%;
   }
+
   60% {
     border-radius: 70% 30% 40% 60% / 30% 70% 50% 50%;
   }
+
   80% {
     border-radius: 50% 50% 30% 70% / 60% 40% 60% 40%;
   }
@@ -599,41 +605,98 @@
   0% {
     transform: rotate(0deg);
   }
+
   100% {
     transform: rotate(720deg);
   }
 }
 
 @keyframes floatRandom1 {
-  0%   { transform: translate(0px, 0px) rotate(0deg); }
-  25%  { transform: translate(20px, -18px) rotate(3deg); }
-  50%  { transform: translate(-18px, 20px) rotate(-3deg); }
-  75%  { transform: translate(16px, -16px) rotate(2deg); }
-  100% { transform: translate(0px, 0px) rotate(0deg); }
+  0% {
+    transform: translate(0px, 0px) rotate(0deg);
+  }
+
+  25% {
+    transform: translate(20px, -18px) rotate(3deg);
+  }
+
+  50% {
+    transform: translate(-18px, 20px) rotate(-3deg);
+  }
+
+  75% {
+    transform: translate(16px, -16px) rotate(2deg);
+  }
+
+  100% {
+    transform: translate(0px, 0px) rotate(0deg);
+  }
 }
 
 @keyframes floatRandom2 {
-  0%   { transform: translate(0px, 0px) rotate(0deg); }
-  25%  { transform: translate(20px, -18px) rotate(3deg); }
-  50%  { transform: translate(-18px, 20px) rotate(-3deg); }
-  75%  { transform: translate(16px, -16px) rotate(2deg); }
-  100% { transform: translate(0px, 0px) rotate(0deg); }
+  0% {
+    transform: translate(0px, 0px) rotate(0deg);
+  }
+
+  25% {
+    transform: translate(20px, -18px) rotate(3deg);
+  }
+
+  50% {
+    transform: translate(-18px, 20px) rotate(-3deg);
+  }
+
+  75% {
+    transform: translate(16px, -16px) rotate(2deg);
+  }
+
+  100% {
+    transform: translate(0px, 0px) rotate(0deg);
+  }
 }
 
 @keyframes floatRandom3 {
-  0%   { transform: translate(0px, 0px) rotate(0deg); }
-  25%  { transform: translate(20px, -18px) rotate(3deg); }
-  50%  { transform: translate(-18px, 20px) rotate(-3deg); }
-  75%  { transform: translate(16px, -16px) rotate(2deg); }
-  100% { transform: translate(0px, 0px) rotate(0deg); }
+  0% {
+    transform: translate(0px, 0px) rotate(0deg);
+  }
+
+  25% {
+    transform: translate(20px, -18px) rotate(3deg);
+  }
+
+  50% {
+    transform: translate(-18px, 20px) rotate(-3deg);
+  }
+
+  75% {
+    transform: translate(16px, -16px) rotate(2deg);
+  }
+
+  100% {
+    transform: translate(0px, 0px) rotate(0deg);
+  }
 }
 
 @keyframes floatRandom4 {
-  0%   { transform: translate(0px, 0px) rotate(0deg); }
-  25%  { transform: translate(20px, -18px) rotate(3deg); }
-  50%  { transform: translate(-18px, 20px) rotate(-3deg); }
-  75%  { transform: translate(16px, -16px) rotate(2deg); }
-  100% { transform: translate(0px, 0px) rotate(0deg); }
+  0% {
+    transform: translate(0px, 0px) rotate(0deg);
+  }
+
+  25% {
+    transform: translate(20px, -18px) rotate(3deg);
+  }
+
+  50% {
+    transform: translate(-18px, 20px) rotate(-3deg);
+  }
+
+  75% {
+    transform: translate(16px, -16px) rotate(2deg);
+  }
+
+  100% {
+    transform: translate(0px, 0px) rotate(0deg);
+  }
 }
 
 @font-face {
@@ -657,9 +720,27 @@
   font-style: normal;
 }
 
-/*이 부분이 kisa 결과 디자인 임시*/
-.kisa-report-text {               
-  color: #007bff;
+.Kisa {
+  background: rgba(255, 255, 255, 0.04);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 12px;
+  padding: 16px 20px 5px 20px;
+  display: inline-block;
+}
+
+.kisa-report-text {
+  color: #ccc;
   font-weight: 500;
   margin-top: 8px;
+  font-family: 'PoppinsLigit', sans-serif;
+  font-size: 18px;
+}
+
+.kisa-icon {
+  width: 100px;
+  display: inline-block;
+  vertical-align: middle;
+  margin-left: 2px;
+  margin-top: -6px;
+  filter: brightness(1.8);
 }

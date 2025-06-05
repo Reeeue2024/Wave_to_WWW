@@ -11,6 +11,7 @@ import ResultUrlBox from '../components/ResultUrlBox';
 
 import Header from '../components/Header';
 
+import KisaImage from '../assets/img/kisa.png';
 
 // 카테고리 및 모듈 설명 맵
 import { categoryMap, categoryDescriptions, moduleDescriptions } from '../components/descriptions';
@@ -193,8 +194,6 @@ function Result() {
     return <p>No reason provided.</p>;
   };
 
-
-
   // DETAILS 탭용 상세 모듈 설명 렌더링
   const renderDetails = (mods) => mods.map((mod, index) => {
     const info = moduleDescriptions[mod.moduleName] || {
@@ -226,6 +225,7 @@ function Result() {
   // 로딩 중일 경우 로더 표시
   if (loading) return <WaveLoader url={userInputUrl} />;
 
+
   // 결과 페이지 전체 렌더링
   return (
 
@@ -247,9 +247,6 @@ function Result() {
 
           {/* 최종 판단 표시 */}
           <div className="final-flag">
-            {summary.reportedToKisa && (                                                    //이 부분이 키사 보고 문장 추가한 부분입니다.
-            <p className="kisa-report-text">📤 해당 URL은 키사(KISA)에 보고되었습니다.</p>
-            )}
             <p className="final-flag-text">
               {summary.resultFlag
                 ? <span className="detected-text">Phishing</span>
@@ -263,6 +260,12 @@ function Result() {
               {phishingCount}
             </span> out of the <span className="safe-number">{totalCount}</span> modules reported suspected phishing detection.
           </p>
+
+          <div className='Kisa'>
+            {summary.reportedToKisa && (
+              <p className="kisa-report-text">The URL has been reported to <img src={KisaImage} className="kisa-icon" /></p>
+            )}
+          </div>
 
           {/* 탭 전환 버튼 */}
           <div className="tabs-header">
