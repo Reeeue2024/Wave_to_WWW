@@ -1,0 +1,457 @@
+/* src/styles/Home.css */
+
+/* 전체 레이아웃 wrapper */
+.home-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  overflow: hidden;
+  background: #171717;
+}
+
+/* 상단 헤더 */
+.home-header {
+  width: 98%;
+  padding: 15px 15px;
+  margin-top: -5px;
+  margin-bottom: -5px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #171717;
+  color: white;
+}
+
+/* 중앙 배경 영역 (로고 + 입력창 포함) */
+.home-background {
+  flex: 1;
+  background: linear-gradient(to bottom right, #171717, #171717);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  padding: 40px 0;
+  overflow: hidden;
+  border-radius: 30px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* 흐릿하게 퍼지는 블롭 배경 요소 */
+.blob {
+  position: absolute;
+  width: 800px;
+  aspect-ratio: 1 / 1;
+  background: linear-gradient(
+    rgba(227, 246, 255, 0.8) 10%,
+    rgba(33, 133, 183, 0.8) 100%
+  );
+  border-radius: 30% 70% 70% 30% / 30% 40% 70% 70%;
+  filter: blur(250px);
+  z-index: 0;
+}
+
+/* 오른쪽 위 블롭 */
+.blob-top-right {
+  top: -200px;
+  right: -200px;
+  animation:
+    moveTopRight 10s ease-in-out infinite,
+    rotateShape 10s linear infinite,
+    changeShape 10s linear infinite;
+}
+
+/* 왼쪽 아래 블롭 */
+.blob-bottom-left {
+  bottom: -200px;
+  left: -200px;
+  animation:
+    moveBottomLeft 10s ease-in-out infinite alternate,
+    rotateShape 10s linear infinite reverse,
+    changeShape 10s linear infinite;
+}
+
+/* 모양 변화 */
+@keyframes changeShape {
+  0%, 100% {
+    border-radius: 30% 70% 70% 30% / 30% 40% 70% 70%;
+  }
+  20% {
+    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+  }
+  40% {
+    border-radius: 40% 60% 60% 40% / 50% 60% 40% 50%;
+  }
+  60% {
+    border-radius: 70% 30% 40% 60% / 30% 70% 50% 50%;
+  }
+  80% {
+    border-radius: 50% 50% 30% 70% / 60% 40% 60% 40%;
+  }
+}
+
+/* 회전 */
+@keyframes rotateShape {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(720deg);
+  }
+}
+
+/* 위치 이동 애니메이션 - 오른쪽 위 */
+@keyframes moveTopRight {
+  0%   { transform: translate(0px, 0px) rotate(0deg); }
+  25%  { transform: translate(20px, -18px) rotate(3deg); }
+  50%  { transform: translate(-18px, 20px) rotate(-3deg); }
+  75%  { transform: translate(16px, -16px) rotate(2deg); }
+  100% { transform: translate(0px, 0px) rotate(0deg); }
+}
+
+/* 위치 이동 애니메이션 - 왼쪽 아래 */
+@keyframes moveBottomLeft {
+  0%   { transform: translate(0px, 0px) rotate(0deg); }
+  25%  { transform: translate(20px, -18px) rotate(3deg); }
+  50%  { transform: translate(-18px, 20px) rotate(-3deg); }
+  75%  { transform: translate(16px, -16px) rotate(2deg); }
+  100% { transform: translate(0px, 0px) rotate(0deg); }
+}
+
+/* 오른쪽 위 위치 지정 클래스 */
+.top-right {
+  top: 0px;
+  right: 0px;
+}
+
+/* 왼쪽 아래 위치 지정 클래스 */
+.bottom-left {
+  bottom: 0px;
+  left: 0px;
+}
+
+/* 중앙 콘텐츠 묶음 (로고 + 데코 + 입력창) */
+.center-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  max-width: 900px;
+  width: 100%;
+  padding: 40px 20px;
+  margin-top: -100px;
+  z-index: 2;
+}
+
+/* 로고 + 데코 묶는 컨테이너 */
+.logo-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  align-items: center;
+  flex-direction: column;
+  margin-bottom: 40px;
+  margin-top: 100px;
+}
+
+/* 로고 이미지 자체 */
+.main-logo {
+  width: 700px;
+  max-width: 90%;
+  height: auto;
+  z-index: 1;             
+  position: relative; 
+}
+
+/* 데코 이미지 위치 레이어 */
+.logo-decoration-layer {
+  position: absolute;
+  top: -50px;
+  left: 50%;            
+  transform: translateX(-50%); 
+  width: 100%;
+  height: 200px;
+  z-index: 3;
+  pointer-events: none;
+}
+
+/* 데코레이션(장식) 이미지에 공통 적용되는 스타일 */
+.decor {
+  position: absolute;
+  width: 40px;
+  height: auto;
+  opacity: 0.85;
+
+  /* animation: floatWiggle 3s ease-in-out infinite; */
+}
+
+/*
+@keyframes floatWiggle {
+  0%   { transform: translate(0px, 0px) rotate(0deg); }
+  25%  { transform: translate(3px, -2px) rotate(1deg); }
+  50%  { transform: translate(-2px, 3px) rotate(-1.5deg); }
+  75%  { transform: translate(1px, -1px) rotate(1deg); }
+  100% { transform: translate(0px, 0px) rotate(0deg); }
+}
+*/
+
+/* 데코 위치 조정 */
+.fish1 {
+  top: 20px;
+  left: 30px;  /* 기존 -600px → 중앙 기준에서 좌측으로 적당히 */
+  width: 70px;
+  transform: rotate(10deg);
+}
+
+.sparkle1 {
+  top: 0px;
+  left: 140px;  
+  width: 45px;
+  transform: rotate(4deg);
+}
+
+.fish2 {
+  top: 0px;
+  left: 275px;
+  width: 100px;
+  transform: rotate(-4deg);
+}
+
+.fish3 {
+  top: 3px;
+  left: 450px;
+  width: 75px;
+  transform: rotate(-11deg);
+}
+
+.sparkle2 {
+  top: 10px;
+  left: 600px;
+  width: 40px;
+  transform: rotate(-18deg);
+}
+
+
+/* 입력창 섹션 */
+.input-section {
+  display: flex;
+  width: 90%;
+  justify-content: center;
+  margin-top: -65px;
+}
+
+/* 입력창 박스 (검색창 모양) */
+.url-input-box {
+  display: flex;
+  align-items: center;
+  background-color: white;
+  padding: 10px 20px;
+  border-radius: 30px;
+  width: 400px;
+  max-width: 90%;
+  box-shadow: 0 0 10px rgba(61, 125, 217, 0.5);
+}
+
+/* 입력창 왼쪽 아이콘 (돋보기) */
+.search-icon {
+  margin-right: 10px;
+  font-size: 18px;
+  color: #aaa;
+}
+
+/* 실제 입력 필드 */
+.url-input {
+  border: none;
+  outline: none;
+  width: 100%;
+  font-size: 16px;
+  background-color: transparent;
+  color: white;
+}
+
+/* 푸터 */
+.home-footer {
+  text-align: center;
+  font-size: 12px;
+  color: #aaa;
+  background: #171717;
+  padding: 15px 0;
+  font-family: 'PoppinsLight', sans-serif;
+}
+
+/* 헤더 로고 이미지 */
+.logo-image {
+  width: 70px;
+  margin-right: 10px;
+}
+
+/* 헤더 네비 버튼 그룹 */
+.nav-buttons {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  overflow: visible;
+}
+
+/* 버튼 공통 스타일 */
+.btn.white {
+  width: 85px !important;
+  box-sizing: border-box;
+  background: transparent;
+  color: white;
+  border: 1px solid white;
+  box-shadow: 0 0 10px #66CCFF;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 11px !important;
+  font-family: 'PoppinsLight', sans-serif;
+  cursor: pointer;
+}
+
+/* Chrome Extension 아이콘 스타일 */
+.chrome-icon {
+  width: 30px;
+  height: 30px;
+  margin-top: -3.5px;
+  object-fit: contain;
+}
+
+/* Chrome Extension 링크 */
+.chrome-icon-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Gmail 아이콘 스타일 */
+.gmail-icon {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+}
+
+/* Gmail 링크 */
+.gmail-icon-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 툴팁 */
+.tooltip-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip-text {
+  position: absolute;
+  top: 110%; 
+  left: -195%;
+  transform: translateX(-50%);
+  background: rgba(255, 255, 255, 0.45); 
+  color: #171717;
+  padding: 20px 24px;
+  border-radius: 10px;
+  white-space: nowrap;
+  font-size: 16px;
+  font-family: 'PoppinsLight', sans-serif;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 100;
+  opacity: 0.95;
+  backdrop-filter: blur(4px);
+  transition: all 0.3s ease;
+  text-align: center;
+  max-width: 250px;
+  line-height: 1.4;
+}
+
+.tooltip-sub {
+  color: #515151; 
+  display: block;
+  margin-top: 2px;
+  font-size: 14px;
+}
+
+/* 말풍선 꼬리 추가 */
+.tooltip-text::after {
+  content: "";
+  position: absolute;
+  bottom: 100%; 
+  left: 100%;
+  transform: translateX(-50%);
+  border-width: 10px;
+  border-style: solid;
+  border-color: transparent transparent rgba(255, 255, 255, 0.55) transparent;
+}
+
+/* GitHub 아이콘 */
+.github-icon {
+  width: 35px;
+  height: 35px;
+  object-fit: contain;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* 로딩 전체 화면 */
+.wave-loader {
+  position: fixed;
+  inset: 0;
+  background-color: #171717;
+  z-index: 9999;
+}
+
+/* 아래에서 위로 차오르는 파도 */
+.full-screen-wave {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to top, #2185B7);
+  transform: translateY(100%);
+  animation: waveRiseUp 2s ease forwards;
+  z-index: 1;
+}
+
+/* 파도 올라오기 */
+@keyframes waveRiseUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0%);
+  }
+}
+
+/* 로고 페이드 인 */
+.loader-logo {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 300px;
+
+  z-index: 2;
+  opacity: 0;
+  animation: fadeInLogo 2s ease 1.2s forwards;
+
+  filter: brightness(0) invert(1);
+}
+
+@keyframes fadeInLogo {
+  to {
+    opacity: 1;
+  }
+}
+
+@font-face {
+  font-family: 'PoppinsLight';
+  src: url('../assets/fonts/Poppins-Light.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}

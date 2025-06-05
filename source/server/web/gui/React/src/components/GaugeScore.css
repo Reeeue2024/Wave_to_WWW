@@ -1,0 +1,57 @@
+/* src/components/GaugeScore.css */
+
+/* 점수 숫자 표시 스타일 */
+.score-big {
+  font-family: 'PoppinsBold', sans-serif;
+  font-size: 38px;
+  font-weight: bold;
+  margin: 0;
+}
+
+/* 점수 라벨 */
+.score-label {
+  font-family: 'PoppinsLight', sans-serif;
+  font-size: 16px;
+  color: #ccc;
+  margin-top: -6px;
+}
+
+/* 위험(피싱 탐지됨) 상태 텍스트 색상 */
+.text-danger {
+  color: #B95250;
+}
+
+/* 안전 상태 텍스트 색상 */
+.text-safe {
+  color: #2185B7;
+}
+
+/* 게이지 전체 래퍼 */
+.gauge-wrapper {
+  width: 60%;
+  max-width: 250px;
+  margin: 0 auto;
+  text-align: center;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  border: none;
+  outline: none;
+  box-shadow: none;
+}
+
+@font-face {
+  font-family: 'PoppinsLight';
+  src: url('../assets/fonts/Poppins-Light.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'PoppinsBold';
+  src: url('../assets/fonts/Poppins-Bold.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}

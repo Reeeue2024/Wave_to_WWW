@@ -1,0 +1,746 @@
+/* src/styles/Home.css */
+
+/* 전체 배경 */
+.result-background {
+  background: linear-gradient(to bottom right, #171717, #171717);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 0;
+  z-index: 0;
+  margin-top: -20px;
+}
+
+/* 상단 헤더 */
+.home-header {
+  width: 98%;
+  padding: 15px 15px;
+  margin-top: -5px;
+  margin-bottom: -5px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #171717;
+  color: white;
+}
+
+/* 메인 결과 박스 */
+.result-container {
+  background: linear-gradient(to bottom right, #171717, #171717);
+  width: 95%;
+  border-radius: 30px;
+  padding: 40px 40px 40px 40px;
+  /* 위쪽 여백 줄이기 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  margin: 40px 0;
+  position: relative;
+  /* 블롭 위치용 */
+  overflow: hidden;
+  background: #171717;
+  margin-top: 0px;
+}
+
+/* 콘텐츠 박스 */
+.result-box {
+  width: 100%;
+  max-width: 960px;
+  margin: auto;
+  padding: 40px;
+  border-radius: 20px;
+  background: #171717;
+  border: 1px solid white;
+  box-shadow: 0 0 20px #B95250;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+  z-index: 2;
+}
+
+/* 결과 설명 텍스트 (모듈 탐지 요약 텍스트) */
+.detection-text {
+  color: #ccc;
+  font-size: 16px;
+  margin-top: -15px;
+  margin-bottom: 24px;
+  font-family: 'PoppinsLight', sans-serif;
+}
+
+/* 안전한 모듈 수 강조 숫자 스타일 */
+.safe-number {
+  color: #2185B7;
+  font-weight: bold;
+  font-family: 'PoppinsBold', sans-serif;
+}
+
+/* 탐지된 모듈 수 강조 숫자 스타일 */
+
+.detected-number {
+  color: #B95250;
+  font-weight: bold;
+  font-family: 'PoppinsBold', sans-serif;
+}
+
+/* 게이지 전체 컨테이너 */
+.gauge-wrapper {
+  width: 60%;
+  max-width: 250px;
+  margin: 0 auto;
+  text-align: center;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* 게이지 아래에 표시되는 텍스트 */
+.gauge-score-text {
+  margin-top: -10px;
+  text-align: center;
+}
+
+/* 점수 수치 표시용 큰 글씨 */
+.score-big {
+  font-size: 36px;
+  font-weight: bold;
+  color: #B95250;
+  margin: 0;
+}
+
+/* 점수 라벨 (예: 'Score' 텍스트) */
+.score-label {
+  font-size: 14px;
+  color: #ccc;
+  margin-top: 4px;
+}
+
+/* 탭 버튼들을 감싸는 헤더 (탭 전환 영역) */
+.tabs-header {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin: 24px 0 12px;
+}
+
+/* 기본 탭 버튼 스타일 */
+.tab-button {
+  background: transparent;
+  color: #A1A1A1;
+  border: none;
+  border-bottom: 2px solid transparent;
+  font-size: 18px;
+  font-family: 'PoppinsMedium', sans-serif;
+  cursor: pointer;
+  padding: 8px 16px;
+  transition: all 0.2s ease;
+}
+
+/* 활성화된 탭 버튼 스타일 */
+.tab-button.active {
+  color: #2185B7;
+  border-bottom: 2px solid #2185B7;
+}
+
+/* 탭 콘텐츠 영역 */
+.tab-content {
+  padding: 20px;
+  border-radius: 10px;
+  color: #eee;
+  text-align: left;
+}
+
+/* 카드 그리드 */
+.module-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+/* 개별 모듈 카드 스타일 */
+.module-card {
+  padding: 16px;
+  border-radius: 14px;
+  background: #171717;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  transition: all 0.3s ease;
+  transform: translateY(0);
+  border: 2px solid transparent;
+  justify-content: space-between;
+}
+
+/* 피싱 아님일 경우 */
+.module-card.safe {
+  border-color: #2185B7;
+  box-shadow: 0 0px 8px rgba(33, 133, 183, 0.5);
+  background: linear-gradient(145deg, #1c1c1c, #222);
+}
+
+/* 피싱 탐지됨일 경우 */
+.module-card.detected {
+  border-color: #B95250;
+  box-shadow: 0 0px 8px rgba(185, 82, 80, 0.5);
+  background: linear-gradient(145deg, #1c1b1b, #241c1c);
+}
+
+/* 마우스 hover 시 카드가 살짝 떠오르는 효과 */
+.module-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* 모듈 카드 내 제목 */
+.module-title {
+  font-family: 'PoppinsMedium', sans-serif;
+  font-size: 16px;
+  margin-bottom: 8px;
+  color: #fff;
+}
+
+/* 탐지 여부 텍스트 (Detected / Safe) */
+.module-status {
+  font-size: 14px;
+}
+
+/* 카테고리별 모듈 묶음 전체 블록 (카테고리 제목 + 모듈 카드들) */
+.module-category-block {
+  width: 100%;
+  margin-bottom: 40px;
+}
+
+/* 모듈 설명 텍스트 */
+.module-description {
+  font-size: 12px;
+  color: #aaa;
+  font-family: 'PoppinsLight', sans-serif;
+  margin-top: -4px;
+}
+
+/* 카테고리 설명 텍스트 */
+.category-description {
+  color: #ccc;
+  font-size: 16px;
+  margin: 8px 0 20px;
+  margin-bottom: -5px;
+  text-align: left;
+  font-family: 'PoppinsLight', sans-serif;
+  line-height: 1.6;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* 카테고리 제목 */
+.category-title {
+  text-align: center;
+  font-size: 26px;
+  font-family: 'PoppinsMedium', sans-serif;
+  margin-bottom: 12px;
+}
+
+/* Reason 정보 블록 전체 */
+.reason-data-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 20px;
+  color: #ddd;
+}
+
+/* 각 Reason 카드 (박스) */
+.reason-data-card {
+  padding: 12px 16px;
+  background: #1e1e1e;
+  border-radius: 10px;
+  border: 1px solid #333;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Reason 카드 내 링크 스타일 */
+.reason-data-card a {
+  color: #4dafff;
+  word-break: break-word;
+}
+
+/* DETAILS 탭의 전체 모듈 상세 레이아웃 */
+.details-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  width: 100%;
+  padding: 20px 0;
+  box-sizing: border-box;
+}
+
+/* DETAILS 내 링크 줄바꿈 처리 */
+.details-section a {
+  word-break: break-word;
+  display: inline-block;
+  max-width: 100%;
+}
+
+/* 각 모듈 상세 카드 스타일 */
+.module-detail-card {
+  padding: 20px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-family: 'PoppinsLight', sans-serif;
+  color: #f0f0f0;
+  display: flex;
+  flex-direction: column;
+  gap: -8px;
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+  transition: all 0.3s ease;
+  transform: translateY(0);
+}
+
+/* 상태별 스타일 */
+.module-detail-card.safe {
+  border: 1px solid #2185B7;
+  box-shadow: 0 0px 8px rgba(33, 133, 183, 0.5);
+  background: linear-gradient(145deg, #1c1c1c, #222);
+}
+
+.module-detail-card.detected {
+  border: 1px solid #B95250;
+  box-shadow: 0 0px 8px rgba(185, 82, 80, 0.5);
+  background: linear-gradient(145deg, #1c1b1b, #241c1c);
+}
+
+/* hover 효과 */
+.module-detail-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* 세부 항목 스타일 */
+.module-detail-card h4 {
+  font-size: 16px;
+  margin-bottom: 8px;
+  color: #fff;
+  font-weight: bold;
+}
+
+/* 링크 강조 */
+.module-detail-card a {
+  color: #4dafff;
+  font-size: 13px;
+  word-break: break-word;
+}
+
+.module-detail-card ul {
+  padding-left: 18px;
+  margin-top: 6px;
+  color: #ddd;
+}
+
+/* 디테일 카드 항목 간격 개선 */
+.module-detail-card p {
+  margin: 6px 0;
+}
+
+/* 디테일 카드 안 항목 강조 */
+.module-detail-card strong {
+  color: #ccc;
+}
+
+.safe {
+  border: 1px solid white;
+  box-shadow: 0 0 10px #2185B7;
+}
+
+.detected {
+  border: 1px solid white;
+  box-shadow: 0 0 10px #B95250;
+}
+
+.safe-text {
+  color: #2185B7;
+  font-size: 50px;
+  font-family: 'PoppinsLight', sans-serif;
+}
+
+.detected-text {
+  color: #B95250;
+  font-size: 50px;
+  font-family: 'PoppinsLight', sans-serif;
+}
+
+.safe-text-card {
+  color: #2185B7;
+  font-size: 18px;
+  font-family: 'PoppinsMedium', sans-serif;
+}
+
+.detected-text-card {
+  color: #B95250;
+  font-size: 18px;
+  font-family: 'PoppinsMedium', sans-serif;
+}
+
+/* 결과 페이지 하단 푸터 */
+.result-footer {
+  width: 100%;
+  text-align: center;
+  margin-top: -25px;
+  font-size: 12px;
+  color: #aaa;
+  background: #171717;
+  font-family: 'PoppinsLight', sans-serif;
+}
+
+/* 로고 이미지 스타일 */
+.logo-image {
+  width: 70px;
+}
+
+/* 헤더 네비 버튼 그룹 */
+.nav-buttons {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  overflow: visible;
+}
+
+/* 버튼 공통 스타일 */
+.btn.white {
+  width: 85px !important;
+  box-sizing: border-box;
+  background: transparent;
+  color: white;
+  border: 1px solid white;
+  box-shadow: 0 0 10px #66CCFF;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 11px !important;
+  font-family: 'PoppinsLight', sans-serif;
+  cursor: pointer;
+}
+
+/* Chrome Extension 아이콘 스타일 */
+.chrome-icon {
+  width: 30px;
+  height: 30px;
+  margin-top: -3.5px;
+  object-fit: contain;
+}
+
+/* Chrome Extension 링크 */
+.chrome-icon-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Gmail 아이콘 스타일 */
+.gmail-icon {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+}
+
+/* Gmail 링크 */
+.gmail-icon-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 툴팁 */
+.tooltip-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip-text {
+  position: absolute;
+  top: 110%;
+  left: -195%;
+  transform: translateX(-50%);
+  background: rgba(255, 255, 255, 0.55);
+  color: #171717;
+  padding: 20px 24px;
+  border-radius: 10px;
+  white-space: nowrap;
+  font-size: 16px;
+  font-family: 'PoppinsLight', sans-serif;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 100;
+  opacity: 0.95;
+  backdrop-filter: blur(4px);
+  transition: all 0.3s ease;
+  text-align: center;
+  max-width: 250px;
+  line-height: 1.4;
+}
+
+.tooltip-sub {
+  color: #515151;
+  display: block;
+  margin-top: 2px;
+  font-size: 14px;
+}
+
+/* 말풍선 꼬리 추가 */
+.tooltip-text::after {
+  content: "";
+  position: absolute;
+  bottom: 100%;
+  left: 80%;
+  transform: translateX(-50%);
+  border-width: 10px;
+  border-style: solid;
+  border-color: transparent transparent rgba(255, 255, 255, 0.55) transparent;
+}
+
+/* GitHub 아이콘 */
+.github-icon {
+  width: 35px;
+  height: 35px;
+  object-fit: contain;
+}
+
+/* 반응형 */
+@media (max-width: 1024px) {
+  .module-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .module-grid {
+    grid-template-columns: repeat(1, 1fr);
+  }
+
+  .module-card {
+    align-items: center;
+    text-align: center;
+  }
+}
+
+.blob {
+  position: absolute;
+  width: 500px;
+  aspect-ratio: 1 / 1;
+  background: linear-gradient(rgba(227, 246, 255, 0.8),
+      rgba(33, 133, 183, 0.8));
+  border-radius: 30% 70% 70% 30% / 30% 40% 70% 70%;
+  filter: blur(130px);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.blob1 {
+  top: 0;
+  left: 0;
+  animation:
+    floatRandom1 10s ease-in-out infinite,
+    rotateShape 10s linear infinite,
+    changeShape 10s linear infinite;
+}
+
+.blob2 {
+  top: 22%;
+  left: 50%;
+  animation:
+    floatRandom2 10s ease-in-out infinite,
+    rotateShape 10s linear infinite reverse,
+    changeShape 10s linear infinite;
+}
+
+.blob3 {
+  bottom: 0;
+  right: 0;
+  animation:
+    floatRandom3 10s ease-in-out infinite,
+    rotateShape 10s linear infinite,
+    changeShape 10s linear infinite;
+}
+
+.blob4 {
+  bottom: 20%;
+  right: 40%;
+  animation:
+    floatRandom3 10s ease-in-out infinite,
+    rotateShape 10s linear infinite,
+    changeShape 10s linear infinite;
+}
+
+
+@keyframes changeShape {
+
+  0%,
+  100% {
+    border-radius: 30% 70% 70% 30% / 30% 40% 70% 70%;
+  }
+
+  20% {
+    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+  }
+
+  40% {
+    border-radius: 40% 60% 60% 40% / 50% 60% 40% 50%;
+  }
+
+  60% {
+    border-radius: 70% 30% 40% 60% / 30% 70% 50% 50%;
+  }
+
+  80% {
+    border-radius: 50% 50% 30% 70% / 60% 40% 60% 40%;
+  }
+}
+
+@keyframes rotateShape {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(720deg);
+  }
+}
+
+@keyframes floatRandom1 {
+  0% {
+    transform: translate(0px, 0px) rotate(0deg);
+  }
+
+  25% {
+    transform: translate(20px, -18px) rotate(3deg);
+  }
+
+  50% {
+    transform: translate(-18px, 20px) rotate(-3deg);
+  }
+
+  75% {
+    transform: translate(16px, -16px) rotate(2deg);
+  }
+
+  100% {
+    transform: translate(0px, 0px) rotate(0deg);
+  }
+}
+
+@keyframes floatRandom2 {
+  0% {
+    transform: translate(0px, 0px) rotate(0deg);
+  }
+
+  25% {
+    transform: translate(20px, -18px) rotate(3deg);
+  }
+
+  50% {
+    transform: translate(-18px, 20px) rotate(-3deg);
+  }
+
+  75% {
+    transform: translate(16px, -16px) rotate(2deg);
+  }
+
+  100% {
+    transform: translate(0px, 0px) rotate(0deg);
+  }
+}
+
+@keyframes floatRandom3 {
+  0% {
+    transform: translate(0px, 0px) rotate(0deg);
+  }
+
+  25% {
+    transform: translate(20px, -18px) rotate(3deg);
+  }
+
+  50% {
+    transform: translate(-18px, 20px) rotate(-3deg);
+  }
+
+  75% {
+    transform: translate(16px, -16px) rotate(2deg);
+  }
+
+  100% {
+    transform: translate(0px, 0px) rotate(0deg);
+  }
+}
+
+@keyframes floatRandom4 {
+  0% {
+    transform: translate(0px, 0px) rotate(0deg);
+  }
+
+  25% {
+    transform: translate(20px, -18px) rotate(3deg);
+  }
+
+  50% {
+    transform: translate(-18px, 20px) rotate(-3deg);
+  }
+
+  75% {
+    transform: translate(16px, -16px) rotate(2deg);
+  }
+
+  100% {
+    transform: translate(0px, 0px) rotate(0deg);
+  }
+}
+
+@font-face {
+  font-family: 'PoppinsLight';
+  src: url('../assets/fonts/Poppins-Light.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'PoppinsMedium';
+  src: url('../assets/fonts/Poppins-Medium.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'PoppinsBold';
+  src: url('../assets/fonts/Poppins-Bold.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+.Kisa {
+  background: rgba(255, 255, 255, 0.04);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 12px;
+  padding: 16px 20px 5px 20px;
+  display: inline-block;
+}
+
+.kisa-report-text {
+  color: #ccc;
+  font-weight: 500;
+  margin-top: 8px;
+  font-family: 'PoppinsLigit', sans-serif;
+  font-size: 18px;
+}
+
+.kisa-icon {
+  width: 100px;
+  display: inline-block;
+  vertical-align: middle;
+  margin-left: 2px;
+  margin-top: -6px;
+  filter: brightness(1.8);
+}

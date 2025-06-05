@@ -4,8 +4,6 @@ services:
       context: ./web/gui/react
     ports:
       - "1000:1000"
-    volumes:
-      - ./web/gui/react:/web
     stdin_open: true
     tty: true
 
