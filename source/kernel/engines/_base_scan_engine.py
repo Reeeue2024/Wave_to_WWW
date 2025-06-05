@@ -21,7 +21,7 @@ SUSPICIOUS_WEIGHT = 10
 HIGH_SUSPICIOUS_WEIGHT = 20
 
 # [ Default ]
-ENGINE_RESULT_SCORE = 70
+ENGINE_RESULT_SCORE = 10
 
 class BaseScanEngine :
     def __init__(self, input_url) :
