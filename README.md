@@ -75,9 +75,9 @@
 
 사용 데이터셋: https://www.kaggle.com/datasets/shashwatwork/web-page-phishing-detection-dataset?resource=download
 
-<img src="./mdassets/features.png" alt="특징" style="width: 600px;" />
+<img src="./mdassets/features.png" alt="특징" style="width: 650px;" />
 
-<img src="./mdassets/ai.png" alt="AI" style="width: 400px;" />
+<img src="./mdassets/ai.png" alt="AI" style="width: 420px;" />
 
 
 ---
@@ -94,7 +94,7 @@
 
 ### System Context Diagram
 <p align="center">
-  <img src="./mdassets/system.png"width="500"/>
+  <img src="./mdassets/system.png"width="600"/>
 </p>
 
 ### Component Diagram
@@ -104,7 +104,7 @@
 
 ### Deployment Diagram
 <p align="center">
-  <img src="./mdassets/deployment.png"width="500"/>
+  <img src="./mdassets/deployment.png"width="600"/>
 </p>
 
 ---
