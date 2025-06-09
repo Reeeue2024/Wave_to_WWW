@@ -16,9 +16,9 @@ class KernelService :
     OUT : 
     """
     def run_kernel(self, input_url, engine_type) :
-        print("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-        print(" [ Kernel Service ] Receive Request ...")
-        print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
+        # print("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        # print(" [ Kernel Service ] Receive Request ...")
+        # print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
 
         try :
             if not input_url or not isinstance(input_url, str) :
@@ -27,8 +27,8 @@ class KernelService :
             if not engine_type or engine_type not in ("full", "light") :
                 raise ValueError("[ ERROR ] \"Engine Type\" is INVALID.")
 
-            print(f"  [ + ]  Input URL : {input_url}")
-            print(f"  [ + ]  Engine Type : {engine_type}")
+            # print(f"  [ + ]  Input URL : {input_url}")
+            # print(f"  [ + ]  Engine Type : {engine_type}")
             
             # [ 1. ] Get Resource
             # black_list_url = kernel_resource_instance.get_resource("black_list_url")
@@ -81,20 +81,20 @@ class KernelService :
                 "error_type" : type(e).__name__,
             }
 
-        print("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-        print(" [ Kernel Service ] Send Response ...")
-        print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
+        # print("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        # print(" [ Kernel Service ] Send Response ...")
+        # print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
 
-        print(f"  [ + ]  Input URL : {self.kernel_result_dictionary.get('input_url')}")
-        print(f"  [ + ]  Engine Type : {self.kernel_result_dictionary.get('engine_type')}")
-        print(f"  [ + ]  Engine Result Flag : {self.kernel_result_dictionary.get('engine_result_flag')}")
-        print(f"  [ + ]  Engine Result Score : {self.kernel_result_dictionary.get('engine_result_score')}")
-        print(f"  [ + ]    | - Engine Result Run True Score : {self.kernel_result_dictionary.get('engine_result_run_true_score')}")
-        print(f"  [ + ]    | - Engine Result Run True Weight : {self.kernel_result_dictionary.get('engine_result_run_true_weight')}")
-        print(f"  [ + ]  Module Result Dictionary List : ( ... )")
-        print(f"  [ + ]  ERROR Flag : {self.kernel_result_dictionary.get('error_flag')}")
-        print(f"  [ + ]  ERROR Type : {self.kernel_result_dictionary.get('error_type')}")
+        # print(f"  [ + ]  Input URL : {self.kernel_result_dictionary.get('input_url')}")
+        # print(f"  [ + ]  Engine Type : {self.kernel_result_dictionary.get('engine_type')}")
+        # print(f"  [ + ]  Engine Result Flag : {self.kernel_result_dictionary.get('engine_result_flag')}")
+        # print(f"  [ + ]  Engine Result Score : {self.kernel_result_dictionary.get('engine_result_score')}")
+        # print(f"  [ + ]    | - Engine Result Run True Score : {self.kernel_result_dictionary.get('engine_result_run_true_score')}")
+        # print(f"  [ + ]    | - Engine Result Run True Weight : {self.kernel_result_dictionary.get('engine_result_run_true_weight')}")
+        # print(f"  [ + ]  Module Result Dictionary List : ( ... )")
+        # print(f"  [ + ]  ERROR Flag : {self.kernel_result_dictionary.get('error_flag')}")
+        # print(f"  [ + ]  ERROR Type : {self.kernel_result_dictionary.get('error_type')}")
 
-        print()
+        # print()
 
         return self.kernel_result_dictionary

@@ -21,7 +21,7 @@ SUSPICIOUS_WEIGHT = 10
 HIGH_SUSPICIOUS_WEIGHT = 20
 
 # [ Default ]
-ENGINE_RESULT_SCORE = 10
+ENGINE_RESULT_SCORE = 70
 
 class BaseScanEngine :
     def __init__(self, input_url) :
@@ -172,7 +172,7 @@ class BaseScanEngine :
 
             js_file = response.text
 
-            print(f"  [ + ]  {'Get JS File - Success':<25} ( {round(time.time() - start_time, 2)}s : {js_file_url} )")
+            # print(f"  [ + ]  {'Get JS File - Success':<25} ( {round(time.time() - start_time, 2)}s : {js_file_url} )")
 
             return js_file_url, js_file
         
@@ -188,9 +188,9 @@ class BaseScanEngine :
     OUT : 
     """
     def set_engine_resource(self) :
-        print("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-        print(" [ Kernel Service - Engine ] Set Engine Resource ...")
-        print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
+        # print("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        # print(" [ Kernel Service - Engine ] Set Engine Resource ...")
+        # print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
 
         start_time = time.time()
 
@@ -201,7 +201,7 @@ class BaseScanEngine :
 
             bs = BeautifulSoup(response.text, "html.parser")
 
-            print(f"  [ + ]  {'Get HTML File - Success':<25} ( {round(time.time() - start_time, 2)}s : {self.input_url} )")
+            # print(f"  [ + ]  {'Get HTML File - Success':<25} ( {round(time.time() - start_time, 2)}s : {self.input_url} )")
 
             html_file_script_tag_list = []
             js_file_dictionary = {}
@@ -274,9 +274,9 @@ class BaseScanEngine :
     OUT : 
     """
     def load_module(self) :
-        print("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-        print(" [ Kernel Service - Engine ] Load Module ...")
-        print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
+        # print("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        # print(" [ Kernel Service - Engine ] Load Module ...")
+        # print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
 
         for module_directory_path, module_file_name in self.module_path_list :
             
@@ -296,13 +296,13 @@ class BaseScanEngine :
 
                 self.module_instance_list.append(module_instance)
 
-                print(f"  [ + ]  {module_class_name:<25} {module_file_path}")
+                # print(f"  [ + ]  {module_class_name:<25} {module_file_path}")
             
             except Exception as e :
                 print(f"[ ERROR ] Fail to Load Module : \"{module_file_path}\"")
                 print(f"{e}")
         
-        print(f"  [ End Log ]  Number of Module : {len(self.module_instance_list)}")
+        # print(f"  [ End Log ]  Number of Module : {len(self.module_instance_list)}")
         
         # print(f"[ DEBUG ] Module Instance List : {self.module_instance_list}")
     
@@ -325,7 +325,7 @@ class BaseScanEngine :
                 # ERROR - Time Out "O" in Module Level
                 if "time out" in module_error_message.lower() :
 
-                    print("[ DEBUG - Module Level in Engine ] Time Out.")
+                    # print("[ DEBUG - Module Level in Engine ] Time Out.")
 
                     return {
                         "run_status" : "Fail",
@@ -338,7 +338,7 @@ class BaseScanEngine :
                 # ERROR - Time Out "X" in Module Level
                 else :
 
-                    print("[ DEBUG - Module Level in Engine ] Not Time Out.")
+                    # print("[ DEBUG - Module Level in Engine ] Not Time Out.")
 
                     return {
                         "run_status" : "Fail",
@@ -361,7 +361,7 @@ class BaseScanEngine :
         except asyncio.TimeoutError as e :
             module_run_time = run_result.get("module_run_time", None)
 
-            print("[ DEBUG - Engine Level in Engine ] Time Out.")
+            # print("[ DEBUG - Engine Level in Engine ] Time Out.")
 
             return {
                 "run_status" : "Fail",
@@ -375,7 +375,7 @@ class BaseScanEngine :
         except Exception as e :
             module_run_time = run_result.get("module_run_time", None)
 
-            print("[ DEBUG - Engine Level in Engine ] Not Time Out.")
+            # print("[ DEBUG - Engine Level in Engine ] Not Time Out.")
 
             return {
                 "run_status" : "Fail",
@@ -410,7 +410,7 @@ class BaseScanEngine :
                     "module_result_data" : module_result_dictionary.get("module_result_data"),
                 })
 
-                print(f"  [ + ]  {module_class_name:<25} ( Run Module - {module_run_status} : {module_run_time}s )")
+                # print(f"  [ + ]  {module_class_name:<25} ( Run Module - {module_run_status} : {module_run_time}s )")
 
             # Run Module - Fail
             else :
@@ -424,7 +424,7 @@ class BaseScanEngine :
                     "module_result_data" : None,
                 })
 
-                print(f"  [ ! ]  {module_class_name:<25} ( Run Module - {module_run_status} : {module_run_time}s )")
+                # print(f"  [ ! ]  {module_class_name:<25} ( Run Module - {module_run_status} : {module_run_time}s )")
 
         # ( Except ) Run Module - Fail
         except Exception as e :
@@ -437,18 +437,18 @@ class BaseScanEngine :
                 "module_result_data" : None,
             })
 
-            print(f"  [ ! ]  {module_class_name:<25} ( Run Module - Fail with Except )")
+            # print(f"  [ ! ]  {module_class_name:<25} ( Run Module - Fail with Except )")
 
-            print(f"{e}")
+            # print(f"{e}")
     
     """
     IN : 
     OUT : 
     """
     async def run_module_asynchronous(self) :
-        print("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-        print(" [ Kernel Service - Engine ] Run Module ( Asynchronous ) ...")
-        print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
+        # print("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        # print(" [ Kernel Service - Engine ] Run Module ( Asynchronous ) ...")
+        # print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
 
         task_list = []
 
@@ -504,7 +504,7 @@ class BaseScanEngine :
                 # ERROR - Time Out "O" in Module Level
                 if "time out" in module_error_message.lower() :
 
-                    print("[ DEBUG - Module Level in Engine ] ERROR O - Time Out.")
+                    # print("[ DEBUG - Module Level in Engine ] ERROR O - Time Out.")
 
                     return {
                         "run_status" : "Fail",
@@ -516,7 +516,7 @@ class BaseScanEngine :
                 # ERROR - Time Out "X" in Module Level
                 else : 
 
-                    print("[ DEBUG - Module Level in Engine ] ERROR O - Not Time Out.")
+                    # print("[ DEBUG - Module Level in Engine ] ERROR O - Not Time Out.")
 
                     return {
                         "run_status" : "Fail",
@@ -538,7 +538,7 @@ class BaseScanEngine :
         except asyncio.TimeoutError as e :
             module_run_time = run_result.get("module_run_time", None)
 
-            print("[ DEBUG - Engine Level in Engine ] ERROR O - Time Out.")
+            # print("[ DEBUG - Engine Level in Engine ] ERROR O - Time Out.")
 
             return {
                 "run_status" : "Fail",
@@ -552,7 +552,7 @@ class BaseScanEngine :
         except Exception as e :
             module_run_time = run_result.get("module_run_time", None)
 
-            print("[ DEBUG - Engine Level in Engine ] Not Time Out. ")
+            # print("[ DEBUG - Engine Level in Engine ] Not Time Out. ")
 
             return {
                 "run_status" : "Fail",
@@ -587,7 +587,7 @@ class BaseScanEngine :
                     "module_result_data" : module_result_dictionary.get("module_result_data"),
                 })
 
-                print(f"  [ + ]  {module_class_name:<25} ( Run Module - {module_run_status} : {module_run_time}s )")
+                # print(f"  [ + ]  {module_class_name:<25} ( Run Module - {module_run_status} : {module_run_time}s )")
 
             # Module Run - Fail
             else :
@@ -601,7 +601,7 @@ class BaseScanEngine :
                     "module_result_data" : None,
                 })
 
-                print(f"  [ ! ]  {module_class_name:<25} ( Run Module - {module_run_status} : {module_run_time}s )")
+                # print(f"  [ ! ]  {module_class_name:<25} ( Run Module - {module_run_status} : {module_run_time}s )")
 
         # ( Except ) Module Run - Fail
         except Exception as e :
@@ -614,18 +614,18 @@ class BaseScanEngine :
                 "module_result_data" : None,
             })
 
-            print(f"  [ ! ]  {module_class_name:<25} ( Run Module - Fail : with Except )")
+            # print(f"  [ ! ]  {module_class_name:<25} ( Run Module - Fail : with Except )")
 
-            print(f"{e}")
+            # print(f"{e}")
     
     """
     IN : 
     OUT : 
     """
     def run_module_synchronous(self) :
-        print("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-        print(" [ Kernel Service - Engine ] Run Module ( Synchronous ) ...")
-        print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
+        # print("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        # print(" [ Kernel Service - Engine ] Run Module ( Synchronous ) ...")
+        # print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
 
         for module_instance in self.module_instance_list :
 
@@ -641,11 +641,11 @@ class BaseScanEngine :
 
                     if redirect_url and self.input_url != redirect_url :
 
-                        print(f"  ( Redirect By Short URL ) Before URL : {self.input_url}")
+                        # print(f"  ( Redirect By Short URL ) Before URL : {self.input_url}")
 
                         self.input_url = redirect_url
 
-                        print(f"  ( Redirect By Short URL ) After URL : {self.input_url}")
+                        # print(f"  ( Redirect By Short URL ) After URL : {self.input_url}")
 
     """
     IN : 

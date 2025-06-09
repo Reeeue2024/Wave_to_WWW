@@ -102,7 +102,7 @@ class JsDynamicDom(BaseModule) :
                 self.module_result_data = None
         
         except json.JSONDecodeError as e :
-            print(f"[ DEBUG ] JSON : {result_js}")
+            # print(f"[ DEBUG ] JSON : {result_js}")
 
             self.module_run = False
             self.module_run_time = round(time.time() - start_time, 2) # Add Execute Time in JS
@@ -111,7 +111,7 @@ class JsDynamicDom(BaseModule) :
             self.module_result_data = None
 
         except Exception as e :
-            print(f"[ DEBUG ] JSON : {result_js}")
+            # print(f"[ DEBUG ] JSON : {result_js}")
             
             self.module_run = False
             self.module_run_time = round(time.time() - start_time, 2) # Add Execute Time in JS
