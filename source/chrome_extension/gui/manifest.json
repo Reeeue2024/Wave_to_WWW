@@ -2,8 +2,8 @@
   "manifest_version": 3,
   "name": "Phishing Detector Extension",
   "version": "1.0",
-  "permissions": ["tabs", "storage", "activeTab", "scripting"],
-  "host_permissions": ["<all_urls>"],
+  "permissions": ["tabs", "storage", "scripting"],
+  "host_permissions": ["<all_urls>"],     
   "action": {
     "default_popup": "index.html"
   },

@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Phishing Detector Extension",
+  "name": "wave to www",
   "version": "1.0",
-  "permissions": ["tabs", "storage", "activeTab", "scripting"],
+  "permissions": ["tabs", "storage", "scripting"],
   "host_permissions": ["<all_urls>"],
   "action": {
     "default_popup": "index.html"
@@ -16,5 +16,10 @@
       "js": ["content.js"],
       "run_at": "document_idle"
     }
-  ]
+  ],
+  "icons": {
+    "16": "16.png",
+    "48": "48.png",
+    "128": "128.png"
+  }
 }

@@ -12,22 +12,15 @@ function App() {
   }, []);
 
   const toggleHovering = () => {
-  const newState = !hovering;
-  setHovering(newState);
-  chrome.storage.sync.set({ hoveringEnabled: newState });
+    const newState = !hovering;
+    setHovering(newState);
+    chrome.storage.sync.set({ hoveringEnabled: newState });
 
-  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-    const currentTabId = tabs[0].id;
-
-    // 현재 탭에 메시지 보내기
-    chrome.runtime.sendMessage({ type: 'TOGGLE_HOVER', enabled: newState });
-
-    // ✅ content.js가 주입되지 않은 경우, 수동 주입 시도
-    chrome.scripting.executeScript({
-      target: { tabId: currentTabId },
-      files: ['content.js'],
+    // ✅ background.js에 메시지 보내기
+    chrome.runtime.sendMessage({
+      type: 'TOGGLE_HOVER_ALL_TABS',
+      enabled: newState,
     });
-  });
   };
 
   return (
@@ -44,7 +37,10 @@ function App() {
         </label>
       </div>
 
-      <button className="visit-button" onClick={() => window.open('https://naver.com')}>
+      <button
+        className="visit-button"
+        onClick={() => window.open('https://naver.com')}
+      >
         Visit Website
       </button>
     </div>
