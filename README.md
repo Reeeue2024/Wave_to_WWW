@@ -57,6 +57,11 @@
 
  이러한 기능들을 종합하여 사용자에게 단순히 ‘위험’ 여부 뿐만 아니라 왜 위험한지를 정확히 설명하고, 다음 행동까지 연결할 수 있도록 동작하는 서비스를 구현했다.
 
+<p align="center">
+  <img src="./mdassets/safe.gif"width="500"/>
+  <img src="./mdassets/phishing.gif"width="500"/>
+</p>
+
  ### **2. 실시간 탐지 Chrome Extension**
 
  웹 서비스가 사용자의 의도적 입력을 기반으로 한다면, 크롬 익스텐션 서비스는 사용자의 일상적인 웹 서핑 중 자연스럽게 피싱을 방지할 수 있는 실시간 서비스이다. 핵심 특징은 다음과 같다.
@@ -67,6 +72,11 @@
 - **UI 친화성**: 페이지의 흐름을 방해하지 않는 비동기 처리 구조로 구성되었고, 경고 메시지 외에 별도의 사용자 동작 없이 서비스를 경험할 수 있다.
 
  이 익스텐션은 특히 비전공자, 일반 사용자들에게 매우 직관적인 형태의 보안 서비스 형태로 개발하였다.
+
+#### 크롬 익스텐션
+<p align="center">
+  <img src="./mdassets/chrome.gif"width="500"/>
+</p>
 
 ---
 
@@ -177,8 +187,6 @@ PROJECT/
     <img src="https://img.shields.io/badge/Chrome%20Extension-Download-29ABE2?style=for-the-badge&logo=googlechrome" alt="크롬 확장 프로그램 링크"/>
   </a>
 </p>
-
-### ⭐️ 사용 흐름
 
 ---
 
