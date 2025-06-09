@@ -199,9 +199,9 @@ PROJECT/
     <td align="center"><img src="./mdassets/gisuk.JPG" width="118"/></td>
   </tr>
   <tr>
-    <td align="center">🌈 <strong>PM</strong><br/>🛠️ <strong>백엔드</strong></td>
+    <td align="center">🌈 <strong>PM</strong><br/>⚙️ <strong>커널</strong></td>
     <td align="center">🌳 <strong>AI</strong><br/>🎨 <strong>디자인</strong></td>
-    <td align="center">⚙️ <strong>커널</strong></td>
+    <td align="center">🛠️ <strong>백엔드</strong></td>
     <td align="center">📱 <strong>프론트엔드</strong></td>
   </tr>
 </table>
