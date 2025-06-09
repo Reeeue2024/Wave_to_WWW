@@ -199,7 +199,7 @@
 /* 모듈 카드 내 제목 */
 .module-title {
   font-family: 'PoppinsMedium', sans-serif;
-  font-size: 16px;
+  font-size: 20px;
   margin-bottom: 8px;
   color: #fff;
 }
@@ -292,7 +292,7 @@
 .module-detail-card {
   padding: 20px;
   border-radius: 12px;
-  font-size: 14px;
+  font-size: 15px;
   font-family: 'PoppinsLight', sans-serif;
   color: #f0f0f0;
   display: flex;
@@ -323,12 +323,11 @@
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
 }
 
-/* 세부 항목 스타일 */
-.module-detail-card h4 {
-  font-size: 16px;
+.module-detail-title {
+  font-family: 'PoppinsMedium', sans-serif;
+  font-size: 20px;
   margin-bottom: 8px;
   color: #fff;
-  font-weight: bold;
 }
 
 /* 링크 강조 */
@@ -386,6 +385,42 @@
   color: #B95250;
   font-size: 18px;
   font-family: 'PoppinsMedium', sans-serif;
+}
+
+/* AI 확률 막대 그래프 */
+.ai-bar-wrapper {
+  margin-top: 12px;
+  width: 100%;
+}
+
+.ai-bar-label {
+  font-size: 14px;
+  color: #ccc;
+  margin-bottom: 6px;
+}
+
+.ai-bar {
+  background-color: #333;
+  border-radius: 6px;
+  height: 22px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.ai-bar-fill {
+  background-color: #2185B7;
+  height: 100%;
+  width: 0%;
+  transition: width 0.5s ease;
+  border-radius: 6px;
+}
+
+.ai-bar-label-emph {
+  font-size: 24px;
+  font-family: 'PoppinsMedium', sans-serif;
+  color: #ffffff;
+  margin-bottom: 6px;
+  text-align: center;
 }
 
 /* 결과 페이지 하단 푸터 */

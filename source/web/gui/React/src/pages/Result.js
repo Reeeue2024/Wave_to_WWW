@@ -102,12 +102,12 @@ function Result() {
   const renderReasonsWithData = (reason, data, moduleName) => {
     //moduleName을 추가하여 AI일 경우에는 reason만 하나의 문장으로 출력하도록 하였습니다.
     if (moduleName === 'Ai') {
-    return (
-      <ul className="reason-list">
-        <li><strong>{reason}</strong></li>
-      </ul>
-    );
-  }
+      return (
+        <ul className="reason-list">
+          <li><strong>{reason}</strong></li>
+        </ul>
+      );
+    }
     // case 1: reason, data 모두 배열
     if (Array.isArray(reason) && Array.isArray(data)) {
       const filtered = reason
@@ -202,21 +202,50 @@ function Result() {
       longDescription: 'No detailed description available.'
     };
 
+    const isAiModule = mod.moduleName === 'Ai';
+
+    let aiProb = 0;
+    if (isAiModule && typeof mod.reason === 'string') {
+      const match = mod.reason.match(/[\d.]+/);
+      aiProb = match ? parseFloat(match[0]) : 0;
+    }
+
     return (
       <div
         key={index}
-        id={`detail-${mod.moduleName}`} // 클릭 시 이동할 위치용 ID
+        id={`detail-${mod.moduleName}`}
         className={`module-detail-card ${mod.moduleResultFlag ? 'detected' : 'safe'}`}
       >
-        <h4>{info.name}</h4>
+        <p className="module-detail-title">{info.name}</p>
         <p>{info.longDescription || info.description}</p>
         <p className={mod.moduleResultFlag ? 'detected-text-card' : 'safe-text-card'}>
           {mod.moduleResultFlag ? 'Detected' : 'Safe'}
         </p>
         <p><strong>Execution:</strong> {mod.moduleRun ? 'Success' : 'Fail'}</p>
-        <p><strong>Score:</strong> {mod.moduleScore} / {mod.moduleWeight}</p>
-        <div><strong>Reason:</strong></div>
-        {renderReasonsWithData(mod.reason, mod.reasonData, mod.moduleName)}
+
+        {!isAiModule && (
+          <>
+            <p><strong>Score:</strong> {mod.moduleScore} / {mod.moduleWeight}</p>
+            <div><strong>Reason:</strong></div>
+            {renderReasonsWithData(mod.reason, mod.reasonData, mod.moduleName)}
+          </>
+        )}
+
+        {/* AI 모듈일 경우 확률 막대 그래프 표시 */}
+        {isAiModule && (
+          <div className="ai-bar-wrapper">
+            <div className="ai-bar-label-emph">{aiProb.toFixed(2)}%</div>
+            <div className="ai-bar">
+              <div
+                className="ai-bar-fill"
+                style={{
+                  width: `${aiProb}%`,
+                  backgroundColor: aiProb >= 70 ? '#B95250' : '#2185B7'
+                }}
+              />
+            </div>
+          </div>
+        )}
         <hr />
       </div>
     );
