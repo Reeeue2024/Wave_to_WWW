@@ -122,7 +122,7 @@
 ## 📁 프로젝트 구조
 
 <pre>
-PROJECT/
+Wave_to_WWW/
 ├── .github/                                  
 ├── scripts/                                  # 배포 및 실행 스크립트 모음
 ├── source/                                   
@@ -187,6 +187,9 @@ PROJECT/
     <img src="https://img.shields.io/badge/Chrome%20Extension-Download-29ABE2?style=for-the-badge&logo=googlechrome" alt="크롬 확장 프로그램 링크"/>
   </a>
 </p>
+
+> 현재 웹 서비스 배포 및 크롬 확장 프로그램 등록 승인이 진행 중이라 실행이 불가능합니다. <br>
+> 추후 배포 및 승인 완료 후, 해당 링크를 통해 접근하실 수 있습니다.
 
 ---
 
