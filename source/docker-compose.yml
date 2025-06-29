@@ -1,7 +1,7 @@
 services:
   web:
     build:
-      context: ./web/gui/react
+      context: ./web/gui/React
     ports:
       - "1000:1000"
     stdin_open: true
