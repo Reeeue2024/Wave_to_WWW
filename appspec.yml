@@ -6,6 +6,9 @@ files:
 
 hooks:
   BeforeInstall:
+    - location: scripts/copy_env.sh
+      timeout: 60
+      runas: ubuntu
     - location: scripts/stop_docker.sh
       timeout: 180
       runas: ubuntu
