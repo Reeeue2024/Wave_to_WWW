@@ -1,9 +1,8 @@
 #!/bin/bash
 
-echo "[INFO] Copying backend.env to server/app/.env"
-cp /home/ubuntu/env-configs/backend.env /home/ubuntu/app/source/server/app/.env
+echo "[INFO] Copying .env files to deployment archive..."
 
-echo "[INFO] Copying kernel.env to kernel/.env"
-cp /home/ubuntu/env-configs/kernel.env /home/ubuntu/app/source/kernel/.env
+cp /home/ubuntu/env-configs/backend.env /opt/codedeploy-agent/deployment-root/*/deployment-archive/source/server/app/.env
+cp /home/ubuntu/env-configs/kernel.env /opt/codedeploy-agent/deployment-root/*/deployment-archive/source/kernel/.env
 
-echo "[INFO] All .env files copied successfully."
+echo "[INFO] .env files successfully copied into CodeDeploy archive"
