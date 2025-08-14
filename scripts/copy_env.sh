@@ -1,5 +1,9 @@
 #!/bin/bash
 
+echo "[INFO] Creating target directories..."
+mkdir -p /home/ubuntu/wavetowww/source/server/app
+mkdir -p /home/ubuntu/wavetowww/source/kernel
+
 echo "[INFO] Copying backend.env to /home/ubuntu/wavetowww/source/server/app/.env"
 cp /home/ubuntu/env-configs/backend.env /home/ubuntu/wavetowww/source/server/app/.env
 
