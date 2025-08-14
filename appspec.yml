@@ -1,8 +1,14 @@
 version: 0.0
 os: linux
 files:
-  - source: /
-    destination: /home/ubuntu/wavetowww
+  - source: source/server/app
+    destination: /home/ubuntu/wavetowww/source/server/app
+  - source: source/kernel
+    destination: /home/ubuntu/wavetowww/source/kernel
+  - source: scripts
+    destination: /home/ubuntu/wavetowww/scripts
+  - source: appspec.yml
+    destination: /home/ubuntu/wavetowww/appspec.yml
 
 hooks:
   BeforeInstall:
