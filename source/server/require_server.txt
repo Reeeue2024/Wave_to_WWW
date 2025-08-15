@@ -36,5 +36,6 @@ scikit-learn
 # Server Resource
 mysql-connector-python
 httpx
+openai
 
 ########## ########## Server - End ########## ##########

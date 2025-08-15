@@ -57,6 +57,10 @@ app.add_middleware(
 # 프론트엔드 정적 파일 서빙
 app.mount("/static", StaticFiles(directory="web/gui"), name="static")
 
+# explain 라우터 등록
+from server.app.routes.explain import router as explain_router
+app.include_router(explain_router)
+
 # 루트 엔드포인트
 @app.get("/")
 def root():
