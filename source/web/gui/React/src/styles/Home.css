@@ -18,14 +18,16 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #171717;
-  color: white;
+
+  background: #171717 !important;
+  color: #171717 !important; 
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
 }
 
 /* 중앙 배경 영역 (로고 + 입력창 포함) */
 .home-background {
   flex: 1;
-  background: linear-gradient(to bottom right, #171717, #171717);
+  background: linear-gradient(to bottom right, #F1F1F1, #F1F1F1);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -232,20 +234,19 @@
   transform: rotate(-18deg);
 }
 
-
 /* 입력창 섹션 */
 .input-section {
   display: flex;
   width: 90%;
   justify-content: center;
-  margin-top: -65px;
+  margin-top: -70px !important;
 }
 
 /* 입력창 박스 (검색창 모양) */
 .url-input-box {
   display: flex;
   align-items: center;
-  background-color: white;
+  background-color: #F1F1F1;
   padding: 10px 20px;
   border-radius: 30px;
   width: 400px;
@@ -299,8 +300,8 @@
   width: 85px !important;
   box-sizing: border-box;
   background: transparent;
-  color: white;
-  border: 1px solid white;
+  color: #F1F1F1 !important;
+  border: 1px solid #F1F1F1;
   box-shadow: 0 0 10px #66CCFF;
   padding: 6px 14px;
   border-radius: 20px;
@@ -414,7 +415,7 @@ html, body {
   height: 100%;
   background: linear-gradient(to top, #2185B7);
   transform: translateY(100%);
-  animation: waveRiseUp 2s ease forwards;
+  animation: waveRiseUp 0.8s ease forwards;
   z-index: 1;
 }
 
@@ -438,7 +439,7 @@ html, body {
 
   z-index: 2;
   opacity: 0;
-  animation: fadeInLogo 2s ease 1.2s forwards;
+  animation: fadeInLogo 1s ease 0.4s forwards;
 
   filter: brightness(0) invert(1);
 }
@@ -447,6 +448,16 @@ html, body {
   to {
     opacity: 1;
   }
+}
+
+/* 로딩 페이드 아웃 클래스 */
+.fade-out {
+  animation: fadeOutSmooth 0.4s ease forwards;
+}
+
+@keyframes fadeOutSmooth {
+  from { opacity: 1; }
+  to { opacity: 0; visibility: hidden; }
 }
 
 @font-face {

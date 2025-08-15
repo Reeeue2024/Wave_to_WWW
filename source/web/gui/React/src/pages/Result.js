@@ -8,15 +8,26 @@ import '../styles/Result.css';
 import GaugeScore from '../components/GaugeScore';
 import WaveLoader from '../components/WaveLoader';
 import ResultUrlBox from '../components/ResultUrlBox';
+import UrlInputBox from '../components/UrlInputBox';
+import FriendlyExplain from '../components/FriendlyExplain';
 
 import Header from '../components/Header';
 
 import KisaImage from '../assets/img/kisa.png';
 
+import SummaryCards from '../components/SummaryCards';
+
+// 언어 변환
+import { getLang } from '../components/lang';
+import { texts } from '../components/texts';
+
 // 카테고리 및 모듈 설명 맵
 import { categoryMap, categoryDescriptions, moduleDescriptions } from '../components/descriptions';
 
+
 function Result() {
+  const lang = getLang(); // 현재 언어: 'en' 또는 'ko'
+
   const location = useLocation(); // 이전 페이지에서 받은 state 접근
   const navigate = useNavigate(); // 페이지 이동용
   const resultData = location.state; // 전달받은 결과 데이터
@@ -24,11 +35,19 @@ function Result() {
   const [loading, setLoading] = useState(true); // 로딩 상태
   const userInputUrl = resultData?.inputUrl;
   const [showTooltip, setShowTooltip] = useState(false)
+  const [editingUrl, setEditingUrl] = useState(false);
 
   // 로딩 화면 2초 후 제거
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 2000);
-    return () => clearTimeout(timer);
+    const fromLangSwitch = sessionStorage.getItem('langSwitch');
+
+    if (fromLangSwitch) {
+      setLoading(false);
+      sessionStorage.removeItem('langSwitch');
+    } else {
+      const timer = setTimeout(() => setLoading(false), 2000);
+      return () => clearTimeout(timer);
+    }
   }, []);
 
   const handleGmailClick = (e) => {
@@ -43,34 +62,43 @@ function Result() {
   }
 
   const { summary, modules } = resultData;
+
+  const isPhishing = summary.resultScore >= 70;
+
   const phishingCount = modules.filter(mod => mod.moduleResultFlag).length;
   const totalCount = modules.length;
 
+  const aiModule = modules.find((mod) => mod.moduleName === 'Ai');
+  const aiScore = aiModule?.reason?.match(/[\d.]+/)?.[0] ?? null;
+  const topReason = aiModule?.reason || modules.find(m => m.moduleResultFlag)?.reason;
+  const detectedModules = modules
+    .filter((mod) => mod.moduleResultFlag)
+    .map((mod) => mod.moduleName); // 또는 moduleDescriptions[mod.moduleName]?.name[lang] 도 가능
 
   // 모듈 이름 접두사 기준으로 카테고리 분류
-  const inferCategory = (name) => {
+  const inferCategoryKey = (name) => {
     for (const prefix in categoryMap) {
-      if (name.startsWith(prefix)) return categoryMap[prefix];
+      if (name.startsWith(prefix)) return prefix;
     }
     return 'Other';
   };
 
   // 카테고리별로 모듈 정리
-  const categories = Object.values(categoryMap);
+  const categoryKeys = Object.keys(categoryMap);
   const categorizedModules = {};
-  categories.forEach((cat) => (categorizedModules[cat] = []));
+  categoryKeys.forEach((key) => (categorizedModules[key] = []));
   modules.forEach((mod) => {
-    const category = inferCategory(mod.moduleName);
-    if (categorizedModules[category]) {
-      categorizedModules[category].push(mod);
+    const categoryKey = inferCategoryKey(mod.moduleName);
+    if (categorizedModules[categoryKey]) {
+      categorizedModules[categoryKey].push(mod);
     }
   });
 
   // DETECTION 탭용 모듈 카드 렌더링
   const renderModules = (mods) => mods.map((mod, index) => {
     const info = moduleDescriptions[mod.moduleName] || {
-      name: mod.moduleName.replace(/^(Ai|Url|Html|JsStatic|JsDynamic)/, ''),
-      description: 'No description available.'
+      name: { en: mod.moduleName, ko: mod.moduleName },
+      description: { en: 'No description available.', ko: '설명이 없습니다.' },
     };
 
     return (
@@ -78,21 +106,19 @@ function Result() {
         key={index}
         className={`module-card ${mod.moduleResultFlag ? 'detected' : 'safe'}`}
         onClick={() => {
-          setActiveTab('details'); // 클릭 시 DETAILS 탭으로 전환
+          setActiveTab('details');
           setTimeout(() => {
             const target = document.getElementById(`detail-${mod.moduleName}`);
-            if (target) {
-              target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
+            if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
           }, 100);
         }}
       >
-        <div className="module-title">{info.name}</div>
-        <div className="module-description">{info.description}</div>
+        <div className="module-title">{info.name[lang]}</div>
+        <div className="module-description">{info.description[lang]}</div>
         <div className="module-status">
           {mod.moduleResultFlag
-            ? <span className="detected-text-card">Detected</span>
-            : <span className="safe-text-card">Safe</span>}
+            ? <span className="detected-text-card">{texts[lang].detected}</span>
+            : <span className="safe-text-card">{texts[lang].safe}</span>}
         </div>
       </div>
     );
@@ -197,9 +223,9 @@ function Result() {
   // DETAILS 탭용 상세 모듈 설명 렌더링
   const renderDetails = (mods) => mods.map((mod, index) => {
     const info = moduleDescriptions[mod.moduleName] || {
-      name: mod.moduleName.replace(/^(Ai|Url|Html|JsStatic|JsDynamic)/, ''),
-      description: 'No description available.',
-      longDescription: 'No detailed description available.'
+      name: { en: mod.moduleName, ko: mod.moduleName },
+      description: { en: 'No description.', ko: '설명이 없습니다.' },
+      longDescription: { en: 'No detailed description.', ko: '상세 설명이 없습니다.' },
     };
 
     const isAiModule = mod.moduleName === 'Ai';
@@ -216,10 +242,10 @@ function Result() {
         id={`detail-${mod.moduleName}`}
         className={`module-detail-card ${mod.moduleResultFlag ? 'detected' : 'safe'}`}
       >
-        <p className="module-detail-title">{info.name}</p>
-        <p>{info.longDescription || info.description}</p>
+        <p className="module-detail-title">{info.name[lang]}</p>
+        <p>{info.longDescription[lang] || info.description[lang]}</p>
         <p className={mod.moduleResultFlag ? 'detected-text-card' : 'safe-text-card'}>
-          {mod.moduleResultFlag ? 'Detected' : 'Safe'}
+          {mod.moduleResultFlag ? texts[lang].detected : texts[lang].safe}
         </p>
         <p><strong>Execution:</strong> {mod.moduleRun ? 'Success' : 'Fail'}</p>
 
@@ -254,10 +280,8 @@ function Result() {
   // 로딩 중일 경우 로더 표시
   if (loading) return <WaveLoader url={userInputUrl} />;
 
-
   // 결과 페이지 전체 렌더링
   return (
-
     <div className="result-background">
       <Header />
       {/* 본문 결과 영역 */}
@@ -269,32 +293,47 @@ function Result() {
         <div className="blob blob4"></div>
 
         {/* 결과 박스 */}
-        <div className={`result-box ${summary.resultFlag ? 'detected' : 'safe'}`}>
+        <div className={`result-box ${isPhishing ? 'detected' : 'safe'}`}>
           {/* URL 정보와 게이지 점수 표시 */}
-          <ResultUrlBox inputUrl={summary.inputUrl} isPhishing={summary.resultFlag} />
-          <GaugeScore score={summary.resultScore} isPhishing={summary.resultFlag} />
+          <div className="input-section2">
+            {editingUrl ? (
+              <UrlInputBox />
+            ) : (
+              <div onClick={() => setEditingUrl(true)} style={{ cursor: 'pointer' }}>
+                <ResultUrlBox inputUrl={summary.inputUrl} isPhishing={isPhishing} />
+              </div>
+            )}
+          </div>
+
+          <GaugeScore score={summary.resultScore} isPhishing={isPhishing} />
 
           {/* 최종 판단 표시 */}
           <div className="final-flag">
             <p className="final-flag-text">
-              {summary.resultFlag
-                ? <span className="detected-text">Phishing</span>
-                : <span className="safe-text">Safe</span>}
+              {isPhishing
+                ? <span className="detected-text">{texts[lang].detected}</span>
+                : <span className="safe-text">{texts[lang].safe}</span>}
             </p>
           </div>
 
-          {/* 탐지 모듈 통계 */}
-          <p className={`detection-text ${summary.resultFlag ? 'red' : 'blue'}`}>
-            <span className={summary.resultFlag ? 'detected-number' : 'safe-number'}>
-              {phishingCount}
-            </span> out of the <span className="safe-number">{totalCount}</span> modules reported suspected phishing detection.
-          </p>
-
+          {/* 키사 신고 여부 */}
           <div className='Kisa'>
-            {summary.reportedToKisa && (
+            {isPhishing && summary.reportedToKisa && (
               <p className="kisa-report-text">The URL has been reported to <img src={KisaImage} className="kisa-icon" /></p>
             )}
           </div>
+
+          {/* 결과 요약 카드 추가 위치 */}
+          <SummaryCards
+            phishingCount={phishingCount}
+            totalCount={totalCount}
+            aiScore={parseFloat(aiScore)}
+            topReason={typeof topReason === 'string' ? topReason.slice(0, 100) : 'N/A'}
+            isReported={summary.reportedToKisa}
+            detectedModules={detectedModules}
+            summary={summary}
+            modules={modules}
+          />
 
           {/* 탭 전환 버튼 */}
           <div className="tabs-header">
@@ -308,18 +347,16 @@ function Result() {
 
           {/* 탭별 콘텐츠 표시 */}
           <div className="tab-content">
-            {categories.map((category) => (
-              <div key={category} className="category-section">
-                <h3 className="category-title">{category}</h3>
+            {categoryKeys.map((key) => (
+              <div key={key} className="category-section">
+                <h3 className="category-title">{categoryMap[key][lang]}</h3>
                 {activeTab === 'details' && (
-                  <p className="category-description">
-                    {categoryDescriptions[Object.keys(categoryMap).find(key => categoryMap[key] === category)]}
-                  </p>
+                  <p className="category-description">{categoryDescriptions[key][lang]}</p>
                 )}
                 <div className={activeTab === 'detection' ? 'module-grid' : 'details-section'}>
                   {activeTab === 'detection'
-                    ? renderModules(categorizedModules[category])
-                    : renderDetails(categorizedModules[category])}
+                    ? renderModules(categorizedModules[key])
+                    : renderDetails(categorizedModules[key])}
                 </div>
               </div>
             ))}
@@ -328,10 +365,10 @@ function Result() {
       </main>
 
       {/* 하단 푸터 */}
-      <footer className="result-footer">
-        © 2025 wave to www. All rights reserved.
-      </footer>
-    </div>
+      < footer className="result-footer" >
+        © 2025 wave to www.All rights reserved.
+      </footer >
+    </div >
   );
 }
 

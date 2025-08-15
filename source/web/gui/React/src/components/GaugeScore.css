@@ -1,19 +1,21 @@
 /* src/components/GaugeScore.css */
 
-/* 점수 숫자 표시 스타일 */
-.score-big {
-  font-family: 'PoppinsBold', sans-serif;
-  font-size: 38px;
-  font-weight: bold;
-  margin: 0;
-}
+/* 게이지 전체 래퍼 */
+.gauge-wrapper {
+  width: 60%;
+  max-width: 250px;
+  margin: 0 auto;
+  margin-top: 25px;
+  margin-bottom: -16px;
+  text-align: center;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 
-/* 점수 라벨 */
-.score-label {
-  font-family: 'PoppinsLight', sans-serif;
-  font-size: 16px;
-  color: #ccc;
-  margin-top: -6px;
+  border: none;
+  outline: none;
+  box-shadow: none;
 }
 
 /* 위험(피싱 탐지됨) 상태 텍스트 색상 */
@@ -26,20 +28,34 @@
   color: #2185B7;
 }
 
-/* 게이지 전체 래퍼 */
-.gauge-wrapper {
-  width: 60%;
-  max-width: 250px;
-  margin: 0 auto;
-  text-align: center;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+/* 도넛형 게이지 영역 */
+.donut-chart {
+  width: 180px;
+  height: 180px;
+}
 
-  border: none;
-  outline: none;
-  box-shadow: none;
+/* 중앙 점수 텍스트 */
+.score-big {
+  font-size: 42px;
+  font-family: 'PoppinsLight', sans-serif;
+  margin-top: -12px;
+}
+
+/* 중앙 라벨 텍스트 */
+.score-label {
+  font-size: 15px;
+  color: #171717;
+  margin-top: -10px;
+  font-family: 'PoppinsLight', sans-serif;
+}
+
+/* 내부 게이지 애니메이션 */
+.CircularProgressbar-path {
+  transition: stroke-dashoffset 1s ease;
+}
+
+.CircularProgressbar-trail {
+  transition: stroke-dashoffset 1s ease;
 }
 
 @font-face {

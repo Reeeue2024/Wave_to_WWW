@@ -3,11 +3,34 @@
 
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
+import { CSSTransition, TransitionGroup } from 'react-transition-group';
+
 import Home from './pages/Home';
 import Result from './pages/Result';
 
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import './App.css';
+
+function AppContent() {
+  const location = useLocation();
+
+  return (
+    <TransitionGroup>
+      <CSSTransition
+        key={location.pathname}
+        classNames="fade"
+        timeout={300}
+      >
+        <Routes location={location}>
+          <Route path="/" element={<Home />} />
+          <Route path="/result" element={<Result />} />
+        </Routes>
+      </CSSTransition>
+    </TransitionGroup>
+  );
+}
 
 function App() {
   const [isToastVisible, setIsToastVisible] = useState(false);

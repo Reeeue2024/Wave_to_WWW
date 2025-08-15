@@ -27,20 +27,17 @@
 
 /* 메인 결과 박스 */
 .result-container {
-  background: linear-gradient(to bottom right, #171717, #171717);
+  background: linear-gradient(to bottom right, #f1f1f1, #f1f1f1) !important;
   width: 95%;
   border-radius: 30px;
-  padding: 40px 40px 40px 40px;
-  /* 위쪽 여백 줄이기 */
+  padding: 40px 40px 40px 30px;
   display: flex;
   justify-content: center;
   align-items: center;
   color: white;
   margin: 40px 0;
   position: relative;
-  /* 블롭 위치용 */
   overflow: hidden;
-  background: #171717;
   margin-top: 0px;
 }
 
@@ -49,9 +46,9 @@
   width: 100%;
   max-width: 960px;
   margin: auto;
-  padding: 40px;
+  padding: 25px;
   border-radius: 20px;
-  background: #171717;
+  background: #fff;
   border: 1px solid white;
   box-shadow: 0 0 20px #B95250;
   display: flex;
@@ -61,28 +58,11 @@
   z-index: 2;
 }
 
-/* 결과 설명 텍스트 (모듈 탐지 요약 텍스트) */
-.detection-text {
-  color: #ccc;
-  font-size: 16px;
-  margin-top: -15px;
-  margin-bottom: 24px;
-  font-family: 'PoppinsLight', sans-serif;
-}
-
-/* 안전한 모듈 수 강조 숫자 스타일 */
-.safe-number {
-  color: #2185B7;
-  font-weight: bold;
-  font-family: 'PoppinsBold', sans-serif;
-}
-
-/* 탐지된 모듈 수 강조 숫자 스타일 */
-
-.detected-number {
-  color: #B95250;
-  font-weight: bold;
-  font-family: 'PoppinsBold', sans-serif;
+.input-section2 {
+  display: flex;
+  width: 90%;
+  justify-content: center;
+  margin-top: -45px !important;
 }
 
 /* 게이지 전체 컨테이너 */
@@ -114,7 +94,7 @@
 /* 점수 라벨 (예: 'Score' 텍스트) */
 .score-label {
   font-size: 14px;
-  color: #ccc;
+  color: #171717;
   margin-top: 4px;
 }
 
@@ -129,7 +109,7 @@
 /* 기본 탭 버튼 스타일 */
 .tab-button {
   background: transparent;
-  color: #A1A1A1;
+  color: #171717;
   border: none;
   border-bottom: 2px solid transparent;
   font-size: 18px;
@@ -149,7 +129,7 @@
 .tab-content {
   padding: 20px;
   border-radius: 10px;
-  color: #eee;
+  color: #fff;
   text-align: left;
 }
 
@@ -165,7 +145,7 @@
 .module-card {
   padding: 16px;
   border-radius: 14px;
-  background: #171717;
+  background: #fff !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   display: flex;
   flex-direction: column;
@@ -179,7 +159,7 @@
 /* 피싱 아님일 경우 */
 .module-card.safe {
   border-color: #2185B7;
-  box-shadow: 0 0px 8px rgba(33, 133, 183, 0.5);
+  box-shadow: 0 0px 8px #2185B7;
   background: linear-gradient(145deg, #1c1c1c, #222);
 }
 
@@ -201,7 +181,7 @@
   font-family: 'PoppinsMedium', sans-serif;
   font-size: 20px;
   margin-bottom: 8px;
-  color: #fff;
+  color: #171717;
 }
 
 /* 탐지 여부 텍스트 (Detected / Safe) */
@@ -225,7 +205,7 @@
 
 /* 카테고리 설명 텍스트 */
 .category-description {
-  color: #ccc;
+  color: #171717;
   font-size: 16px;
   margin: 8px 0 20px;
   margin-bottom: -5px;
@@ -243,6 +223,7 @@
   font-size: 26px;
   font-family: 'PoppinsMedium', sans-serif;
   margin-bottom: 12px;
+  color: #171717;
 }
 
 /* Reason 정보 블록 전체 */
@@ -294,7 +275,7 @@
   border-radius: 12px;
   font-size: 15px;
   font-family: 'PoppinsLight', sans-serif;
-  color: #f0f0f0;
+  color: #171717;
   display: flex;
   flex-direction: column;
   gap: -8px;
@@ -302,6 +283,7 @@
   overflow-wrap: anywhere;
   transition: all 0.3s ease;
   transform: translateY(0);
+  background: #fff !important;
 }
 
 /* 상태별 스타일 */
@@ -327,7 +309,7 @@
   font-family: 'PoppinsMedium', sans-serif;
   font-size: 20px;
   margin-bottom: 8px;
-  color: #fff;
+  color: #171717;
 }
 
 /* 링크 강조 */
@@ -340,7 +322,7 @@
 .module-detail-card ul {
   padding-left: 18px;
   margin-top: 6px;
-  color: #ddd;
+  color: #171717;
 }
 
 /* 디테일 카드 항목 간격 개선 */
@@ -350,7 +332,7 @@
 
 /* 디테일 카드 안 항목 강조 */
 .module-detail-card strong {
-  color: #ccc;
+  color: #171717;
 }
 
 .safe {
@@ -366,13 +348,13 @@
 .safe-text {
   color: #2185B7;
   font-size: 50px;
-  font-family: 'PoppinsLight', sans-serif;
+  font-family: 'PoppinsMedium', sans-serif;
 }
 
 .detected-text {
   color: #B95250;
   font-size: 50px;
-  font-family: 'PoppinsLight', sans-serif;
+  font-family: 'PoppinsMedium', sans-serif;
 }
 
 .safe-text-card {
@@ -395,7 +377,7 @@
 
 .ai-bar-label {
   font-size: 14px;
-  color: #ccc;
+  color: #171717;
   margin-bottom: 6px;
 }
 
@@ -418,7 +400,7 @@
 .ai-bar-label-emph {
   font-size: 24px;
   font-family: 'PoppinsMedium', sans-serif;
-  color: #ffffff;
+  color: #171717;
   margin-bottom: 6px;
   text-align: center;
 }
@@ -756,7 +738,7 @@
 }
 
 .Kisa {
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(0, 0, 0, 0.04);
   -webkit-backdrop-filter: blur(8px);
   border-radius: 12px;
   padding: 16px 20px 5px 20px;
@@ -764,7 +746,7 @@
 }
 
 .kisa-report-text {
-  color: #ccc;
+  color: #171717;
   font-weight: 500;
   margin-top: 8px;
   font-family: 'PoppinsLigit', sans-serif;

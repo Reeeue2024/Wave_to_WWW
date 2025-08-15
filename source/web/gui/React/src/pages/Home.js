@@ -2,9 +2,9 @@
 
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import '../styles/Home.css'; // 스타일 시트
+import '../styles/Home.css';
 
-import UrlInputBox from '../components/UrlInputBox'; // URL 입력 컴포넌트
+import UrlInputBox from '../components/UrlInputBox';
 import Header from '../components/Header';
 
 import logoHeader from '../assets/img/logo_header.png';
@@ -15,21 +15,29 @@ import sparkle from '../assets/img/sparkle.png';
 
 function Home() {
   const navigate = useNavigate(); // 페이지 이동을 위한 hook
-  const [initialLoading, setInitialLoading] = useState(true);
+
+  const [initialLoading, setInitialLoading] = useState(() => {
+    return sessionStorage.getItem('waveFirstVisitShown') ? false : true;
+  });
+  const [fadeOutLoading, setFadeOutLoading] = useState(false);
 
   const [showTooltip, setShowTooltip] = useState(false)
 
-  // 로딩 애니메이션 3초 후 종료
+  // 로딩 애니메이션 1.8초 후 종료
   useEffect(() => {
-    const timer = setTimeout(() => setInitialLoading(false), 3000);
-    return () => clearTimeout(timer);
-  }, []);
+    if (!initialLoading) return;
 
-  const handleGmailClick = (e) => {
-    e.preventDefault();
-    setShowTooltip(true);
-    setTimeout(() => setShowTooltip(false), 6000);
-  };
+    const timer1 = setTimeout(() => setFadeOutLoading(true), 1300);
+    const timer2 = setTimeout(() => {
+      setInitialLoading(false);
+      sessionStorage.setItem('waveFirstVisitShown', 'true');
+    }, 1800);
+
+    return () => {
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+    };
+  }, [initialLoading]);
 
   return (
     <>

@@ -1,37 +1,46 @@
 // src/components/GaugeScore.js
-// 피싱 탐지 점수를 게이지 형태로 시각화하는 컴포넌트를 정의
 
-import React from 'react';
-import GaugeChart from 'react-gauge-chart';
+import React, { useEffect, useState } from 'react';
+import { CircularProgressbarWithChildren, buildStyles } from 'react-circular-progressbar';
+import 'react-circular-progressbar/dist/styles.css'; // 설치한 스타일
 import './GaugeScore.css';
 
-// 점수에 따른 게이지 시각화 컴포넌트
 function GaugeScore({ score }) {
-  const percent = score / 100;           
-  const isPhishing = score >= 70;        // 70점 이상이면 피싱 탐지로 판단
+  const [animatedScore, setAnimatedScore] = useState(0);
+  const isPhishing = score >= 70;
+  const color = isPhishing ? '#B95250' : '#2185B7';
+
+  useEffect(() => {
+    let current = 0;
+    const interval = setInterval(() => {
+      current += 1;
+      setAnimatedScore(current);
+      if (current >= score) clearInterval(interval);
+    }, 10); // 10ms 간격으로 증가 (0.83초 정도 소요)
+
+    return () => clearInterval(interval);
+  }, [score]);
 
   return (
     <div className={`gauge-wrapper ${isPhishing ? 'danger' : 'safe'}`}>
-      {/* 게이지 차트 설정 */}
-      <GaugeChart
-        id="phishing-score-gauge"        
-        nrOfLevels={20}                  // 게이지 눈금 레벨
-        arcsLength={[0.7, 0.3]}          // 파란 영역(안전) 70%, 빨간 영역(위험) 30%
-        colors={['#2185B7', '#B95250']}  // 안전(파랑), 위험(빨강)
-        percent={percent}                // 현재 퍼센트 위치
-        arcPadding={0.02}                // 색 영역 간 간격
-        needleColor="#ffffff"            // 바늘 색상
-        needleBaseColor="#ffffff"        // 바늘 베이스 색상
-        textColor="transparent"          // 게이지 내 텍스트 숨김
-      />
-      <div className="gauge-score-text">
-        {/* 점수 숫자 표시 (색상은 위험 여부에 따라 변경) */}
-        <div className={`score-big ${isPhishing ? 'text-danger' : 'text-safe'}`}>{score}%</div>
-        {/* 라벨 텍스트 */}
-        <div className="score-label">Phishing Risk</div>
+      <div className="donut-chart">
+        <CircularProgressbarWithChildren
+          value={animatedScore}
+          maxValue={100}
+          strokeWidth={12}
+          styles={buildStyles({
+            pathColor: color,
+            trailColor: '#eeeeee',
+          })}
+        >
+          <div className={`score-big ${isPhishing ? 'text-danger' : 'text-safe'}`}>
+            {animatedScore}%
+          </div>
+          <div className="score-label">Phishing Risk</div>
+        </CircularProgressbarWithChildren>
       </div>
     </div>
   );
 }
 
-export default GaugeScore; 
+export default GaugeScore;

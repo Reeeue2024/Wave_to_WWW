@@ -106,7 +106,7 @@ function UrlInputBox() {
           reasonData: (() => {
             const data = module.module_result_data?.reason_data;
 
-            // ✅ AI 모듈일 때: 객체로 올 경우 처리
+            // AI 모듈일 때: 객체로 올 경우 처리
             if (
               module.module_class_name === 'Ai' &&
               typeof data === 'object' &&

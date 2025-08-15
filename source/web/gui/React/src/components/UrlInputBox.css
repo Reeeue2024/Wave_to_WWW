@@ -6,7 +6,7 @@
   align-items: center;
   justify-content: center;
 
-  background-color: #171717;
+  background-color: #fff;
   padding: 18px 18px;
   border-radius: 30px;
 
@@ -18,10 +18,9 @@
   margin: 50px auto 0;
   box-sizing: border-box;    
 
-  border: 1px solid #ffffff;
+  border: 1px solid #fff;
   box-shadow:
-    0 0 8px #2185B7,
-    0 0 16px #66CCFF;
+    0 0 10px #2185B7;
 
   animation: none
 }
@@ -34,7 +33,7 @@
 /* 파란색 glow 효과 (정상) */
 .safe-glow .url-input-box {
   border: 1px solid white;
-  box-shadow: 0 0 10px #66CCFF;
+  box-shadow: 0 0 10px #2185B7;
 }
 
 /* 빨간색 glow 효과 (피싱) */
@@ -57,8 +56,8 @@
   border: none;
   outline: none;
   font-size: 17px;
-  color: #fff;
-  background-color: #171717;
+  color: #171717;
+  background-color: #fff;
   font-family: 'PoppinsLight', sans-serif;
 }
 
@@ -146,14 +145,14 @@
   transform: translate(-50%, -50%) !important;
   z-index: 9999 !important;
 
-  background-color: rgba(23, 23, 23, 0.90) !important; /* ✅ 반투명 다크 배경 */
-  color: rgba(255, 255, 255, 0.92) !important;
+  background-color: rgba(248, 248, 248, 0.95) !important; 
+  color: #171717 !important; 
 
   border-radius: 10px !important;
   text-align: center !important;
   padding: 16px 24px !important;
   min-width: 250px;
-  box-shadow: 0 0 16px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 16px rgba(0, 0, 0, 0.2);
 
   font-family: 'PoppinsLight', sans-serif !important;
   font-size: 16px;
