@@ -9,33 +9,36 @@ import 'react-toastify/dist/ReactToastify.css';
 import './UrlInputBox.css';
 import searchIcon from '../assets/img/search_icon.png';
 
-// 커스텀 토스트 애니메이션 제거 설정 (입장/퇴장 효과 없음)
+// 필요한 경우 상대경로로 프록시 사용(백엔드/Nginx 설정에 맞춰 '' 또는 'http://localhost:3000'로)
+const API_BASE = ''; // 예: '' → 같은 도메인/프록시, 'http://localhost:3000' → 직접 호출
+
+// 커스텀 토스트(애니메이션 제거)
 const NoAnimation = cssTransition({
   enter: 'no-enter',
   exit: 'no-exit',
   duration: [1, 1],
 });
 
-
 function UrlInputBox() {
   const [url, setUrl] = useState('');
-  const [error, setError] = useState('');
-  const [serverError, setServerError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const canceled = useRef(false);
 
-  // URL 유효성 검사 정규표현식
+  // URL 유효성 검사
   const isValidUrl = (value) => {
-    const pattern = new RegExp('^(https?:\\/\\/)?' +
-      '(([\\da-z.-]+)\\.([a-z.]{2,6})|' +
-      '(([0-9]{1,3}\\.){3}[0-9]{1,3}))' +
-      '(\\:[0-9]{1,5})?' +
-      '(\\/[-a-zA-Z0-9()@:%_+.~#?&//=]*)?$', 'i');
+    const pattern = new RegExp(
+      '^(https?:\\/\\/)?' +
+        '(([\\da-z.-]+)\\.([a-z.]{2,6})|' +
+        '(([0-9]{1,3}\\.){3}[0-9]{1,3}))' +
+        '(\\:[0-9]{1,5})?' +
+        '(\\/[-a-zA-Z0-9()@:%_+.~#?&//=]*)?$',
+      'i'
+    );
     return pattern.test(value);
   };
 
-  // 중앙에 커스텀 토스트 메시지를 표시하는 함수
+  // 중앙 토스트
   const showCenteredToast = (msg) => {
     toast.error(msg, {
       transition: NoAnimation,
@@ -55,114 +58,100 @@ function UrlInputBox() {
     });
   };
 
-  // 폼 제출 이벤트 처리
+  // 폼 제출
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!isValidUrl(url)) {
-      const msg = 'The URL format is invalid.';
-      setError(msg);
-      setServerError('');
-      showCenteredToast(msg);
+      showCenteredToast('The URL format is invalid.');
       return;
     }
 
-    setError('');
-    setServerError('');
     setLoading(true);
 
     try {
-      // 백엔드 서버로 URL 분석 요청
-      const response = await axios.post(
-        'http://localhost:3000/detect/url',
+      // 1) 탐지 요청
+      const { data } = await axios.post(
+        `${API_BASE}/detect/url`,
         { url },
-        {
-          headers: { 'client-type': 'web' },
-          timeout: 30000,
-        }
+        { headers: { 'client-type': 'web' }, timeout: 30000 }
       );
 
-      const payload = response.data.data || response.data;
+      const payload = data?.data || data || {};
 
-      // 요약 결과 저장
-      const scanResult = {
-        inputUrl: payload.input_url,
-        resultFlag: payload.engine_result_flag,
-        resultScore: payload.engine_result_score,
-        reportedToKisa: payload.reported_to_kisa ?? false  //  키사 플래그 파싱
+      // 2) 요약 스키마 정규화
+      const summary = {
+        inputUrl: String(payload.input_url ?? ''),
+        resultFlag: !!payload.engine_result_flag,
+        resultScore: Number(payload.engine_result_score ?? 0) || 0,
+        reportedToKisa: !!(payload.reported_to_kisa ?? false),
       };
 
-      // 모듈별 분석 결과 정리
-      const scanModuleResultMap = Array.isArray(payload.module_result_dictionary_list)
-        ? payload.module_result_dictionary_list.map((module) => ({
-          moduleName: module.module_class_name,
-          moduleRun: module.module_run,
-          moduleScore: module.module_score,
-          moduleWeight: module.module_weight,
-          moduleResultFlag: module.module_result_flag,
-
-          moduleError: module.module_error || null,
-          reason: module.module_result_data?.reason || null,
-          reasonData: (() => {
-            const data = module.module_result_data?.reason_data;
-
-            // AI 모듈일 때: 객체로 올 경우 처리
-            if (
-              module.module_class_name === 'Ai' &&
-              typeof data === 'object' &&
-              data !== null &&
-              !Array.isArray(data)
-            ) {
-              console.log(`[ DEBUG ] : ${data}`);
-              return Object.entries(data).map(([key, value]) => `${key}: ${value}`);
-            }
-
-            // ✅ 일반적인 배열/string 처리
-            if (Array.isArray(data)) return data.map((d) => String(d));
-            if (typeof data === 'string') return [data];
-            if (data != null) return [String(data)];
-
-            return null;
-          })(),
-        }))
+      // 3) 모듈 스키마 정규화
+      const modulesRaw = Array.isArray(payload.module_result_dictionary_list)
+        ? payload.module_result_dictionary_list
         : [];
 
+      const modules = modulesRaw.map((m) => {
+        const reasonData = m?.module_result_data?.reason_data;
+        let normalizedReason = m?.module_result_data?.reason ?? null;
 
-      // 페이지 이동 (결과 페이지로)
+        // reason이 비어있고 reason_data만 있는 경우 보조로 채움
+        if (normalizedReason == null && reasonData != null) {
+          if (Array.isArray(reasonData)) normalizedReason = reasonData.map(String).slice(0, 20);
+          else if (typeof reasonData === 'object')
+            normalizedReason = Object.entries(reasonData)
+              .slice(0, 20)
+              .map(([k, v]) => `${k}: ${String(v)}`);
+          else normalizedReason = String(reasonData);
+        }
+
+        return {
+          moduleName: String(m?.module_class_name ?? ''),
+          moduleResultFlag: !!m?.module_result_flag,
+          moduleScore: typeof m?.module_score === 'number' ? m.module_score : null,
+          moduleWeight: typeof m?.module_weight === 'number' ? m.module_weight : null,
+          moduleRun: typeof m?.module_run === 'boolean' ? m.module_run : null,
+          reason: normalizedReason ?? null,
+        };
+      });
+
+      // 4) 로딩 해제 후 결과 페이지 이동 (로더에 갇히지 않도록 선해제)
       if (!canceled.current) {
-        navigate('/result', {
-          state: {
-            summary: scanResult,
-            modules: scanModuleResultMap,
-          },
-        });
+        setLoading(false);
+        navigate('/result', { state: { summary, modules } });
       }
-
     } catch (err) {
-      console.error('Axios error:', err);
-      let msg = '';
-      if (err.response) msg = err.response.data.message || 'Server error.';
-      else if (err.request) msg = 'No response from server.';
-      else msg = `Request error: ${err.message}`;
-
-      setServerError(msg);
+      console.error('Detect flow error:', err);
+      const msg =
+        err?.response?.data?.message
+          ? String(err.response.data.message)
+          : err?.message
+          ? String(err.message)
+          : 'Server error.';
       showCenteredToast(msg);
 
-      // 취소 상태일 경우 홈으로 이동, 아니면 로딩 해제
       if (canceled.current) {
         navigate('/');
-      } else {
-        setLoading(false);
       }
+    } finally {
+      // 어떤 경우에도 로딩 해제(중복 호출되어도 안전)
+      setLoading(false);
     }
   };
 
-  // 로딩 중이면 WaveLoader 로딩 화면 출력
-  if (loading) return <WaveLoader url={url} onCancelHome={() => {
-    canceled.current = true;
-    setLoading(false); // 로딩 종료
-    navigate('/');     // 홈으로 이동
-  }} />;
+  // 로딩 화면
+  if (loading)
+    return (
+      <WaveLoader
+        url={url}
+        onCancelHome={() => {
+          canceled.current = true;
+          setLoading(false);
+          navigate('/');
+        }}
+      />
+    );
 
   return (
     <div className="url-input-wrapper">
