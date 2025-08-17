@@ -124,94 +124,39 @@ function Result() {
     );
   });
 
-  // reason 및 관련 링크 렌더링
   const renderReasonsWithData = (reason, data, moduleName) => {
-    //moduleName을 추가하여 AI일 경우에는 reason만 하나의 문장으로 출력하도록 하였습니다.
-    if (moduleName === 'Ai') {
+    const extractSentences = (text) =>
+      text
+        .split(/(?<=[.!?])\s+/g)
+        .map((r) => r.trim())
+        .filter((r) => r !== '');
+
+    const normalizeToArray = (input) => {
+      if (typeof input === 'string') {
+        return extractSentences(input).filter((r) => !r.includes('[ More ]'));
+      }
+      if (Array.isArray(input)) {
+        return input
+          .map((r) => String(r).trim())
+          .filter((r) => r !== '' && !r.includes('[ More ]'));
+      }
+      if (typeof input === 'object' && input !== null) {
+        return Object.entries(input)
+          .map(([k, v]) => `${String(k)}: ${String(v)}`)
+          .filter((r) => !r.includes('[ More ]'));
+      }
+      return [];
+    };
+
+    const reasonList = normalizeToArray(reason);
+    const dataList = normalizeToArray(data);
+    const combined = [...new Set([...reasonList, ...dataList])];
+
+    if (combined.length > 0) {
       return (
         <ul className="reason-list">
-          <li><strong>{reason}</strong></li>
-        </ul>
-      );
-    }
-    // case 1: reason, data 모두 배열
-    if (Array.isArray(reason) && Array.isArray(data)) {
-      const filtered = reason
-        .map((r, i) => {
-          const text = typeof r === 'string' ? r.trim() : '';
-          const href = typeof data[i] === 'string' ? data[i].trim() : '';
-          if (!text && !href) return null;
-          return { text, href };
-        })
-        .filter(item => item !== null);
-
-      if (filtered.length === 0) return null;
-
-      return (
-        <ul className="reason-list">
-          {filtered.map((item, i) => (
-            <li key={i}>
-              {item.text && <strong>{item.text}</strong>}
-              {item.href && (
-                <div>
-                  <a href={item.href} target="_blank" rel="noopener noreferrer">
-                    {item.href}
-                  </a>
-                </div>
-              )}
-            </li>
-          ))}
-        </ul>
-      );
-    }
-
-    // case 2: reason이 문자열일 때
-    if (typeof reason === 'string') {
-      const reasons = reason
-        .split('/(?<=[.!?])\s+/g') //.단위로 쪼개게 되어서 30.80%가 split 되었던 거라서 문장 단위로 쪼개도록 split 하였습니다.
-        .map(r => r.trim())
-        .filter(r => r !== '');
-
-      const filtered = reasons.map((r, i) => {
-        const href = typeof data?.[i] === 'string' ? data[i].trim() : '';
-        return { text: r, href };
-      });
-
-      if (filtered.length === 0) return null;
-
-      return (
-        <ul className="reason-list">
-          {filtered.map((item, i) => (
-            <li key={i}>
-              {item.text && <strong>{item.text}</strong>}
-              {item.href && (
-                <div>
-                  <a href={item.href} target="_blank" rel="noopener noreferrer">
-                    {item.href}
-                  </a>
-                </div>
-              )}
-            </li>
-          ))}
-        </ul>
-      );
-    }
-
-    // case 3: data만 배열일 때
-    if (Array.isArray(data)) {
-      const validLinks = data
-        .filter(d => typeof d === 'string' && d.trim() !== '');
-
-      if (validLinks.length === 0) return null;
-
-      return (
-        <ul className="reason-list">
-          {validLinks.map((d, i) => (
-            <li key={i}>
-              <a href={d} target="_blank" rel="noopener noreferrer">
-                {d}
-              </a>
-            </li>
+          {combined.map((r, i) => (
+            <li key={i}><strong>{r}</strong></li>
           ))}
         </ul>
       );
@@ -252,8 +197,13 @@ function Result() {
         {!isAiModule && (
           <>
             <p><strong>Score:</strong> {mod.moduleScore} / {mod.moduleWeight}</p>
+
             <div><strong>Reason:</strong></div>
-            {renderReasonsWithData(mod.reason, mod.reasonData, mod.moduleName)}
+            {mod.moduleRun && mod.moduleResultFlag && (mod.reason || mod.reasonData) ? (
+              renderReasonsWithData(mod.reason, mod.reasonData, mod.moduleName)
+            ) : (
+              <p>No reason provided.</p>
+            )}
           </>
         )}
 

@@ -201,6 +201,9 @@
   color: #aaa;
   font-family: 'PoppinsLight', sans-serif;
   margin-top: -4px;
+  white-space: normal;         
+  overflow: visible;           
+  text-overflow: unset;       
 }
 
 /* 카테고리 설명 텍스트 */

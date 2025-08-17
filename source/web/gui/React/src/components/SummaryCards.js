@@ -26,6 +26,12 @@ function SummaryCards({ phishingCount, totalCount, aiScore = 0, summary, modules
         { name: 'Remain', value: 100 - aiVal },
     ];
 
+    // --- 새로 추가된 부분: AI 점수 색상 조건 ---
+    const isAiHigh = aiVal >= 70;
+    const AI_COLOR = isAiHigh ? '#B95250' : '#2185B7';   // 70↑이면 빨간색
+    const AI_BG    = isAiHigh ? '#f3e8e8' : '#e6eef4';   // 배경은 연한 톤
+    // -----------------------------------------
+
     const CX = CHART_W / 2;
     const CY = CHART_H;
     const centerY = CY - INNER_R * 0.55;
@@ -94,7 +100,6 @@ function SummaryCards({ phishingCount, totalCount, aiScore = 0, summary, modules
                         >
                             {lang === 'ko' ? 'Safe' : 'Safe'}
                         </text>
-
                     </PieChart>
                     <div className="modules-below">{totalCount} Modules</div>
 
@@ -104,7 +109,7 @@ function SummaryCards({ phishingCount, totalCount, aiScore = 0, summary, modules
                         <span className="dot blue" /> Safe {totalCount ? ((safeCount / totalCount) * 100).toFixed(1) : 0}%
                     </div>
 
-                    {/* AI 점수 */}
+                    {/* AI 점수 (조건 색상 적용) */}
                     <PieChart width={CHART_W} height={CHART_H}>
                         <Pie
                             data={aiData}
@@ -115,18 +120,18 @@ function SummaryCards({ phishingCount, totalCount, aiScore = 0, summary, modules
                             cornerRadius={10}
                             isAnimationActive={false}
                         >
-                            <Cell fill="#2185B7" />
-                            <Cell fill="#e6eef4" />
+                            <Cell fill={AI_COLOR} />
+                            <Cell fill={AI_BG} />
                         </Pie>
 
-                        {/* AI 값 중앙 표시 */}
+                        {/* AI 값 중앙 표시 (숫자 색도 조건 적용) */}
                         <text
                             x={CX}
                             y={CY - 58}
                             textAnchor="middle"
                             dominantBaseline="central"
                             className="donut-center-number"
-                            fill="#2185B7"
+                            fill={AI_COLOR}
                         >
                             {Math.round(aiVal)}%
                         </text>

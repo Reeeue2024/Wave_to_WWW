@@ -35,20 +35,20 @@ export default function FriendlyExplain({ summary, modules }) {
     };
     const safeModules = Array.isArray(modules)
       ? modules.map((m) => ({
-          moduleName: String(m.moduleName ?? ''),
-          moduleResultFlag: !!m.moduleResultFlag,
-          moduleScore: typeof m.moduleScore === 'number' ? m.moduleScore : null,
-          moduleWeight: typeof m.moduleWeight === 'number' ? m.moduleWeight : null,
-          moduleRun: typeof m.moduleRun === 'boolean' ? m.moduleRun : null,
-          reason: (() => {
-            const r = m.reason;
-            if (r == null) return null;
-            if (typeof r === 'string') return r.slice(0, 1000);
-            if (Array.isArray(r)) return r.slice(0, 20).map((x) => String(x).slice(0, 500));
-            if (typeof r === 'object') return Object.fromEntries(Object.entries(r).slice(0, 20));
-            return String(r).slice(0, 1000);
-          })(),
-        }))
+        moduleName: String(m.moduleName ?? ''),
+        moduleResultFlag: !!m.moduleResultFlag,
+        moduleScore: typeof m.moduleScore === 'number' ? m.moduleScore : null,
+        moduleWeight: typeof m.moduleWeight === 'number' ? m.moduleWeight : null,
+        moduleRun: typeof m.moduleRun === 'boolean' ? m.moduleRun : null,
+        reason: (() => {
+          const r = m.reason;
+          if (r == null) return null;
+          if (typeof r === 'string') return r.slice(0, 1000);
+          if (Array.isArray(r)) return r.slice(0, 20).map((x) => String(x).slice(0, 500));
+          if (typeof r === 'object') return Object.fromEntries(Object.entries(r).slice(0, 20));
+          return String(r).slice(0, 1000);
+        })(),
+      }))
       : [];
     return { lang, summary: safeSummary, modules: safeModules };
   }, [lang, summary, modules]);
@@ -85,7 +85,7 @@ export default function FriendlyExplain({ summary, modules }) {
 
       // 요청이 실제로 시작된 시점에만 타임아웃 가동
       abortTimer = setTimeout(() => {
-        try { controller.abort(new DOMException('Timeout', 'AbortError')); } catch (_) {}
+        try { controller.abort(new DOMException('Timeout', 'AbortError')); } catch (_) { }
       }, 20000);
 
       try {
@@ -138,30 +138,28 @@ export default function FriendlyExplain({ summary, modules }) {
         {lang === 'ko' ? '해설' : 'Explanation'}
       </div>
 
-      {loading && <div style={{ opacity: 0.7 }}>{lang === 'ko' ? '설명을 생성하는 중…' : 'Generating explanation…'}</div>}
+      <div
+        className="explain-scroll"
+        style={{
+          fontSize: 14,
+          lineHeight: 1.6,
+          color: '#171717',
+          whiteSpace: 'pre-wrap',
+          height: 300,
+          overflowY: 'scroll',
+          scrollbarGutter: 'stable both-edges',
+        }}
+      >
+        {loading && <div style={{ opacity: 0.7 }}>{lang === 'ko' ? '설명을 생성하는 중…' : 'Generating explanation…'}</div>}
 
-      {!!err && !loading && (
-        <div style={{ color: '#B95250', marginBottom: 8 }}>
-          {lang === 'ko' ? '서버 응답에 문제가 있어요.' : 'There was a problem with the server response.'}
-        </div>
-      )}
+        {!loading && err && (
+          <div style={{ color: '#B95250', marginBottom: 8 }}>
+            {lang === 'ko' ? '서버 응답에 문제가 있어요.' : 'There was a problem with the server response.'}
+          </div>
+        )}
 
-      {!loading && (
-        <div
-          className="explain-scroll"
-          style={{
-            fontSize: 14,
-            lineHeight: 1.6,
-            color: '#171717',
-            whiteSpace: 'pre-wrap',
-            height: 300,
-            overflowY: 'scroll',
-            scrollbarGutter: 'stable both-edges',
-          }}
-        >
-          {text}
-        </div>
-      )}
+        {!loading && text}
+      </div>
     </div>
   );
 }
