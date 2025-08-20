@@ -31,7 +31,7 @@ function Result() {
   const location = useLocation(); // 이전 페이지에서 받은 state 접근
   const navigate = useNavigate(); // 페이지 이동용
   const resultData = location.state; // 전달받은 결과 데이터
-  const [activeTab, setActiveTab] = useState('detection'); // 탭 상태
+  const [activeTab, setActiveTab] = useState('modules'); // 기본: 전체 모듈 카드
   const [loading, setLoading] = useState(true); // 로딩 상태
   const userInputUrl = resultData?.inputUrl;
   const [showTooltip, setShowTooltip] = useState(false)
@@ -268,8 +268,13 @@ function Result() {
 
           {/* 키사 신고 여부 */}
           <div className='Kisa'>
-            {isPhishing && summary.reportedToKisa && (
-              <p className="kisa-report-text">The URL has been reported to <img src={KisaImage} className="kisa-icon" /></p>
+            {isPhishing && (
+              <p className="kisa-report-text">
+                {getLang() === 'ko'
+                  ? <>해당 URL은 <img src={KisaImage} alt="KISA" className="kisa-icon" />에 신고되었습니다.</>
+                  : <>The URL has been reported to <img src={KisaImage} alt="KISA" className="kisa-icon" /></>
+                }
+              </p>
             )}
           </div>
 
@@ -287,32 +292,60 @@ function Result() {
 
           {/* 탭 전환 버튼 */}
           <div className="tabs-header">
-            <button className={`tab-button ${activeTab === 'detection' ? 'active' : ''}`} onClick={() => setActiveTab('detection')}>
+            <button
+              className={`tab-button ${activeTab === 'modules' ? 'active' : ''}`}
+              onClick={() => setActiveTab('modules')}
+            >
+              MODULES
+            </button>
+            <button
+              className={`tab-button ${activeTab === 'detection' ? 'active' : ''}`}
+              onClick={() => setActiveTab('detection')}
+            >
               DETECTION
             </button>
-            <button className={`tab-button ${activeTab === 'details' ? 'active' : ''}`} onClick={() => setActiveTab('details')}>
+            <button
+              className={`tab-button ${activeTab === 'details' ? 'active' : ''}`}
+              onClick={() => setActiveTab('details')}
+            >
               DETAILS
             </button>
           </div>
 
           {/* 탭별 콘텐츠 표시 */}
           <div className="tab-content">
-            {categoryKeys.map((key) => (
-              <div key={key} className="category-section">
-                <h3 className="category-title">{categoryMap[key][lang]}</h3>
-                {activeTab === 'details' && (
-                  <p className="category-description">{categoryDescriptions[key][lang]}</p>
-                )}
-                <div className={activeTab === 'detection' ? 'module-grid' : 'details-section'}>
-                  {activeTab === 'detection'
-                    ? renderModules(categorizedModules[key])
-                    : renderDetails(categorizedModules[key])}
+            {categoryKeys.map((key) => {
+              const allMods = categorizedModules[key] || [];
+              const detectedOnly = allMods.filter(m => m.moduleResultFlag);
+              const isCardsView = activeTab === 'modules' || activeTab === 'detection';
+              const listForCards = activeTab === 'detection' ? detectedOnly : allMods;
+
+              return (
+                <div key={key} className="category-section">
+                  <h3 className="category-title">{categoryMap[key][lang]}</h3>
+                  {activeTab === 'details' && (
+                    <p className="category-description">{categoryDescriptions[key][lang]}</p>
+                  )}
+
+                  <div className={isCardsView ? 'module-grid' : 'details-section'}>
+                    {activeTab === 'details' ? (
+                      renderDetails(allMods)
+                    ) : (
+                      listForCards.length > 0
+                        ? renderModules(listForCards)  // MODULES: 전체 / DETECTION: 탐지만
+                        : <p style={{ color: '#595959', gridColumn: '1 / -1' }}>
+                          {lang === 'ko'
+                            ? '이 카테고리에는 탐지된 항목이 없습니다.'
+                            : 'No detections in this category.'}
+                        </p>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
-        </div>
-      </main>
+        </div >
+      </main >
 
       {/* 하단 푸터 */}
       < footer className="result-footer" >
