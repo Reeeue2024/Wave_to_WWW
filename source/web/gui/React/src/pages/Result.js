@@ -94,7 +94,7 @@ function Result() {
     }
   });
 
-  // DETECTION 탭용 모듈 카드 렌더링
+  // MODULES 탭용 모듈 카드 렌더링
   const renderModules = (mods) => mods.map((mod, index) => {
     const info = moduleDescriptions[mod.moduleName] || {
       name: { en: mod.moduleName, ko: mod.moduleName },
@@ -290,59 +290,66 @@ function Result() {
             modules={modules}
           />
 
-          {/* 탭 전환 버튼 */}
-          <div className="tabs-header">
-            <button
-              className={`tab-button ${activeTab === 'modules' ? 'active' : ''}`}
-              onClick={() => setActiveTab('modules')}
-            >
-              MODULES
-            </button>
-            <button
-              className={`tab-button ${activeTab === 'detection' ? 'active' : ''}`}
-              onClick={() => setActiveTab('detection')}
-            >
-              DETECTION
-            </button>
-            <button
-              className={`tab-button ${activeTab === 'details' ? 'active' : ''}`}
-              onClick={() => setActiveTab('details')}
-            >
-              DETAILS
-            </button>
-          </div>
+          {/* [모듈 영역을 Detection Summary와 동일 톤의 카드로 감싸기 */}
+          <div className="tabs-card">
+            {/* 탭 전환 버튼 */}
+            <div className="tabs-header">
+              <button
+                className={`tab-button ${activeTab === 'modules' ? 'active' : ''}`}
+                onClick={() => setActiveTab('modules')}
+              >
+                MODULES
+              </button>
+              <button
+                className={`tab-button ${activeTab === 'detection' ? 'active' : ''}`}
+                onClick={() => setActiveTab('detection')}
+              >
+                DETECTED
+              </button>
+              <button
+                className={`tab-button ${activeTab === 'details' ? 'active' : ''}`}
+                onClick={() => setActiveTab('details')}
+              >
+                DETAILS
+              </button>
+            </div>
 
-          {/* 탭별 콘텐츠 표시 */}
-          <div className="tab-content">
-            {categoryKeys.map((key) => {
-              const allMods = categorizedModules[key] || [];
-              const detectedOnly = allMods.filter(m => m.moduleResultFlag);
-              const isCardsView = activeTab === 'modules' || activeTab === 'detection';
-              const listForCards = activeTab === 'detection' ? detectedOnly : allMods;
+            {/* 탭별 콘텐츠 표시 */}
+            <div className="tab-content">
+              {categoryKeys.map((key) => {
+                const allMods = categorizedModules[key] || [];
+                const detectedOnly = allMods.filter(m => m.moduleResultFlag);
+                const isCardsView = activeTab === 'modules' || activeTab === 'detection';
+                const listForCards = activeTab === 'detection' ? detectedOnly : allMods;
 
-              return (
-                <div key={key} className="category-section">
-                  <h3 className="category-title">{categoryMap[key][lang]}</h3>
-                  {activeTab === 'details' && (
-                    <p className="category-description">{categoryDescriptions[key][lang]}</p>
-                  )}
-
-                  <div className={isCardsView ? 'module-grid' : 'details-section'}>
-                    {activeTab === 'details' ? (
-                      renderDetails(allMods)
-                    ) : (
-                      listForCards.length > 0
-                        ? renderModules(listForCards)  // MODULES: 전체 / DETECTION: 탐지만
-                        : <p style={{ color: '#595959', gridColumn: '1 / -1' }}>
-                          {lang === 'ko'
-                            ? '이 카테고리에는 탐지된 항목이 없습니다.'
-                            : 'No detections in this category.'}
+                return (
+                  <section key={key} className="summary-section-card">
+                    <header className="summary-section-card__header">
+                      <h3 className="summary-section-card__title category-title">
+                        {categoryMap[key][lang]}
+                      </h3>
+                      {activeTab === 'details' && (
+                        <p className="category-description">
+                          {categoryDescriptions[key][lang]}
                         </p>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
+                      )}
+                    </header>
+
+                    <div className={isCardsView ? 'module-grid' : 'details-section'}>
+                      {activeTab === 'details' ? (
+                        renderDetails(allMods)
+                      ) : (
+                        listForCards.length > 0
+                          ? renderModules(listForCards)
+                          : <p className="empty-text">
+                            {lang === 'ko' ? '이 카테고리에는 탐지된 항목이 없습니다.' : 'No detections in this category.'}
+                          </p>
+                      )}
+                    </div>
+                  </section>
+                );
+              })}
+            </div>
           </div>
         </div >
       </main >

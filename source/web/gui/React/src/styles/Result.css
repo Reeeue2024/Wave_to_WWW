@@ -106,11 +106,26 @@
   margin: 24px 0 12px;
 }
 
+/* 탭 전체를 감싸는 카드 (Detection Summary와 동일 톤) */
+.tabs-card {
+  width: 95%;
+  max-width: 900px;
+  margin: 0 auto 28px;
+  margin-top: 35px;
+  padding: 24px 20px;
+  box-sizing: border-box;
+  padding: 10px 10px;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, .15);
+}
+
 /* 기본 탭 버튼 스타일 */
 .tab-button {
   background: transparent;
   color: #171717;
   border: none;
+  margin-top: -20px;
   border-bottom: 2px solid transparent;
   font-size: 18px;
   font-family: 'PoppinsMedium', sans-serif;
@@ -129,8 +144,20 @@
 .tab-content {
   padding: 20px;
   border-radius: 10px;
-  color: #fff;
+  color: #171717;
   text-align: left;
+}
+
+.empty-text {
+  color: #595959;
+  font-size: 18px;
+  margin: 20px auto;           
+  text-align: center !important;
+  margin-left: 240px;        
+  font-family: 'PoppinsLight', sans-serif;
+  line-height: 1.6;
+  display: block;                   
+  width: 100%;                    
 }
 
 /* 카드 그리드 */
@@ -179,7 +206,7 @@
 /* 모듈 카드 내 제목 */
 .module-title {
   font-family: 'PoppinsMedium', sans-serif;
-  font-size: 22px;
+  font-size: 19px;
   margin-bottom: 8px;
   color: #171717;
 }
@@ -197,13 +224,13 @@
 
 /* 모듈 설명 텍스트 */
 .module-description {
-  font-size: 14.5px;
+  font-size: 12.5px;
   color: #595959;
   font-family: 'PoppinsLight', sans-serif;
   margin-top: -4px;
-  white-space: normal;         
-  overflow: visible;           
-  text-overflow: unset;       
+  white-space: normal;
+  overflow: visible;
+  text-overflow: unset;
 }
 
 /* 카테고리 설명 텍스트 */
@@ -222,7 +249,7 @@
 
 /* 카테고리 제목 */
 .category-title {
-  text-align: center;
+  text-align: center !important;
   font-size: 26px;
   font-family: 'PoppinsMedium', sans-serif;
   margin-bottom: 12px;
@@ -762,5 +789,4 @@
   vertical-align: middle;
   margin-left: 2px;
   margin-top: -6px;
-  filter: brightness(1.8);
 }
