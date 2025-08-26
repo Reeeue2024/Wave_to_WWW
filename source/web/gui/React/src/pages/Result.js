@@ -73,7 +73,7 @@ function Result() {
   const topReason = aiModule?.reason || modules.find(m => m.moduleResultFlag)?.reason;
   const detectedModules = modules
     .filter((mod) => mod.moduleResultFlag)
-    .map((mod) => mod.moduleName); // 또는 moduleDescriptions[mod.moduleName]?.name[lang] 도 가능
+    .map((mod) => mod.moduleName);
 
   // 모듈 이름 접두사 기준으로 카테고리 분류
   const inferCategoryKey = (name) => {
@@ -117,7 +117,7 @@ function Result() {
         <div className="module-description">{info.description[lang]}</div>
         <div className="module-status">
           {mod.moduleResultFlag
-            ? <span className="detected-text-card">{texts[lang].detected}</span>
+            ? <span className="detected-text-card">{texts[lang].detectedCard}</span>
             : <span className="safe-text-card">{texts[lang].safe}</span>}
         </div>
       </div>
@@ -190,7 +190,7 @@ function Result() {
         <p className="module-detail-title">{info.name[lang]}</p>
         <p>{info.longDescription[lang] || info.description[lang]}</p>
         <p className={mod.moduleResultFlag ? 'detected-text-card' : 'safe-text-card'}>
-          {mod.moduleResultFlag ? texts[lang].detected : texts[lang].safe}
+          {mod.moduleResultFlag ? texts[lang].detectedCard : texts[lang].safe}
         </p>
         <p><strong>Execution:</strong> {mod.moduleRun ? 'Success' : 'Fail'}</p>
 
@@ -261,7 +261,7 @@ function Result() {
           <div className="final-flag">
             <p className="final-flag-text">
               {isPhishing
-                ? <span className="detected-text">{texts[lang].detected}</span>
+                ? <span className="detected-text">{texts[lang].phishingFinal}</span>
                 : <span className="safe-text">{texts[lang].safe}</span>}
             </p>
           </div>
