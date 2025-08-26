@@ -8,7 +8,7 @@ function SummaryCards({ phishingCount, totalCount, aiScore = 0, summary, modules
     const lang = localStorage.getItem('lang') || 'en';
     const safeCount = Math.max(0, totalCount - phishingCount);
 
-    const COLORS = { Phishing: '#B95250', Safe: '#2185B7' };
+    const COLORS = { Detected: '#B95250', Safe: '#2185B7' };
 
     const CHART_W = 260;
     const CHART_H = 150;
@@ -16,7 +16,7 @@ function SummaryCards({ phishingCount, totalCount, aiScore = 0, summary, modules
     const OUTER_R = 100;
 
     const moduleData = [
-        { name: 'Phishing', value: phishingCount },
+        { name: 'Detected', value: phishingCount },
         { name: 'Safe', value: safeCount },
     ];
 
@@ -57,7 +57,7 @@ function SummaryCards({ phishingCount, totalCount, aiScore = 0, summary, modules
                             cornerRadius={10}
                             isAnimationActive={false}
                         >
-                            <Cell fill={COLORS.Phishing} />
+                            <Cell fill={COLORS.Detected} />
                             <Cell fill={COLORS.Safe} />
                         </Pie>
 
@@ -68,7 +68,7 @@ function SummaryCards({ phishingCount, totalCount, aiScore = 0, summary, modules
                             textAnchor="middle"
                             dominantBaseline="central"
                             className="donut-center-number"
-                            fill={COLORS.Phishing}
+                            fill={COLORS.Detected}
                         >
                             {phishingCount}
                         </text>
@@ -104,7 +104,7 @@ function SummaryCards({ phishingCount, totalCount, aiScore = 0, summary, modules
                     <div className="modules-below">{totalCount} Modules</div>
 
                     <div className="half-caption">
-                        <span className="dot red" /> Phishing {totalCount ? ((phishingCount / totalCount) * 100).toFixed(1) : 0}%
+                        <span className="dot red" /> Detected {totalCount ? ((phishingCount / totalCount) * 100).toFixed(1) : 0}%
                         <span className="caption-sep"> · </span>
                         <span className="dot blue" /> Safe {totalCount ? ((safeCount / totalCount) * 100).toFixed(1) : 0}%
                     </div>

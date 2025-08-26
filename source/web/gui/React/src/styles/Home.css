@@ -186,13 +186,13 @@
   align-items: center;
   flex-direction: column;
   margin-bottom: 40px;
-  margin-top: 100px;
+  margin-top: 80px;
 }
 
 .main-logo {
   width: 700px;
   max-width: 90%;
-  margin-top: 80px;
+  margin-top: 90px;
   height: auto;
   z-index: 1;
   position: relative;
@@ -218,14 +218,14 @@
 
 .fish1 {
   top: 20px;
-  left: 30px;
+  left: 35px;
   width: 70px;
   transform: rotate(10deg);
 }
 
 .sparkle1 {
   top: 0px;
-  left: 140px;
+  left: 150px;
   width: 45px;
   transform: rotate(4deg);
 }
@@ -239,14 +239,14 @@
 
 .fish3 {
   top: 3px;
-  left: 450px;
+  left: 455px;
   width: 75px;
   transform: rotate(-11deg);
 }
 
 .sparkle2 {
   top: 10px;
-  left: 600px;
+  left: 610px;
   width: 40px;
   transform: rotate(-18deg);
 }

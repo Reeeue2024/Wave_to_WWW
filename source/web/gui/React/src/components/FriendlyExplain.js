@@ -5,15 +5,13 @@ import { getLang } from './lang';
 // 마크다운/별표 제거기
 function stripMd(s = '') {
   return s
-    // 굵게/기울임/인라인코드/헤딩/링크/체크박스 등 제거
-    .replace(/\*\*(.*?)\*\*/g, '$1')              // **bold**
-    .replace(/__(.*?)__/g, '$1')                  // __bold__
-    .replace(/\*(?!\*)([^*\n]+?)\*(?!\*)/g, '$1') // *italic*
-    .replace(/`([^`]+?)`/g, '$1')                 // `code`
-    .replace(/^\s{0,3}#{1,6}\s*/gm, '')           // # heading
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')      // [text](url)
-    .replace(/^\s*[-*]\s+\[.\]\s*/gm, '- ')       // - [ ] item
-    // 남은 표식들 최종 제거
+    .replace(/\*\*(.*?)\*\*/g, '$1')
+    .replace(/__(.*?)__/g, '$1')
+    .replace(/\*(?!\*)([^*\n]+?)\*(?!\*)/g, '$1')
+    .replace(/`([^`]+?)`/g, '$1')
+    .replace(/^\s{0,3}#{1,6}\s*/gm, '')
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    .replace(/^\s*[-*]\s+\[.\]\s*/gm, '- ')
     .replace(/\*\*/g, '')
     .replace(/__/g, '')
     .replace(/```/g, '');
@@ -70,22 +68,22 @@ export default function FriendlyExplain({ summary, modules }) {
   }, [payload, lang]);
 
   useEffect(() => {
-    // 직전 요청 중단
     if (abortRef.current) abortRef.current.abort();
     const controller = new AbortController();
     abortRef.current = controller;
 
-    let startTimer = null;   // fetch 시작을 "다음 틱"으로 지연
-    let abortTimer = null;   // 실제 요청이 시작된 뒤에만 타임아웃 세팅
+    let startTimer = null;
+    let abortTimer = null;
 
     const run = async () => {
       setLoading(true);
       setErr('');
       setText('');
 
-      // 요청이 실제로 시작된 시점에만 타임아웃 가동
       abortTimer = setTimeout(() => {
-        try { controller.abort(new DOMException('Timeout', 'AbortError')); } catch (_) { }
+        try {
+          controller.abort(new DOMException('Timeout', 'AbortError'));
+        } catch (_) { }
       }, 20000);
 
       try {
@@ -109,7 +107,6 @@ export default function FriendlyExplain({ summary, modules }) {
           setText(makeLocalFallback());
           return;
         }
-        // 서버 응답을 렌더 전에 정리
         setText(stripMd(serverText));
       } catch (e) {
         if (e?.name !== 'AbortError') {
@@ -122,7 +119,6 @@ export default function FriendlyExplain({ summary, modules }) {
       }
     };
 
-    // StrictMode에서 중복 요청 방지
     startTimer = setTimeout(run, 0);
 
     return () => {
@@ -131,6 +127,16 @@ export default function FriendlyExplain({ summary, modules }) {
       controller.abort();
     };
   }, [payload, makeLocalFallback]);
+
+  // === 인라인 스피너 스타일 정의 ===
+  const spinnerStyle = {
+    width: 24,
+    height: 24,
+    border: '3px solid #ccc',
+    borderTop: '3px solid #171717',
+    borderRadius: '50%',
+    animation: 'spin 1s linear infinite',
+  };
 
   return (
     <div style={{ textAlign: 'left', width: '100%' }}>
@@ -150,7 +156,46 @@ export default function FriendlyExplain({ summary, modules }) {
           scrollbarGutter: 'stable both-edges',
         }}
       >
-        {loading && <div style={{ opacity: 0.7 }}>{lang === 'ko' ? '설명을 생성하는 중…' : 'Generating explanation…'}</div>}
+        {loading && (
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center', // 세로 가운데
+              alignItems: 'center',     // 가로 가운데
+              height: '100%',
+              opacity: 0.9,
+            }}
+          >
+            <div className="spinner"></div>
+            <div style={{ marginTop: 30 }}>
+              {lang === 'ko' ? '설명을 생성하는 중…' : 'Generating explanation…'}
+            </div>
+
+            <style>
+              {`
+              .spinner {
+                width: 10px;
+                height: 10px;
+                border-radius: 10px;
+                box-shadow: 28px 0px 0 0 #2185B7,
+                            22.7px 16.5px 0 0 #2185B7,
+                            8.68px 26.6px 0 0 #2185B7,
+                            -8.68px 26.6px 0 0 #2185B7,
+                            -22.7px 16.5px 0 0 #2185B7;
+                animation: spinner-b87k6z 1s infinite linear;
+              }
+
+              @keyframes spinner-b87k6z {
+                to {
+                  transform: rotate(360deg);
+                }
+              }
+            `}
+            </style>
+          </div>
+        )}
+
 
         {!loading && err && (
           <div style={{ color: '#B95250', marginBottom: 8 }}>
@@ -160,6 +205,15 @@ export default function FriendlyExplain({ summary, modules }) {
 
         {!loading && text}
       </div>
+
+      {/* 인라인 keyframes */}
+      <style>
+        {`
+          @keyframes spin {
+            to { transform: rotate(360deg); }
+          }
+        `}
+      </style>
     </div>
   );
 }
