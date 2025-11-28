@@ -61,14 +61,14 @@
 
  이러한 기능들을 종합하여 사용자에게 단순히 ‘위험’ 여부 뿐만 아니라 왜 위험한지를 정확히 설명하고, 후속 대응까지 연결할 수 있도록 동작하는 체계적 분석 서비스를 구현했다.
 
-- **Safe Result**
+- **Safe Result 실행화면**
 <p align="center">
-  <img src="./mdassets/safe.gif"width="500"/>
+  <img src="./mdassets/web_safe.gif"width="500"/>
 </p>
 
-- **Phishing Result**
+- **Phishing Result 실행화면**
 <p align="center">
-  <img src="./mdassets/phishing.gif"width="500"/>
+  <img src="./mdassets/web_phishing.gif"width="500"/>
 </p>
 
  ### **2. 실시간 탐지 Chrome Extension**
@@ -82,7 +82,7 @@
 
  이 익스텐션은 특히 비전공자, 일반 사용자들에게 매우 직관적인 형태의 보안 서비스 형태로 개발하였다.
 
-- **Chrome Extension**
+- **Chrome Extension 실행화면**
 <p align="center">
   <img src="./mdassets/chrome.gif"width="500"/>
 </p>
