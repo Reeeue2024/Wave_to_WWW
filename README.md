@@ -6,17 +6,20 @@
 
 ## 🌊 소개
 
-<strong>wave to www</strong>는 <strong>누구나 쉽게 사용할 수 있도록 설계된 사용자 중심의 피싱 탐지 서비스</strong>입니다.
-단순히 <strong>위험 여부만을 알려주는 기존 방식</strong>에서 한 걸음 더 나아가,
-<strong>AI 분석</strong>과 <strong>룰 기반 코드 분석</strong>을 결합하여 <strong>왜 위험한지에 대한 근거</strong>까지 함께 제공합니다.
+**wave to www**는 **누구나 쉽게 사용할 수 있도록 설계된 사용자 중심의 피싱 탐지 서비스**입니다.
+단순히 **위험 여부만을 알려주는 기존 방식**에서 한 걸음 더 나아가,
+**AI 분석**과 **룰 기반 코드 분석**을 결합하여 **왜 위험한지에 대한 근거**까지 함께 제공합니다.
 
-<strong>HTML, JavaScript, URL 패턴 등 피싱 사이트의 공통적인 특징</strong>을 사전에 분석하고 이를 <strong>모듈화</strong>하여
-<strong>탐지의 정밀도</strong>와 <strong>설명력</strong>을 높였습니다. <strong>웹 기반 서비스</strong>와 <strong>크롬 확장 프로그램</strong> 두 가지 형태로 제공되며,
-사용자는 <strong>직접 URL을 입력</strong>하거나 <strong>웹서핑 중 마우스오버만으로 실시간 탐지</strong>를 받을 수 있습니다.
+**HTML, JavaScript, URL 패턴 등 피싱 사이트의 공통적인 특징**을 사전에 분석하고 이를 **모듈화**하여
+**탐지의 정밀도**와 **설명력**을 높였습니다.
+특히, 탐지 근거를 **ChatGPT API**를 활용하여 일반 사용자도 이해하기 쉬운 **자연어 해설로 자동 변환**하여 제공합니다.
 
-<strong>누구나 이해할 수 있는 시각적 결과</strong>와 함께,
-<strong>전문가에게는 분석 도구로</strong>, <strong>기관에는 대응 체계로 활용</strong> 가능한
-<strong>범용성과 실용성</strong>을 갖춘 서비스입니다.
+**웹 기반 서비스**와 **크롬 확장 프로그램** 두 가지 형태로 제공되며,
+사용자는 **직접 URL을 입력**하거나 **웹서핑 중 마우스오버만으로 실시간 탐지**를 받을 수 있습니다. 또한, 웹 서비스는 **한/영 변환 버튼**을 통해 다양한 사용자 환경을 지원합니다.
+
+**누구나 이해할 수 있는 시각적 결과**와 함께,
+**전문가에게는 분석 도구로**, **기관에는 대응 체계로 활용** 가능한
+**범용성과 실용성**을 갖춘 서비스입니다.
 
 <p align="center">
   <img src="./mdassets/main.png" alt="프로젝트 메인"/>
@@ -52,13 +55,19 @@
 - **JavaScript 정적/동적 분석** : DOM 조작 또는 사용자 입력 탈취 목적의 JavaScript를 감지한다.
 - **URL 패턴 및 도메인 분석** : 도메인 유사도, IP 기반 URL, URL 인코딩 여부 등을 바탕으로 위험 점수를 부여한다.
 - **AI 기반 판단 모듈**: 페이지의 구조적 특징을 기반으로 학습된 모델로 위험 여부를 예측한다.
-- **근거 제시** : 탐지 결과에 대해 모듈별 위험도와 근거 메시지를 출력하여 어떤 부분에서 어떤 이유 때문에 탐지가 되었는지 근거를 제시한다.
-- **자동 제보 기능** : 위험 사이트로 판단된 경우, KISA(한국인터넷진흥원)에 자동 신고 메일을 전송한다. SMTP 기반 발신 시스템을 구성했다.
+- **근거 제시 및 해설 (ChatGPT API 연동)** : 탐지 결과에 대해 모듈별 위험도와 근거 메시지를 출력하며, OpenAI ChatGPT API를 활용하여 이 기술적 분석 내용을 일반 사용자가 이해하기 쉬운 자연어 해설로 자동 변환하여 제공한다.
+- **다국어 지원 (한/영 변환)**: 화면 상단에 한/영 전환 버튼을 두어 모든 페이지를 한국어로도 전환해 볼 수 있도록 지원한다.
+- **KISA 자동 제보** : 위험 사이트로 판단된 경우, KISA(한국인터넷진흥원)에 자동 신고 메일을 전송한다. SMTP 기반 발신 시스템을 구성했다.
 
- 이러한 기능들을 종합하여 사용자에게 단순히 ‘위험’ 여부 뿐만 아니라 왜 위험한지를 정확히 설명하고, 다음 행동까지 연결할 수 있도록 동작하는 서비스를 구현했다.
+ 이러한 기능들을 종합하여 사용자에게 단순히 ‘위험’ 여부 뿐만 아니라 왜 위험한지를 정확히 설명하고, 후속 대응까지 연결할 수 있도록 동작하는 체계적 분석 서비스를 구현했다.
 
+- **Safe Result**
 <p align="center">
   <img src="./mdassets/safe.gif"width="500"/>
+</p>
+
+- **Phishing Result**
+<p align="center">
   <img src="./mdassets/phishing.gif"width="500"/>
 </p>
 
@@ -73,7 +82,7 @@
 
  이 익스텐션은 특히 비전공자, 일반 사용자들에게 매우 직관적인 형태의 보안 서비스 형태로 개발하였다.
 
-#### 크롬 익스텐션
+- **Chrome Extension**
 <p align="center">
   <img src="./mdassets/chrome.gif"width="500"/>
 </p>
@@ -207,7 +216,7 @@ Wave_to_WWW/
     <td align="center"><img src="./mdassets/jihun.JPG" width="107"/></td>
     <td align="center"><img src="./mdassets/jimin.JPG" width="105"/></td>
     <td align="center"><img src="./mdassets/hajin.JPG" width="110"/></td>
-    <td align="center"><img src="./mdassets/gisuk.JPG" width="118"/></td>
+    <td align="center"> <img src="./mdassets/gisuk.JPG" width="118"/></td>
   </tr>
   <tr>
     <td align="center">🌈 <strong>PM</strong><br/>⚙️ <strong>커널</strong></td>
